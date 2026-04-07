@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ohada-financial-extractor"
+version = "0.1.0"
+description = "Extract and normalize financial data from OHADA-compliant Excel financial statements (DSF)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Leonel B. Kamguia Wabo", email = "bomyr.kamguia@bkresearchandanalytics.com"},
+    {name = "Ronald V. Ndayou", email = "ronald.ndayou@bkresearchandanalytics.com"},
+]
+keywords = ["OHADA", "financial-extraction", "accounting", "Excel", "financial statements"]
+
+[project.urls]
+Repository = "https://github.com/bomyrk/ohada-financial-extractor"
+Issues = "https://github.com/bomyrk/ohada-financial-extractor/issues"
