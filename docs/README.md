@@ -1,9 +1,6 @@
 # OHADA Financial Extractor
 
-
-
 Extract and normalize financial data from OHADA-compliant Excel financial statements.
-
 
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -11,13 +8,10 @@ Extract and normalize financial data from OHADA-compliant Excel financial statem
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-
 ## Overview
 
 
-
 This library automates financial data extraction from Excel files following **OHADA** (Organization for the Harmonization of African Business Law) accounting standards, used by 18 African countries.
-
 
 
 ### What It Does
@@ -181,7 +175,9 @@ Feed cleaned, structured data into analytics and forecasting models.
 
 ### **OHADA Zone Coverage**
 
-Supported in: Benin, Burkina Faso, Cameroon, Central African Republic, Chad, Comoros, Congo (DR), Congo, Côte d'Ivoire, Equatorial Guinea, Gabon, Guinea, Guinea-Bissau, Mali, Niger, Senegal, Togo, Seychelles.
+Supported in: Benin, Burkina Faso, Cameroon, Central African Republic, Chad, 
+Comoros, Congo (DR), Congo, Côte d'Ivoire, Equatorial Guinea, Gabon, Guinea, 
+Guinea-Bissau, Mali, Niger, Senegal, Togo.
 
 **Contribution**
 
@@ -199,22 +195,22 @@ MIT License — see LICENSE
 
 If you use this library in your research or production system, please cite:
 
-**Leonel B. Kamguia Wabo**, & **Ronald V. Ndayou** (2026). *OHADA Financial Extractor*. B.K. Research & Analytics. 
+**Kamguia Wabo, L. B.**, & **Ndayou, R. V.** (2026). *OHADA Financial Extractor*. B.K. Research & Analytics. 
 Retrieved from [https://github.com/bomyrk/ohada-financial-extractor](https://github.com/bomyrk/ohada-financial-extractor)
 
 ```
 @software{ohada_extractor_2026,
   title={OHADA Financial Extractor},
-  author={Kamguia Wabo, Bomyr},
-  year={2024},
+  author={Kamguia Wabo, L. Bomyr},
+  year={2026},
   url={https://github.com/bomyrk/ohada-financial-extractor}
 }
 ```
 
 ### Author
 
-Bomyr Kamguia Wabo \
-B.K. Research & Analytics
+Kamguia Wabo, L. B. \
+B.K. Research & Analytics\
 [bomyr.kamguia@bkresearchandanalytics.com](mailto:bomyr.kamguia@bkresearchandanalytics.com)
 
 ---

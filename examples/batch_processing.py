@@ -24,37 +24,40 @@ def process_multiple_files(file_list):
         List of extracted FinancialStatement objects
     """
     extractor = FinancialExtractor()
-    statements = []
-    
-    for file_path in file_list:
-        try:
-            print(f"Processing: {file_path}")
-            stmt = extractor.extract_from_excel(file_path)
-            statements.append(stmt)
-            print(f"  ✓ Extracted {len(stmt.periods)} periods")
-        except Exception as e:
-            print(f"  ✗ Error: {e}")
-    
+
+    # Extract data
+    statements = extractor.extract_over_period(file_list)
+
+    print(f"\n✓ Extraction successful!")
+    print(f"  Periods: {statements.periods}")
+    print(f"  File: {statements.file_path}")
+
+    # Convert to JSON
+    json_output = OHADAJSONFormatter.to_json(
+        assets=statements.asset_data,
+        liabilities=statements.liability_data,
+        income=statements.income_data,
+        cashflow=statements.cashflow_data,
+        periods=statements.periods,
+        indent=2
+    )
+
+    # Save to file
+    output_file = Path(__file__).parent.parent / 'output_extraction.json'
+    with open(output_file, 'w') as f:
+        f.write(json_output)
+
+    print(f"\n✓ JSON output saved to: {output_file}")
+
+    # Display sample
+    data = json.loads(json_output)
+    print(f"\nSample output structure:")
+    print(f"  Assets count: {len(data['balance_sheet']['assets'])}")
+    print(f"  Liabilities count: {len(data['balance_sheet']['liabilities'])}")
+    print(f"  Income items count: {len(data['income_statement'])}")
+    print(f"  Cashflow items count: {len(data['cashflow_statement'])}")
+
     return statements
-
-
-def consolidate_statements(statements):
-    """
-    Consolidate multiple statements (future enhancement).
-    
-    Args:
-        statements: List of FinancialStatement objects
-        
-    Returns:
-        Consolidated data
-    """
-    # TODO: Implement consolidation logic
-    # For now, return all statements
-    return {
-        'count': len(statements),
-        'periods': [p for stmt in statements for p in stmt.periods],
-        'statements': [stmt.to_dict() for stmt in statements],
-    }
 
 
 def main():
@@ -62,7 +65,7 @@ def main():
     data_dir = Path(__file__).parent / 'data'
     
     # Find all Excel files
-    excel_files = list(data_dir.glob('*.xlsx'))
+    excel_files = sorted(data_dir.glob('*.xlsx'))
     
     if not excel_files:
         print(f"No Excel files found in {data_dir}")
@@ -72,20 +75,7 @@ def main():
     print(f"Found {len(excel_files)} Excel files")
     
     # Process
-    statements = process_multiple_files(excel_files)
-    
-    if statements:
-        # Consolidate
-        consolidated = consolidate_statements(statements)
-        
-        # Save results
-        output_file = data_dir.parent / 'batch_output.json'
-        with open(output_file, 'w') as f:
-            json.dump(consolidated, f, indent=2, default=str)
-        
-        print(f"\n✓ Consolidated output saved to: {output_file}")
-    else:
-        print("\n✗ No files processed successfully")
+    process_multiple_files(excel_files)
 
 
 if __name__ == '__main__':

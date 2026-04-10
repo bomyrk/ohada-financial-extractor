@@ -158,6 +158,7 @@ class OHADAStatement:
     accounts: List[Tuple[str, str]]
     has_value_types: bool  # True for balance sheet (Gross/Amort/Net), False for others
     value_types: Optional[List[str]] = None
+    columns_idx: Optional[Tuple[int,...]] = None
 
     def __post_init__(self):
         if self.value_types is None:
@@ -167,13 +168,14 @@ class OHADAStatement:
 # OHADA Statement Configurations
 OHADA_STATEMENTS = {
     'assets_sheet': OHADAStatement(
-        name='Balance Sheet Asset',
+        name='Balance Sheet Assets',
         sheet_name='BILAN PAYSAGE',
         start_account='AD',
         end_account='BZ',
         account_count=29,
         accounts=ASSETS_ACCOUNTS,
         has_value_types=True,
+        columns_idx = (0, 3, 4, 5, 6),
     ),
     'liabilities_sheet': OHADAStatement(
         name='Balance Sheet Liability',
@@ -183,6 +185,7 @@ OHADA_STATEMENTS = {
         account_count=28,
         accounts=LIABILITIES_ACCOUNTS,
         has_value_types=False,
+        columns_idx=(0, 3, 4),
     ),
     'income_statement': OHADAStatement(
         name='Income Statement',
@@ -192,6 +195,7 @@ OHADA_STATEMENTS = {
         account_count=42,
         accounts=INCOME_ACCOUNTS,
         has_value_types=False,
+        columns_idx=(0, 4, 5)
     ),
     'cashflow': OHADAStatement(
         name='Cash Flow Statement',
@@ -201,5 +205,6 @@ OHADA_STATEMENTS = {
         account_count=25,
         accounts=CASHFLOW_ACCOUNTS,
         has_value_types=False,
+        columns_idx= (0, 4, 5),
     ),
 }

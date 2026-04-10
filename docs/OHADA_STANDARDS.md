@@ -501,7 +501,7 @@ The following 18 countries apply OHADA accounting standards:
 
 17. **Togo** (XOF)
 
-18. **Tunisia** (TND)
+18. **Togo** (XOF)
 
 
 
@@ -532,36 +532,18 @@ Non-asset statements track only **Net** values.
 ### Balance Sheet Equation
 
 
-
 Total Assets (BZ) = Total Liabilities & Equity (DZ)
-
-
-
-
 
 ### Income Statement Link
 
-
-
 Net Income (XI) = Retained Earnings in Balance Sheet (CJ)
 
-
-
-
-
 ### Cash Flow Check
-
-
 
 Net Change in Cash (ZG) = Operating CF (ZB) + Investing CF (ZC) + Financing CF (ZE)
 
 
-
-
-
 ## References
-
-
 
 - OHADA Uniform Act on Accounting and Financial Information (AAIFI)
 
@@ -572,8 +554,6 @@ Net Change in Cash (ZG) = Operating CF (ZB) + Investing CF (ZC) + Financing CF (
 
 
 ---
-
-
 
 *For detailed regulatory information, consult official OHADA documentation from your country's regulatory authority.*
 

@@ -15,7 +15,7 @@ from ohada_extractor.formatters import OHADAJSONFormatter
 
 def main():
     # Path to sample Excel file
-    sample_file = Path(__file__).parent / 'data' / 'sample_ohada_statement_2024.xlsx'
+    sample_file = Path(__file__).parent / 'data' / 'DSF_Normal_Tantanpion_2024.xlsx'
     
     if not sample_file.exists():
         print(f"Error: Sample file not found at {sample_file}")

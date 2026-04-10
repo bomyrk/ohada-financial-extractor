@@ -65,11 +65,16 @@ class OHADAJSONFormatter:
                 gross_key = f'gross{period_key}' if period_key else 'gross'
                 amort_key = f'amort{period_key}' if period_key else 'amort'
                 net_key = f'net{period_key}' if period_key else 'net'
-                
-                record[gross_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx])
-                record[amort_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx + 1])
-                record[net_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx + 2])
-                
+
+                if value_idx != (len(row)-1):
+                    record[gross_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx])
+                    record[amort_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx + 1])
+                    record[net_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx + 2])
+                else:
+                    record[gross_key] = None
+                    record[amort_key] = None
+                    record[net_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx])
+
                 value_idx += 3
 
             result.append(record)

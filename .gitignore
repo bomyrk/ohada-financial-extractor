@@ -41,6 +41,6 @@ htmlcov/
 Thumbs.db
 
 # Project-specific
-*.xlsx
+# *.xlsx
 !examples/data/sample_ohada_statement_2024.xlsx
 output.json
