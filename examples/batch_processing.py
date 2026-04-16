@@ -34,11 +34,7 @@ def process_multiple_files(file_list):
 
     # Convert to JSON
     json_output = OHADAJSONFormatter.to_json(
-        assets=statements.asset_data,
-        liabilities=statements.liability_data,
-        income=statements.income_data,
-        cashflow=statements.cashflow_data,
-        periods=statements.periods,
+        statement=statements,
         indent=2
     )
 

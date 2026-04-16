@@ -9,21 +9,21 @@ import json
 import numpy as np
 from datetime import date, datetime
 
-from ..core.schemas import OHADA_STATEMENTS
-
-
 class OHADAJSONFormatter:
-    """Convert financial statement arrays to JSON-compatible format."""
+    """Convert financial statement arrays + notes + metadata to JSON-compatible format."""
 
+    # ---------------------------------------------------------
+    # GENERIC NUMPY SERIALIZER (with 2-decimal rounding)
+    # ---------------------------------------------------------
     @staticmethod
     def numpy_to_serializable(obj: Any) -> Any:
         """Convert NumPy types to JSON-serializable types."""
         if isinstance(obj, np.integer):
             return int(obj)
         elif isinstance(obj, np.floating):
-            return float(obj)
+            return round(float(obj), 2)
         elif isinstance(obj, np.ndarray):
-            return obj.tolist()
+            return [OHADAJSONFormatter.numpy_to_serializable(item) for item in obj.tolist()]
         elif isinstance(obj, (date, datetime)):
             return obj.isoformat()
         elif isinstance(obj, dict):
@@ -32,6 +32,53 @@ class OHADAJSONFormatter:
             return [OHADAJSONFormatter.numpy_to_serializable(item) for item in obj]
         return obj
 
+    # ---------------------------------------------------------
+    # NOTES FORMATTER (NEW)
+    # ---------------------------------------------------------
+    @staticmethod
+    def format_notes(notes_dict: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """
+        Format notes (annexes) into JSON-compatible structure.
+        Handles:
+            - raw_value arrays
+            - preprocess_value arrays or tuples
+            - multi-year merged notes
+        """
+        if notes_dict is None:
+            return None
+
+        formatted = {}
+
+        for key, entry in notes_dict.items():
+            formatted[key] = {
+                "name": entry.get("name"),
+                "raw_value": OHADAJSONFormatter.numpy_to_serializable(entry.get("raw_value")),
+                "preprocess_value": OHADAJSONFormatter.numpy_to_serializable(entry.get("preprocess_value"))
+            }
+
+        return formatted
+
+    # ---------------------------------------------------------
+    # METADATA FORMATTER
+    # ---------------------------------------------------------
+    @staticmethod
+    def format_metadata(metadata_obj) -> Optional[Dict[str, Any]]:
+        if metadata_obj is None:
+            return None
+        return {
+            "currency": metadata_obj.currency,
+            "legal_form": metadata_obj.legal_form,
+            "country": metadata_obj.country,
+            "year_creation": metadata_obj.year_creation,
+            "regime_fiscal": metadata_obj.regime_fiscal,
+            "dividend": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.dividend),
+            "number_of_shares": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_shares),
+            "number_of_employees": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_employees),
+        }
+
+    # ---------------------------------------------------------
+    # ASSETS FORMATTER
+    # ---------------------------------------------------------
     @staticmethod
     def format_assets(
         asset_data: np.ndarray,
@@ -81,6 +128,9 @@ class OHADAJSONFormatter:
 
         return result
 
+    # ---------------------------------------------------------
+    # GENERIC STATEMENT FORMATTER
+    # ---------------------------------------------------------
     @staticmethod
     def format_statement(
         statement_data: np.ndarray,
@@ -118,50 +168,47 @@ class OHADAJSONFormatter:
 
         return result
 
+    # ---------------------------------------------------------
+    # FULL STATEMENT FORMATTER (UPDATED)
+    # ---------------------------------------------------------
     @staticmethod
-    def format_statement_data(
-        assets: np.ndarray,
-        liabilities: np.ndarray,
-        income: np.ndarray,
-        cashflow: np.ndarray,
-        periods: List[str]
-    ) -> Dict[str, Any]:
+    def format_statement_data(statement) -> Dict[str, Any]:
         """
-        Format all financial statements to complete JSON structure.
+        Format a FinancialStatement object into a JSON-ready dictionary.
         
         Returns:
             Dictionary with formatted statements ready for JSON serialization
         """
         from ..core.schemas import ASSETS_ACCOUNTS, LIABILITIES_ACCOUNTS, INCOME_ACCOUNTS, CASHFLOW_ACCOUNTS
 
+        periods = statement.periods if len(statement.periods) >2 else statement.periods[::-1]
         return {
+            "metadata": OHADAJSONFormatter.format_metadata(statement.metadata),
             'extraction_metadata': {
                 'periods': periods,
-                'statement_types': ['balance_sheet_assets', 'balance_sheet_liabilities', 'income_statement', 'cashflow'],
+                'statement_types': ['balance_sheet_assets', 'balance_sheet_liabilities', 'income_statement', 'cashflow',
+                    'notes', 'metadata',],
             },
             'balance_sheet': {
-                'assets': OHADAJSONFormatter.format_assets(assets, periods, ASSETS_ACCOUNTS),
+                'assets': OHADAJSONFormatter.format_assets(statement.asset_data, periods, ASSETS_ACCOUNTS),
                 'liabilities': OHADAJSONFormatter.format_statement(
-                    liabilities, periods, LIABILITIES_ACCOUNTS, 'liabilities'
+                    statement.liability_data, periods, LIABILITIES_ACCOUNTS, 'liabilities'
                 ),
             },
             'income_statement': OHADAJSONFormatter.format_statement(
-                income, periods, INCOME_ACCOUNTS, 'income'
+                statement.income_data, periods, INCOME_ACCOUNTS, 'income'
             ),
             'cashflow_statement': OHADAJSONFormatter.format_statement(
-                cashflow, periods, CASHFLOW_ACCOUNTS, 'cashflow'
+                statement.cashflow_data, periods, CASHFLOW_ACCOUNTS, 'cashflow'
             ),
+            'notes': OHADAJSONFormatter.format_notes(statement.notes)
         }
 
+    # ---------------------------------------------------------
+    # JSON STRING OUTPUT (UPDATED)
+    # ---------------------------------------------------------
     @staticmethod
-    def to_json(
-        assets: np.ndarray,
-        liabilities: np.ndarray,
-        income: np.ndarray,
-        cashflow: np.ndarray,
-        periods: List[str],
-        indent: int = 2
-    ) -> str:
+    def to_json(statement, indent: int = 2) -> str:
         """
         Convert all statements to JSON string.
         
@@ -171,7 +218,5 @@ class OHADAJSONFormatter:
         Returns:
             JSON string
         """
-        data = OHADAJSONFormatter.format_statement_data(
-            assets, liabilities, income, cashflow, periods
-        )
+        data = OHADAJSONFormatter.format_statement_data(statement)
         return json.dumps(data, indent=indent, default=OHADAJSONFormatter.numpy_to_serializable)

@@ -36,11 +36,7 @@ def main():
     
     # Convert to JSON
     json_output = OHADAJSONFormatter.to_json(
-        assets=statement.asset_data,
-        liabilities=statement.liability_data,
-        income=statement.income_data,
-        cashflow=statement.cashflow_data,
-        periods=statement.periods,
+        statement=statement,
         indent=2
     )
     
@@ -58,6 +54,32 @@ def main():
     print(f"  Liabilities count: {len(data['balance_sheet']['liabilities'])}")
     print(f"  Income items count: {len(data['income_statement'])}")
     print(f"  Cashflow items count: {len(data['cashflow_statement'])}")
+
+    statement = extractor.extract_from_excel('examples/data/DSF_Normal_Tantanpion_2024.xlsx')
+    from ohada_extractor.validation.coherence_validator import CoherenceValidator
+
+    validator = CoherenceValidator.from_financial_statement(statement)
+    validator.validate()
+
+    statement_2 = extractor.extract_over_period(
+        ['examples/data/DSF_Normal_Tantanpion_2024.xlsx', 'examples/data/DSF_Normal_Tantanpion_2025.xlsx'])
+    validator_2 = CoherenceValidator.from_financial_statement(statement_2)
+    from ohada_extractor.core.metadata_extractor import CompanyMetadataExtractor
+
+    statement.metadata = CompanyMetadataExtractor.extract_from_statement(statement)
+
+    from ohada_extractor.visualization.themes.styles import apply_ohada_style
+
+    apply_ohada_style()
+    statement.plot("assets", plot_type="static")
+
+    from ohada_extractor.visualization.themes.templates import register_ohada_template
+    import plotly.io as pio
+
+    register_ohada_template()
+    pio.templates.default = "ohada"
+
+    statement.plot("assets", plot_type="dynamic")
 
 
 if __name__ == '__main__':
