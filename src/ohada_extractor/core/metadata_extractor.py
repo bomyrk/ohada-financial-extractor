@@ -83,8 +83,8 @@ class CompanyMetadataExtractor:
         values = other_data[:, 1:]
 
         dividend = values[9, :] if values.shape[0] > 9 else None
-        number_of_shares = values[1:4, :].sum(axis=0) if values.shape[0] > 4 else None
-        number_of_employees = values[-2:, :].sum(axis=0) if values.shape[0] >= 2 else None
+        number_of_shares = np.sum(values[1:4:, :], axis=0, where=(values[1:4:, :] != None), initial=0) if values.shape[0] > 4 else None
+        number_of_employees = np.sum(values[-2:, :], axis=0, where=(values[-2:, :] != None), initial=0) if values.shape[0] >= 2 else None
 
         return {
             "dividend": dividend,
@@ -115,7 +115,7 @@ class CompanyMetadataExtractor:
         metadata = CompanyMetadataExtractor.from_fiche_r2(f2a)
 
         # Add KPIs from NOTE 31
-        kpis = CompanyMetadataExtractor.extract_kpis_from_other(other)
+        kpis = CompanyMetadataExtractor.extract_kpis_from_other(statement.other_data)
 
         metadata.dividend = kpis["dividend"]
         metadata.number_of_shares = kpis["number_of_shares"]

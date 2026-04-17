@@ -101,4 +101,6 @@ def plot_single_static(statement, data_type, style, period, value_type):
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.001)
+

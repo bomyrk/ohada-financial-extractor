@@ -102,7 +102,7 @@ class FinancialStatement:
         if not self.periods:
             raise ValueError("FinancialStatement.periods is empty — cannot build xarray objects.")
 
-        n_years = len(self.years)
+        n_years = len(self.periods)
         # Convert periods to datetime index
         self.years = pd.Index(pd.to_datetime(self.periods), name="annee") if n_years > 2 else pd.Index(pd.to_datetime(self.periods[::-1]), name="annee")
 

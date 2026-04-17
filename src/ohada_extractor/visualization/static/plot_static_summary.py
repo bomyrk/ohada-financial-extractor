@@ -16,7 +16,7 @@ def plot_asset_summary_static(statement, period="all"):
     """Static summary plots for Assets (components + total breakdown)."""
 
     years_dt = statement.years
-    years_str = statement.years.strftime("%Y-%m-%d").to_list()
+    years_str = statement.years.year.astype(str).to_list()
 
     if period != "all":
         period_dt = pd.Timestamp(period)
@@ -137,14 +137,15 @@ def plot_asset_summary_static(statement, period="all"):
     ax1.grid(True, alpha=0.3)
     ax2.grid(True, alpha=0.3)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.001)
 
 
 def plot_liability_summary_static(statement, period="all"):
     """Static summary plots for Liabilities (components + total breakdown)."""
 
     years_dt = statement.years
-    years_str = statement.years.strftime("%Y-%m-%d").to_list()
+    years_str = statement.years.year.astype(str).to_list()
 
     if period != "all":
         period_dt = pd.Timestamp(period)
@@ -265,4 +266,6 @@ def plot_liability_summary_static(statement, period="all"):
     ax1.grid(True, alpha=0.3)
     ax2.grid(True, alpha=0.3)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.001)
+

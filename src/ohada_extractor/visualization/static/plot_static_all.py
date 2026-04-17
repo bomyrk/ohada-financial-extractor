@@ -95,4 +95,5 @@ def plot_all_static(statement, style, period, value_type):
         ax.legend()
 
     plt.tight_layout()
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.001)
