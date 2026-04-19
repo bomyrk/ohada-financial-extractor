@@ -36,6 +36,10 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
 
         data = prepare_data_for_plotting(statement, data_type, period, value_type)
 
+        # Remove accounts that are zero for all periods
+        #non_zero_mask = data.values.max(axis=0) != 0
+        #data = data[:, non_zero_mask]
+
         if isinstance(data.compte.values[0], tuple):
             labels = [item[0] for item in data.compte.values]
         else:

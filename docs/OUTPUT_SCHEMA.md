@@ -283,4 +283,5 @@ Valid output JSON should satisfy:
 1. All reference values match OHADA account codes
 2. Assets (BZ) = Liabilities (DZ) for each period
 3. Net Income (XI) matches Balance Sheet retained earnings (CJ) for each period
+4. Internal validation [e.g "AD=AE+AF+AG+AH"] (NEW)
 4. All numeric values are valid JSON numbers

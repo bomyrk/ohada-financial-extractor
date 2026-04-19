@@ -143,8 +143,8 @@ CASHFLOW_ACCOUNTS = [
     ('Nouveaux emprunts', 'FO'),
     ('Autres financements', 'FP'),
     ('Remboursement emprunts', 'FQ'),
-    ('Flux de financement', 'ZE'),
-    ('Variation de trésorerie', 'ZF'),
+    ('Flux des capitaux etrangers', 'ZE'),
+    ('Flux de financement', 'ZF'),
     ('Variation nette de trésorerie', 'ZG'),
     ('Trésorerie nette au 31 décembre', 'ZH'),
 ]

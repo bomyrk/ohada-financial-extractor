@@ -29,6 +29,8 @@ from .dynamic.plot_dynamic_all import plot_all_dynamic
 from .dynamic.plot_dynamic_summary import (
     plot_asset_summary_dynamic,
     plot_liability_summary_dynamic,
+    plot_income_summary_dynamic,
+    plot_cashflow_summary_dynamic,
 )
 
 
@@ -109,6 +111,20 @@ def _route_summary(statement, data_type, plot_type, period):
     elif data_type == "liabilities":
         return (
             plot_liability_summary_dynamic(statement, period)
+            if plot_type == "dynamic"
+            else plot_liability_summary_static(statement, period)
+        )
+
+    elif data_type == "income":
+        return (
+            plot_income_summary_dynamic(statement, period)
+            if plot_type == "dynamic"
+            else plot_income_summary_static(statement, period)
+        )
+
+    elif data_type == "cashflow":
+        return (
+            plot_cashflow_summary_dynamic(statement, period)
             if plot_type == "dynamic"
             else plot_liability_summary_static(statement, period)
         )

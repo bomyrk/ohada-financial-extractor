@@ -79,11 +79,8 @@ statement = extractor.extract_from_excel('financial_statement.xlsx')
 
 # Convert to JSON
 json_output = OHADAJSONFormatter.to_json(
-    assets=statement.asset_data,
-    liabilities=statement.liability_data,
-    income=statement.income_data,
-    cashflow=statement.cashflow_data,
-    periods=statement.periods
+    statement=statement,
+    indent=2
 )
 
 # Use or save
@@ -112,6 +109,74 @@ print(f"Total Assets: {data['balance_sheet']['assets'][-1]}")
 - Operating, investing, financing activities
 - Beginning and ending cash positions
 
+### **Metadata Extraction (NEW)**
+
+The extractor now automatically parses company metadata from DSF notes and headers, including:
+
+- Legal form
+- Fiscal regime
+- Country (headquater)
+- Year of creation
+- Currency
+- etc.
+
+Metadata is available immediately after extraction:
+````python
+from ohada_extractor.core.extractor import FinancialExtractor
+from ohada_extractor.core.metadata_extractor import CompanyMetadataExtractor
+
+# Initialize extractor
+extractor = FinancialExtractor()
+    
+# Extract data
+statement = extractor.extract_from_excel("financial_statement.xlsx")
+
+print("\n--- Building company metadata from statement ---")
+statement.metadata = CompanyMetadataExtractor.extract_from_statement(statement)
+
+metadata = statement.metadata
+
+print(metadata.currency)
+print(metadata.legal_form)
+print(metadata.regime_fiscal)
+
+````
+Metadata is fully JSON‑serializable and can be exported:
+````python
+metadata_dict = metadata.to_dict()
+````
+This enables automated KYC, and regulatory reporting workflow.
+
+### **Notes Extraction (NEW)**
+
+The extractor now includes 23 OHADA Notes (Annexes) engine, parsing structured and unstructured notes such as:
+- Fiche R2 — Company identity
+- Note 31 — Repartition du résultat et autres elements sur les dernières années
+- Accounting policies
+- Commitments & guarantees
+- Tax regime
+- Share capital information
+- Workforce details
+
+Notes are extracted automatically:
+````python
+statement = extractor.extract_from_excel("financial_statement.xlsx")
+
+# Retrieve by key
+note = statement.get_note("note3a")
+
+# Retrieve by human-readable name
+note = statement.get_note_by_name("IMMOBILISATION BRUTE")
+
+````
+Each note includes:
+- name
+- raw_value
+- preprocess_value
+
+Notes can be exported to JSON for auditing or BI tools.
+
+
 ### **Features**
 - ✅ Multi-file period aggregation (2-5 years)
 - ✅ Automatic data validation
@@ -119,6 +184,41 @@ print(f"Total Assets: {data['balance_sheet']['assets'][-1]}")
 - ✅ Account code standardization (OHADA)
 - ✅ Gross/Amort/Net decomposition for assets
 - ✅ Support for 18 OHADA zone countries
+
+### **📊 Visualization Layer (NEW)**
+
+The library now includes a **visualization module** for OHADA financial statements.
+
+**Static 4×2 Overview Dashboard**
+
+Grouped, stacked, waterfall, and cashflow charts in a single figure:
+
+````python
+from ohada_extractor.visualization import plot_overview_dashboard_clean
+plot_overview_dashboard_clean(statement)
+````
+
+**Dynamic Tabbed Dashboard**
+
+Interactive dashboard with tabs for:
+- Assets
+- Liabilities
+- Income
+- Cashflow
+
+````python
+from ohada_extractor.visualization import plot_ohada_tabs_dynamic
+plot_ohada_tabs_dynamic(statement)
+````
+
+**Streamlit Integration**
+
+A ready‑to‑use Streamlit app is included:
+
+````bash
+streamlit run examples/example_visualization_streamlit.py
+````
+This enables instant deployment of dashboards for analysts, auditors, and credit officers.
 
 ### **Documentation**
 - OHADA Standards — Account codes and structures for 18 countries
@@ -131,7 +231,7 @@ print(f"Total Assets: {data['balance_sheet']['assets'][-1]}")
 {
   "extraction_metadata": {
     "periods": ["2023-12-31", "2024-12-31"],
-    "statement_types": ["balance_sheet_assets", "income_statement", "cashflow"]
+    "statement_types": ["balance_sheet_assets", "income_statement", "cashflow", "notes"]
   },
   "balance_sheet": {
     "assets": [
@@ -149,6 +249,31 @@ print(f"Total Assets: {data['balance_sheet']['assets'][-1]}")
   }
 }
 ```
+
+
+### **📁 Examples (New)**
+The repository now includes a full *examples/* directory:
+
+````Code
+examples/
+    example_metadata_extraction.py
+    example_notes_usage.py
+    example_visualization_streamlit.py
+````
+**Metadata Example**
+
+Shows how to extract and export company metadata.
+
+**Notes Example**
+
+Demonstrates how to retrieve raw and processed OHADA notes.
+
+**Visualization Example**
+
+Runs static dashboards, dynamic dashboards, and a Streamlit UI.
+
+These examples make onboarding fast for banks, auditors, fintechs, and researchers.
+
 
 ### **TESTING**
 

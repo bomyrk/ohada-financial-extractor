@@ -21,6 +21,10 @@ def plot_single_dynamic(statement, data_type, style, period, value_type):
 
     data = prepare_data_for_plotting(statement, data_type, period, value_type)
 
+    # Remove accounts that are zero for this period
+    non_zero_mask = data.values != 0
+    data = data[non_zero_mask]
+
     if isinstance(data.compte.values[0], tuple):
         labels = [item[0] for item in data.compte.values]
     else:

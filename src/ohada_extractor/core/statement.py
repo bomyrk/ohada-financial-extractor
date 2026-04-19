@@ -35,6 +35,28 @@ class CompanyMetadata:
     number_of_shares: Optional[np.ndarray] = None
     number_of_employees: Optional[np.ndarray] = None
 
+    def to_dict(self):
+        """Convert metadata to JSON‑friendly dict."""
+
+        def convert(v):
+            if isinstance(v, np.ndarray):
+                if v.size == 1:
+                    return v.item()
+                return v.tolist()
+            return v
+
+        return {k: convert(v) for k, v in self.__dict__.items()}
+
+    def missing_fields(self):
+        """Return a list of metadata fields that are None or empty."""
+        missing = []
+        for field_name, value in self.__dict__.items():
+            if value is None:
+                missing.append(field_name)
+            elif isinstance(value, np.ndarray) and value.size == 0:
+                missing.append(field_name)
+        return missing
+
 
 # ----------------------------------------------------------------------
 #  FINANCIAL STATEMENT MODEL

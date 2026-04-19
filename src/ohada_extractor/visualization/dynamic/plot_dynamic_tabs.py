@@ -26,7 +26,7 @@ def plot_ohada_tabs_dynamic(statement):
         ("Assets", statement.asset.sel(valeur="Net"), ["AZ", "BK", "BT"], "BZ"),
         ("Liabilities", statement.liability, ["DF", "DP", "DT"], "DZ"),
         ("Income", statement.income, ["XE", "XF", "XH", "RS"], "XI"),
-        ("Cashflow", statement.cashflow, ["ZB", "ZC", "ZE"], "ZF"),
+        ("Cashflow", statement.cashflow, ["ZB", "ZC", "ZF"], "ZG"),
     ]
 
     # ============================================================
@@ -41,7 +41,7 @@ def plot_ohada_tabs_dynamic(statement):
     )
 
     all_traces = []
-    visibility_masks = []
+    tab_indices = []  # list of lists: indices of traces per tab
 
     # ============================================================
     # 3) BUILD TRACES FOR EACH TAB
@@ -56,27 +56,52 @@ def plot_ohada_tabs_dynamic(statement):
             compte=pd.IndexSlice[:, total_ref], annee=years_dt
         ).squeeze(drop=True)
 
-        # % of total
-        pct_data = {
-            ref: (
+        # Track which traces belong to this tab
+        tab_trace_indices = []
+
+        # --------------------------------------------------------
+        # % of total (safe division with masking)
+        # --------------------------------------------------------
+        pct_data = {}
+        total_vals = total_data.values.astype(float)
+
+        for ref in refs:
+            vals = (
                 component_data.sel(compte=pd.IndexSlice[:, ref])
                 .squeeze(drop=True)
-                .values
-                / total_data.values
-                * 100
+                .values.astype(float)
             )
-            for ref in refs
-        }
 
-        # YoY growth
+            pct = np.full_like(vals, np.nan, dtype=float)
+            mask = total_vals != 0
+            pct[mask] = vals[mask] / total_vals[mask] * 100
+            pct_data[ref] = pct
+
+        # --------------------------------------------------------
+        # YoY growth (safe division with masking)
+        # --------------------------------------------------------
         growth_data = {}
         for ref in refs:
             vals = (
                 component_data.sel(compte=pd.IndexSlice[:, ref])
                 .squeeze(drop=True)
-                .values
+                .values.astype(float)
             )
-            growth = np.concatenate([[np.nan], (vals[1:] - vals[:-1]) / vals[:-1] * 100])
+
+            if len(vals) == 0:
+                growth = np.array([], dtype=float)
+            elif len(vals) == 1:
+                growth = np.array([np.nan], dtype=float)
+            else:
+                prev = vals[:-1]
+                curr = vals[1:]
+
+                growth_vals = np.full_like(curr, np.nan, dtype=float)
+                mask = prev != 0
+                growth_vals[mask] = (curr[mask] - prev[mask]) / prev[mask] * 100
+
+                growth = np.concatenate([[np.nan], growth_vals])
+
             growth_data[ref] = growth
 
         labels = {
@@ -84,9 +109,6 @@ def plot_ohada_tabs_dynamic(statement):
             for ref in refs
         }
         total_label = get_account_label(statement, title.lower(), total_ref)
-
-        # Track which traces belong to this tab
-        tab_trace_indices = []
 
         # ============================================================
         # STACKED BARS (ABSOLUTE VALUES) + % LABELS
@@ -96,14 +118,17 @@ def plot_ohada_tabs_dynamic(statement):
             series = (
                 component_data.sel(compte=pd.IndexSlice[:, ref])
                 .squeeze(drop=True)
-                .values
+                .values.astype(float)
             )
 
             trace = go.Bar(
                 name=labels[ref],
                 x=years_str,
                 y=series,
-                text=[f"{v:.1f}%" for v in pct_data[ref]],
+                text=[
+                    f"{v:.1f}%" if (v is not None and not np.isnan(v)) else ""
+                    for v in pct_data[ref]
+                ],
                 textposition="inside",
                 legendgroup=f"{title}_stack",
                 offsetgroup=f"{title}_stack",
@@ -119,7 +144,7 @@ def plot_ohada_tabs_dynamic(statement):
         trace = go.Scatter(
             name=f"{total_label} (Total)",
             x=years_str,
-            y=total_data.values,
+            y=total_vals,
             mode="lines+markers",
             line=dict(color="black", width=2, dash="dot"),
             legendgroup=f"{title}_total",
@@ -145,18 +170,26 @@ def plot_ohada_tabs_dynamic(statement):
             all_traces.append(trace)
             tab_trace_indices.append(len(all_traces) - 1)
 
-        # Build visibility mask for this tab
-        mask = [False] * len(all_traces)
-        for i in tab_trace_indices:
-            mask[i] = True
-        visibility_masks.append(mask)
+        tab_indices.append(tab_trace_indices)
 
     # Add all traces to figure
     for trace in all_traces:
         fig.add_trace(trace, row=1, col=1)
 
     # ============================================================
-    # 4) ADD TABS (BUTTONS)
+    # 4) BUILD VISIBILITY MASKS AFTER ALL TRACES EXIST
+    # ============================================================
+
+    n_traces = len(all_traces)
+    visibility_masks = []
+    for tab_trace_indices in tab_indices:
+        mask = [False] * n_traces
+        for i in tab_trace_indices:
+            mask[i] = True
+        visibility_masks.append(mask)
+
+    # ============================================================
+    # 5) ADD TABS (BUTTONS)
     # ============================================================
 
     fig.update_layout(
@@ -182,12 +215,12 @@ def plot_ohada_tabs_dynamic(statement):
         ]
     )
 
-    # Default tab = Assets
+    # Default tab = Assets (first group)
     for i, trace in enumerate(all_traces):
         trace.visible = visibility_masks[0][i]
 
     # ============================================================
-    # 5) FINAL LAYOUT
+    # 6) FINAL LAYOUT
     # ============================================================
 
     fig.update_layout(

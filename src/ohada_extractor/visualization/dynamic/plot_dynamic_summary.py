@@ -10,12 +10,8 @@ from plotly.subplots import make_subplots
 from ..utils import get_account_label
 
 
-# ============================================================
-#  ASSET SUMMARY (DYNAMIC)
-# ============================================================
-
 def plot_asset_summary_dynamic(statement, period="all"):
-    """Dynamic summary plots for Assets with % labels + growth lines."""
+    """Dynamic summary plots for Assets with clean labels and centered title."""
 
     years_dt = statement.years
     years_str = statement.years.year.astype(str).to_list()
@@ -52,26 +48,23 @@ def plot_asset_summary_dynamic(statement, period="all"):
         compte=pd.IndexSlice[:, bz_ref], annee=years_to_plot_dt
     )
 
-    # --- Compute percentages ---
+    # --- Compute % of total ---
     total_vals = total_assets_data.squeeze(drop=True).values
     pct_data = {
-        ref: (component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values / total_vals * 100)
+        ref: (
+            component_data.sel(compte=pd.IndexSlice[:, ref])
+            .squeeze(drop=True)
+            .values
+            / total_vals
+            * 100
+        )
         for ref in component_refs
     }
-
-    # --- Compute growth rates ---
-    growth_data = {}
-    if len(years_to_plot_dt) > 1:
-        for ref in component_refs:
-            vals = component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values
-            growth = np.concatenate([[np.nan], (vals[1:] - vals[:-1]) / vals[:-1] * 100])
-            growth_data[ref] = growth
 
     # --- Figure ---
     fig = make_subplots(
         rows=1,
         cols=2,
-        specs=[[{"secondary_y": False}, {"secondary_y": True}]],
         subplot_titles=(
             f"Key Asset Components ({title_period})",
             f"Total Assets Breakdown ({title_period})",
@@ -79,7 +72,7 @@ def plot_asset_summary_dynamic(statement, period="all"):
     )
 
     # ============================================================
-    #  SUBPLOT 1 — GROUPED BARS
+    #  SUBPLOT 1 — GROUPED BARS WITH VALUE LABELS ABOVE
     # ============================================================
 
     if period == "all":
@@ -91,6 +84,8 @@ def plot_asset_summary_dynamic(statement, period="all"):
                     name=component_labels[ref],
                     x=years_to_plot_str,
                     y=series.values,
+                    text=[f"{v:,.0f}" for v in series.values],
+                    textposition="outside",
                     legendgroup="components",
                     offsetgroup=ref,
                 ),
@@ -112,6 +107,8 @@ def plot_asset_summary_dynamic(statement, period="all"):
                 name="Value",
                 x=labels,
                 y=series.values,
+                text=[f"{v:,.0f}" for v in series.values],
+                textposition="outside",
                 legendgroup="components",
                 offsetgroup="single",
             ),
@@ -121,7 +118,7 @@ def plot_asset_summary_dynamic(statement, period="all"):
         fig.update_xaxes(title_text="Asset Category", row=1, col=1)
 
     # ============================================================
-    #  SUBPLOT 2 — STACKED BARS + % LABELS + TOTAL LINE + GROWTH LINES
+    #  SUBPLOT 2 — STACKED BARS WITH % LABELS ABOVE
     # ============================================================
 
     if period == "all":
@@ -134,7 +131,7 @@ def plot_asset_summary_dynamic(statement, period="all"):
                     x=years_to_plot_str,
                     y=series.values,
                     text=[f"{v:.1f}%" for v in pct_data[ref]],
-                    textposition="inside",
+                    textposition="outside",
                     legendgroup="stack",
                     offsetgroup="stack",
                 ),
@@ -142,41 +139,10 @@ def plot_asset_summary_dynamic(statement, period="all"):
                 col=2,
             )
 
-        # Total line
-        total_series = total_assets_data.squeeze(drop=True)
-        fig.add_trace(
-            go.Scatter(
-                name=f"{bz_label} (Total)",
-                x=years_to_plot_str,
-                y=total_series.values,
-                mode="lines+markers",
-                line=dict(color="black", width=2, dash="dot"),
-                legendgroup="stack",
-            ),
-            row=1,
-            col=2,
-            secondary_y=False,
-        )
-
-        # Growth lines (secondary axis)
-        for ref in component_refs:
-            fig.add_trace(
-                go.Scatter(
-                    name=f"{component_labels[ref]} Growth (%)",
-                    x=years_to_plot_str,
-                    y=growth_data[ref],
-                    mode="lines+markers",
-                    line=dict(width=2),
-                    legendgroup="growth",
-                ),
-                row=1,
-                col=2,
-                secondary_y=True,
-            )
+        # Total line removed (cleaner)
 
         fig.update_xaxes(title_text="Year", row=1, col=2)
-        fig.update_yaxes(title_text="Value", row=1, col=2, secondary_y=False)
-        fig.update_yaxes(title_text="Growth (%)", row=1, col=2, secondary_y=True)
+        fig.update_yaxes(title_text="Value", row=1, col=2)
 
     else:
         # Single period stacked bar
@@ -198,23 +164,10 @@ def plot_asset_summary_dynamic(statement, period="all"):
                     x=[bz_label],
                     y=[val],
                     text=[f"{pct:.1f}%"],
-                    textposition="inside",
+                    textposition="outside",
                     legendgroup="stack",
                     offsetgroup="stack",
                 ),
-                row=1,
-                col=2,
-            )
-
-        if not np.isnan(total_value):
-            fig.add_annotation(
-                x=bz_label,
-                y=total_value,
-                text=f"Total: {total_value:,.0f}",
-                showarrow=True,
-                arrowhead=4,
-                ax=0,
-                ay=-40,
                 row=1,
                 col=2,
             )
@@ -223,11 +176,15 @@ def plot_asset_summary_dynamic(statement, period="all"):
         fig.update_yaxes(title_text="Value", row=1, col=2)
 
     # ============================================================
-    #  FINAL LAYOUT
+    #  FINAL LAYOUT — CENTER TITLE
     # ============================================================
 
     fig.update_layout(
-        title_text=f"Asset Summary Analysis ({title_period})",
+        title={
+            "text": f"Asset Summary Analysis ({title_period})",
+            "x": 0.5,
+            "xanchor": "center",
+        },
         height=650,
         width=1300,
         template="plotly_white",
@@ -240,12 +197,9 @@ def plot_asset_summary_dynamic(statement, period="all"):
 
 
 
-# ============================================================
-#  LIABILITY SUMMARY (DYNAMIC)
-# ============================================================
 
 def plot_liability_summary_dynamic(statement, period="all"):
-    """Dynamic summary plots for Liabilities with % labels + growth lines."""
+    """Dynamic summary plots for Liabilities with clean labels and centered title."""
 
     years_dt = statement.years
     years_str = statement.years.year.astype(str).to_list()
@@ -282,26 +236,23 @@ def plot_liability_summary_dynamic(statement, period="all"):
         compte=pd.IndexSlice[:, dz_ref], annee=years_to_plot_dt
     )
 
-    # --- Compute percentages ---
+    # --- Compute % of total ---
     total_vals = total_liab_data.squeeze(drop=True).values
     pct_data = {
-        ref: (component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values / total_vals * 100)
+        ref: (
+            component_data.sel(compte=pd.IndexSlice[:, ref])
+            .squeeze(drop=True)
+            .values
+            / total_vals
+            * 100
+        )
         for ref in component_refs
     }
-
-    # --- Compute growth rates ---
-    growth_data = {}
-    if len(years_to_plot_dt) > 1:
-        for ref in component_refs:
-            vals = component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values
-            growth = np.concatenate([[np.nan], (vals[1:] - vals[:-1]) / vals[:-1] * 100])
-            growth_data[ref] = growth
 
     # --- Figure ---
     fig = make_subplots(
         rows=1,
         cols=2,
-        specs=[[{"secondary_y": False}, {"secondary_y": True}]],
         subplot_titles=(
             f"Key Liability/Equity Components ({title_period})",
             f"Total Liabilities & Equity Breakdown ({title_period})",
@@ -309,7 +260,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
     )
 
     # ============================================================
-    #  SUBPLOT 1 — GROUPED BARS
+    #  SUBPLOT 1 — GROUPED BARS WITH VALUE LABELS ABOVE
     # ============================================================
 
     if period == "all":
@@ -321,6 +272,8 @@ def plot_liability_summary_dynamic(statement, period="all"):
                     name=component_labels[ref],
                     x=years_to_plot_str,
                     y=series.values,
+                    text=[f"{v:,.0f}" for v in series.values],
+                    textposition="outside",
                     legendgroup="components",
                     offsetgroup=ref,
                 ),
@@ -342,6 +295,8 @@ def plot_liability_summary_dynamic(statement, period="all"):
                 name="Value",
                 x=labels,
                 y=series.values,
+                text=[f"{v:,.0f}" for v in series.values],
+                textposition="outside",
                 legendgroup="components",
                 offsetgroup="single",
             ),
@@ -351,7 +306,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
         fig.update_xaxes(title_text="Liability/Equity Category", row=1, col=1)
 
     # ============================================================
-    #  SUBPLOT 2 — STACKED BARS + % LABELS + TOTAL LINE + GROWTH LINES
+    #  SUBPLOT 2 — STACKED BARS WITH % LABELS ABOVE
     # ============================================================
 
     if period == "all":
@@ -364,7 +319,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
                     x=years_to_plot_str,
                     y=series.values,
                     text=[f"{v:.1f}%" for v in pct_data[ref]],
-                    textposition="inside",
+                    textposition="outside",
                     legendgroup="stack",
                     offsetgroup="stack",
                 ),
@@ -372,41 +327,8 @@ def plot_liability_summary_dynamic(statement, period="all"):
                 col=2,
             )
 
-        # Total line
-        total_series = total_liab_data.squeeze(drop=True)
-        fig.add_trace(
-            go.Scatter(
-                name=f"{dz_label} (Total)",
-                x=years_to_plot_str,
-                y=total_series.values,
-                mode="lines+markers",
-                line=dict(color="black", width=2, dash="dot"),
-                legendgroup="stack",
-            ),
-            row=1,
-            col=2,
-            secondary_y=False,
-        )
-
-        # Growth lines (secondary axis)
-        for ref in component_refs:
-            fig.add_trace(
-                go.Scatter(
-                    name=f"{component_labels[ref]} Growth (%)",
-                    x=years_to_plot_str,
-                    y=growth_data[ref],
-                    mode="lines+markers",
-                    line=dict(width=2),
-                    legendgroup="growth",
-                ),
-                row=1,
-                col=2,
-                secondary_y=True,
-            )
-
         fig.update_xaxes(title_text="Year", row=1, col=2)
-        fig.update_yaxes(title_text="Value", row=1, col=2, secondary_y=False)
-        fig.update_yaxes(title_text="Growth (%)", row=1, col=2, secondary_y=True)
+        fig.update_yaxes(title_text="Value", row=1, col=2)
 
     else:
         # Single period stacked bar
@@ -428,23 +350,10 @@ def plot_liability_summary_dynamic(statement, period="all"):
                     x=[dz_label],
                     y=[val],
                     text=[f"{pct:.1f}%"],
-                    textposition="inside",
+                    textposition="outside",
                     legendgroup="stack",
                     offsetgroup="stack",
                 ),
-                row=1,
-                col=2,
-            )
-
-        if not np.isnan(total_value):
-            fig.add_annotation(
-                x=dz_label,
-                y=total_value,
-                text=f"Total: {total_value:,.0f}",
-                showarrow=True,
-                arrowhead=4,
-                ax=0,
-                ay=-40,
                 row=1,
                 col=2,
             )
@@ -453,11 +362,15 @@ def plot_liability_summary_dynamic(statement, period="all"):
         fig.update_yaxes(title_text="Value", row=1, col=2)
 
     # ============================================================
-    #  FINAL LAYOUT
+    #  FINAL LAYOUT — CENTER TITLE
     # ============================================================
 
     fig.update_layout(
-        title_text=f"Liability Summary Analysis ({title_period})",
+        title={
+            "text": f"Liability Summary Analysis ({title_period})",
+            "x": 0.5,
+            "xanchor": "center",
+        },
         height=650,
         width=1300,
         template="plotly_white",
@@ -466,4 +379,289 @@ def plot_liability_summary_dynamic(statement, period="all"):
     )
 
     fig.update_yaxes(title_text="Value", row=1, col=1)
+    fig.show()
+
+def plot_income_summary_dynamic(statement, period="all"):
+    """Dynamic summary plots for Income with grouped bars + waterfall."""
+
+    years_dt = statement.years
+    years_str = statement.years.year.astype(str).to_list()
+
+    # --- Period selection ---
+    if period != "all":
+        period_dt = pd.Timestamp(period)
+        if period_dt not in years_dt:
+            raise ValueError(f"Period {period} not found. Available: {years_str}")
+        years_to_plot_dt = [period_dt]
+        years_to_plot_str = [str(period_dt.year)]
+        title_period = str(period_dt.year)
+    else:
+        years_to_plot_dt = years_dt
+        years_to_plot_str = years_str
+        title_period = "All Periods"
+
+    # --- Data selection ---
+    income_data = statement.income
+
+    refs = ["XE", "XF", "XH", "RS", "XI"]
+    labels = {ref: get_account_label(statement, "income", ref) for ref in refs}
+
+    component_data = income_data.sel(
+        compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt
+    )
+
+    # --- Figure ---
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=(
+            f"Income Components ({title_period})",
+            f"Income Waterfall ({title_period})",
+        ),
+    )
+
+    # ============================================================
+    #  SUBPLOT 1 — GROUPED BARS WITH VALUE LABELS
+    # ============================================================
+
+    if period == "all":
+        for ref in refs:
+            series = component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True)
+
+            fig.add_trace(
+                go.Bar(
+                    name=labels[ref],
+                    x=years_to_plot_str,
+                    y=series.values,
+                    text=[f"{v:,.0f}" for v in series.values],
+                    textposition="outside",
+                    offsetgroup=ref,
+                    legendgroup="income",
+                ),
+                row=1,
+                col=1,
+            )
+
+        fig.update_xaxes(title_text="Year", row=1, col=1)
+
+    else:
+        series = component_data.squeeze(drop=True)
+        fig.add_trace(
+            go.Bar(
+                name="Income Components",
+                x=[labels[ref] for ref in refs],
+                y=series.values,
+                text=[f"{v:,.0f}" for v in series.values],
+                textposition="outside",
+            ),
+            row=1,
+            col=1,
+        )
+        fig.update_xaxes(title_text="Income Categories", row=1, col=1)
+
+    # ============================================================
+    #  SUBPLOT 2 — WATERFALL CHART
+    # ============================================================
+
+    if period == "all":
+        # One waterfall per year
+        for i, year in enumerate(years_to_plot_dt):
+            year_data = component_data.sel(annee=year).squeeze(drop=True).values
+
+            fig.add_trace(
+                go.Waterfall(
+                    name=str(year.year),
+                    x=[labels[ref] for ref in refs],
+                    y=year_data,
+                    measure=["relative", "relative", "relative", "relative", "total"],
+                    connector={"line": {"color": "gray"}},
+                ),
+                row=1,
+                col=2,
+            )
+
+        fig.update_xaxes(title_text="Income Flow", row=1, col=2)
+
+    else:
+        year_data = component_data.squeeze(drop=True).values
+
+        fig.add_trace(
+            go.Waterfall(
+                name=str(period_dt.year),
+                x=[labels[ref] for ref in refs],
+                y=year_data,
+                measure=["relative", "relative", "relative", "relative", "total"],
+                connector={"line": {"color": "gray"}},
+            ),
+            row=1,
+            col=2,
+        )
+
+        fig.update_xaxes(title_text="Income Flow", row=1, col=2)
+
+    # ============================================================
+    #  FINAL LAYOUT — CENTER TITLE
+    # ============================================================
+
+    fig.update_layout(
+        title={
+            "text": f"Income Summary Analysis ({title_period})",
+            "x": 0.5,
+            "xanchor": "center",
+        },
+        height=650,
+        width=1300,
+        template="plotly_white",
+        hovermode="x unified",
+    )
+
+    fig.update_yaxes(title_text="Value", row=1, col=1)
+    fig.update_yaxes(title_text="Value", row=1, col=2)
+
+    fig.show()
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+from ..utils import get_account_label
+
+
+def plot_cashflow_summary_dynamic(statement, period="all"):
+    """Dynamic summary plots for Cashflow with grouped bars + waterfall."""
+
+    years_dt = statement.years
+    years_str = statement.years.year.astype(str).to_list()
+
+    # --- Period selection ---
+    if period != "all":
+        period_dt = pd.Timestamp(period)
+        if period_dt not in years_dt:
+            raise ValueError(f"Period {period} not found. Available: {years_str}")
+        years_to_plot_dt = [period_dt]
+        years_to_plot_str = [str(period_dt.year)]
+        title_period = str(period_dt.year)
+    else:
+        years_to_plot_dt = years_dt
+        years_to_plot_str = years_str
+        title_period = "All Periods"
+
+    # --- Data selection ---
+    cash_data = statement.cashflow
+
+    refs = ["ZB", "ZC", "ZF", "ZG"]
+    labels = {ref: get_account_label(statement, "cashflow", ref) for ref in refs}
+
+    component_data = cash_data.sel(
+        compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt
+    )
+
+    # --- Figure ---
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=(
+            f"Cashflow Components ({title_period})",
+            f"Cashflow Waterfall ({title_period})",
+        ),
+    )
+
+    # ============================================================
+    #  SUBPLOT 1 — GROUPED BARS WITH VALUE LABELS
+    # ============================================================
+
+    if period == "all":
+        for ref in refs:
+            series = component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True)
+
+            fig.add_trace(
+                go.Bar(
+                    name=labels[ref],
+                    x=years_to_plot_str,
+                    y=series.values,
+                    text=[f"{v:,.0f}" for v in series.values],
+                    textposition="outside",
+                    offsetgroup=ref,
+                    legendgroup="cashflow",
+                ),
+                row=1,
+                col=1,
+            )
+
+        fig.update_xaxes(title_text="Year", row=1, col=1)
+
+    else:
+        series = component_data.squeeze(drop=True)
+        fig.add_trace(
+            go.Bar(
+                name="Cashflow Components",
+                x=[labels[ref] for ref in refs],
+                y=series.values,
+                text=[f"{v:,.0f}" for v in series.values],
+                textposition="outside",
+            ),
+            row=1,
+            col=1,
+        )
+        fig.update_xaxes(title_text="Cashflow Categories", row=1, col=1)
+
+    # ============================================================
+    #  SUBPLOT 2 — WATERFALL CHART
+    # ============================================================
+
+    if period == "all":
+        for year in years_to_plot_dt:
+            year_data = component_data.sel(annee=year).squeeze(drop=True).values
+
+            fig.add_trace(
+                go.Waterfall(
+                    name=str(year.year),
+                    x=[labels[ref] for ref in refs],
+                    y=year_data,
+                    measure=["relative", "relative", "relative", "total"],
+                    connector={"line": {"color": "gray"}},
+                ),
+                row=1,
+                col=2,
+            )
+
+        fig.update_xaxes(title_text="Cashflow Flow", row=1, col=2)
+
+    else:
+        year_data = component_data.squeeze(drop=True).values
+
+        fig.add_trace(
+            go.Waterfall(
+                name=str(period_dt.year),
+                x=[labels[ref] for ref in refs],
+                y=year_data,
+                measure=["relative", "relative", "relative", "total"],
+                connector={"line": {"color": "gray"}},
+            ),
+            row=1,
+            col=2,
+        )
+
+        fig.update_xaxes(title_text="Cashflow Flow", row=1, col=2)
+
+    # ============================================================
+    #  FINAL LAYOUT — CENTER TITLE
+    # ============================================================
+
+    fig.update_layout(
+        title={
+            "text": f"Cashflow Summary Analysis ({title_period})",
+            "x": 0.5,
+            "xanchor": "center",
+        },
+        height=650,
+        width=1300,
+        template="plotly_white",
+        hovermode="x unified",
+    )
+
+    fig.update_yaxes(title_text="Value", row=1, col=1)
+    fig.update_yaxes(title_text="Value", row=1, col=2)
+
     fig.show()

@@ -6,190 +6,268 @@ from plotly.subplots import make_subplots
 from ..utils import get_account_label
 
 
-def plot_overview_dashboard_dynamic(statement):
+def plot_overview_dashboard_clean(statement):
     """
-    4‑Panel OHADA Overview Dashboard:
-    - Panel 1: Asset Summary (stacked + YoY growth)
-    - Panel 2: Liability Summary (stacked + YoY growth)
-    - Panel 3: Income Summary (stacked + YoY growth)
-    - Panel 4: Cashflow Summary (stacked + YoY growth)
+    Clean 4‑Panel OHADA Overview Dashboard:
+    - Assets (grouped + stacked)
+    - Liabilities (grouped + stacked)
+    - Income (grouped + waterfall)
+    - Cashflow (grouped + waterfall)
     """
 
+    # Use statement.years as the canonical time axis
     years_dt = statement.years
-    years_str = statement.years.year.astype(str).to_list()
-
-    # ============================================================
-    # 1) DEFINE COMPONENTS FOR EACH STATEMENT
-    # ============================================================
-
-    # Assets
-    asset_refs = ["AZ", "BK", "BT"]
-    asset_total = "BZ"
-
-    # Liabilities
-    liab_refs = ["DF", "DP", "DT"]
-    liab_total = "DZ"
-
-    # Income
-    income_refs = ["XE", "XF", "XH", "RS"]
-    income_total = "XI"
-
-    # Cashflow
-    cash_refs = ["ZB", "ZC", "ZE"]
-    cash_total = "ZF"
-
-    groups = [
-        ("Assets", statement.asset.sel(valeur="Net"), asset_refs, asset_total),
-        ("Liabilities", statement.liability, liab_refs, liab_total),
-        ("Income", statement.income, income_refs, income_total),
-        ("Cashflow", statement.cashflow, cash_refs, cash_total),
-    ]
-
-    # ============================================================
-    # 2) CREATE FIGURE WITH 4 PANELS
-    # ============================================================
+    years_str = years_dt.year.astype(str).to_list()
 
     fig = make_subplots(
-        rows=2,
+        rows=4,
         cols=2,
-        specs=[
-            [{"secondary_y": True}, {"secondary_y": True}],
-            [{"secondary_y": True}, {"secondary_y": True}],
-        ],
         subplot_titles=[
-            "Assets Summary",
-            "Liabilities Summary",
-            "Income Summary",
-            "Cashflow Summary",
+            "Assets – Grouped", "Assets – Stacked",
+            "Liabilities – Grouped", "Liabilities – Stacked",
+            "Income – Grouped", "Income – Waterfall",
+            "Cashflow – Grouped", "Cashflow – Waterfall",
         ],
+        specs=[
+            [{"secondary_y": False}, {"secondary_y": False}],
+            [{"secondary_y": False}, {"secondary_y": False}],
+            [{"secondary_y": False}, {"secondary_y": False}],
+            [{"secondary_y": False}, {"secondary_y": False}],
+        ],
+        horizontal_spacing=0.08,
+        vertical_spacing=0.05,
     )
 
     # ============================================================
-    # 3) LOOP THROUGH EACH PANEL
+    # 1) ASSETS (AZ, BK, BT, BZ)
     # ============================================================
 
-    for idx, (title, data_array, refs, total_ref) in enumerate(groups, start=1):
+    asset_refs = ["AZ", "BK", "BT"]
+    asset_total = "BZ"
 
-        row = 1 if idx <= 2 else 2
-        col = 1 if idx in (1, 3) else 2
+    asset_data = statement.asset.sel(valeur="Net")
 
-        # Extract data
-        component_data = data_array.sel(
-            compte=pd.IndexSlice[:, refs], annee=years_dt
-        )
-        total_data = data_array.sel(
-            compte=pd.IndexSlice[:, total_ref], annee=years_dt
-        ).squeeze(drop=True)
+    # Select using the original years_dt (whatever type annee uses)
+    asset_components = asset_data.sel(
+        compte=pd.IndexSlice[:, asset_refs],
+        annee=years_dt,
+    )
 
-        # Compute % of total
-        pct_data = {
-            ref: (
-                component_data.sel(compte=pd.IndexSlice[:, ref])
-                .squeeze(drop=True)
-                .values
-                / total_data.values
-                * 100
-            )
-            for ref in refs
-        }
+    asset_total_data = asset_data.sel(
+        compte=pd.IndexSlice[:, asset_total],
+        annee=years_dt,
+    ).squeeze()
 
-        # Compute YoY growth
-        growth_data = {}
-        for ref in refs:
-            vals = (
-                component_data.sel(compte=pd.IndexSlice[:, ref])
-                .squeeze(drop=True)
-                .values
-            )
-            growth = np.concatenate([[np.nan], (vals[1:] - vals[:-1]) / vals[:-1] * 100])
-            growth_data[ref] = growth
+    asset_labels = {ref: get_account_label(statement, "assets", ref) for ref in asset_refs}
 
-        # Labels
-        labels = {
-            ref: get_account_label(statement, title.lower(), ref)
-            for ref in refs
-        }
-        total_label = get_account_label(statement, title.lower(), total_ref)
+    # Remove zero-only components
+    asset_labels = {ref: asset_labels[ref] for ref in asset_refs}
 
-        # ============================================================
-        # STACKED BARS (ABSOLUTE VALUES) + % LABELS
-        # ============================================================
-
-        for ref in refs:
-            series = (
-                component_data.sel(compte=pd.IndexSlice[:, ref])
-                .squeeze(drop=True)
-                .values
-            )
-
-            fig.add_trace(
-                go.Bar(
-                    name=labels[ref],
-                    x=years_str,
-                    y=series,
-                    text=[f"{v:.1f}%" for v in pct_data[ref]],
-                    textposition="inside",
-                    legendgroup=f"{title}_stack",
-                    offsetgroup=f"{title}_stack",
-                ),
-                row=row,
-                col=col,
-                secondary_y=False,
-            )
-
-        # ============================================================
-        # TOTAL LINE
-        # ============================================================
-
+    # Grouped bars (left)
+    for ref in asset_refs:
+        series = asset_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
         fig.add_trace(
-            go.Scatter(
-                name=f"{total_label} (Total)",
+            go.Bar(
+                name=asset_labels[ref],
                 x=years_str,
-                y=total_data.values,
-                mode="lines+markers",
-                line=dict(color="black", width=2, dash="dot"),
-                legendgroup=f"{title}_total",
+                y=series.values,
+                text=[f"{v:,.0f}" for v in series.values],
+                textposition="outside",
+                offsetgroup=ref,
             ),
-            row=row,
-            col=col,
-            secondary_y=False,
+            row=1,
+            col=1,
         )
 
-        # ============================================================
-        # GROWTH LINES (SECONDARY AXIS)
-        # ============================================================
-
-        for ref in refs:
-            fig.add_trace(
-                go.Scatter(
-                    name=f"{labels[ref]} Growth (%)",
-                    x=years_str,
-                    y=growth_data[ref],
-                    mode="lines+markers",
-                    line=dict(width=2),
-                    legendgroup=f"{title}_growth",
-                ),
-                row=row,
-                col=col,
-                secondary_y=True,
-            )
-
-        # Axis labels
-        fig.update_xaxes(title_text="Year", row=row, col=col)
-        fig.update_yaxes(title_text="Value", row=row, col=col, secondary_y=False)
-        fig.update_yaxes(title_text="Growth (%)", row=row, col=col, secondary_y=True)
+    # Stacked bars (right)
+    for ref in asset_refs:
+        series = asset_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        pct = series.values / asset_total_data.values * 100
+        fig.add_trace(
+            go.Bar(
+                name=asset_labels[ref],
+                x=years_str,
+                y=series.values,
+                text=[f"{p:.1f}%" for p in pct],
+                textposition="outside",
+                offsetgroup="stack",
+            ),
+            row=1,
+            col=2,
+        )
 
     # ============================================================
-    # 4) FINAL LAYOUT
+    # 2) LIABILITIES (DF, DP, DT, DZ)
+    # ============================================================
+
+    liab_refs = ["DF", "DP", "DT"]
+    liab_total = "DZ"
+
+    liab_data = statement.liability
+
+    liab_components = liab_data.sel(
+        compte=pd.IndexSlice[:, liab_refs],
+        annee=years_dt,
+    )
+
+    liab_total_data = liab_data.sel(
+        compte=pd.IndexSlice[:, liab_total],
+        annee=years_dt,
+    ).squeeze()
+
+    liab_labels = {ref: get_account_label(statement, "liabilities", ref) for ref in liab_refs}
+
+    # Remove zero-only components
+    liab_labels = {ref: liab_labels[ref] for ref in liab_refs}
+
+    # Grouped bars (left)
+    for ref in liab_refs:
+        series = liab_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        fig.add_trace(
+            go.Bar(
+                name=liab_labels[ref],
+                x=years_str,
+                y=series.values,
+                text=[f"{v:,.0f}" for v in series.values],
+                textposition="outside",
+                offsetgroup=ref,
+            ),
+            row=2,
+            col=1,
+        )
+
+    # Stacked bars (right)
+    for ref in liab_refs:
+        series = liab_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        pct = series.values / liab_total_data.values * 100
+        fig.add_trace(
+            go.Bar(
+                name=liab_labels[ref],
+                x=years_str,
+                y=series.values,
+                text=[f"{p:.1f}%" for p in pct],
+                textposition="outside",
+                offsetgroup="stack",
+            ),
+            row=2,
+            col=2,
+        )
+
+    # ============================================================
+    # 3) INCOME (XE, XF, XH, RS, XI)
+    # ============================================================
+
+    income_refs = ["XE", "XF", "XH", "RS", "XI"]
+    income_data = statement.income
+
+    income_components = income_data.sel(
+        compte=pd.IndexSlice[:, income_refs],
+        annee=years_dt,
+    )
+
+    income_labels = {ref: get_account_label(statement, "income", ref) for ref in income_refs}
+
+    # Remove zero-only components
+
+    income_labels = {ref: income_labels[ref] for ref in income_refs}
+
+    # Grouped bars (left)
+    for ref in income_refs:
+        series = income_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        fig.add_trace(
+            go.Bar(
+                name=income_labels[ref],
+                x=years_str,
+                y=series.values,
+                text=[f"{v:,.0f}" for v in series.values],
+                textposition="outside",
+                offsetgroup=ref,
+            ),
+            row=3,
+            col=1,
+        )
+
+    # Waterfall (right)
+    for year in income_components.annee.values:
+        year_vals = income_components.sel(annee=year).squeeze().values
+        fig.add_trace(
+            go.Waterfall(
+                name=str(pd.to_datetime(year).year),
+                x=[income_labels[r] for r in income_refs],
+                y=year_vals,
+                measure=["relative"] * (len(income_refs) - 1) + ["total"],
+                connector={"line": {"color": "gray"}},
+            ),
+            row=3,
+            col=2,
+        )
+
+    # ============================================================
+    # 4) CASHFLOW (ZB, ZC, ZF, ZG)
+    # ============================================================
+
+    cash_refs = ["ZB", "ZC", "ZF", "ZG"]
+    cash_data = statement.cashflow
+
+    cash_components = cash_data.sel(
+        compte=pd.IndexSlice[:, cash_refs],
+        annee=years_dt,
+    )
+
+    cash_labels = {ref: get_account_label(statement, "cashflow", ref) for ref in cash_refs}
+
+    # Remove zero-only components
+
+    cash_labels = {ref: cash_labels[ref] for ref in cash_refs}
+
+    # Grouped bars (left)
+    for ref in cash_refs:
+        series = cash_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        fig.add_trace(
+            go.Bar(
+                name=cash_labels[ref],
+                x=years_str,
+                y=series.values,
+                text=[f"{v:,.0f}" for v in series.values],
+                textposition="outside",
+                offsetgroup=ref,
+            ),
+            row=4,
+            col=1,
+        )
+
+    # Waterfall (right)
+    for year in cash_components.annee.values:
+        year_vals = cash_components.sel(annee=year).squeeze().values
+        fig.add_trace(
+            go.Waterfall(
+                name=str(pd.to_datetime(year).year),
+                x=[cash_labels[r] for r in cash_refs],
+                y=year_vals,
+                measure=["relative"] * (len(cash_refs) - 1) + ["total"],
+                connector={"line": {"color": "gray"}},
+            ),
+            row=4,
+            col=2,
+        )
+
+    # ============================================================
+    # FINAL LAYOUT
     # ============================================================
 
     fig.update_layout(
-        title_text="OHADA 4‑Panel Overview Dashboard",
-        height=1200,
-        width=1600,
+        title={
+            "text": "OHADA 4‑Panel Overview Dashboard (Clean Version)",
+            "x": 0.5,
+            "xanchor": "center",
+        },
+        height=1800,
+        width=1300,
         template="plotly_white",
         hovermode="x unified",
         barmode="stack",
+        showlegend=False,   # ← REMOVE LEGEND
+        margin=dict(t=80, b=40)
     )
 
     fig.show()

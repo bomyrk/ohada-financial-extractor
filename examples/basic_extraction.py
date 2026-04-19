@@ -111,6 +111,12 @@ def main():
         period="all"
     )
     statement.plot(
+        data_type="all",
+        plot_type="dynamic",
+        style="area",  # bar / line / area
+        period="all"
+    )
+    statement.plot(
         data_type="liabilities",
         plot_type="dynamic",
         summary=True,
@@ -128,6 +134,8 @@ def main():
     statement.plot("liabilities", plot_type="dynamic")
     statement.plot("assets", plot_type="dynamic", summary = True)
     statement.plot("liabilities", plot_type="dynamic", summary=True)
+    statement.plot("income", plot_type="dynamic", summary=True)
+    statement.plot("cashflow", plot_type="dynamic", summary=True)
 
     from ohada_extractor.visualization.dynamic.plot_dynamic_tabs import (
         plot_ohada_tabs_dynamic
@@ -136,11 +144,11 @@ def main():
     plot_ohada_tabs_dynamic(statement)
 
     from ohada_extractor.visualization.dynamic.plot_dynamic_overview import (
-        plot_overview_dashboard_dynamic
+        plot_overview_dashboard_clean
     )
 
     # Display the 4-panel dashboard
-    plot_overview_dashboard_dynamic(statement)
+    plot_overview_dashboard_clean(statement)
 
 
 if __name__ == '__main__':
