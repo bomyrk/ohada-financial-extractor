@@ -21,6 +21,7 @@ from .static.plot_static_all import plot_all_static
 from .static.plot_static_summary import (
     plot_asset_summary_static,
     plot_liability_summary_static,
+    plot_income_summary_static,
 )
 
 # Dynamic plot modules

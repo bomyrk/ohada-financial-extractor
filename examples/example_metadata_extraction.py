@@ -41,7 +41,6 @@ def main():
 
     if not sample_file.exists():
         print(f"Error: Sample file not found at {sample_file}")
-        print("Please run: python scripts/generate_sample_data.py")
         return
 
     extractor = FinancialExtractor()
