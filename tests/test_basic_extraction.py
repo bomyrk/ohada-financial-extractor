@@ -3,7 +3,6 @@ Unit tests for basic extraction functionality
 """
 
 import unittest
-import numpy as np
 from pathlib import Path
 from ohada_extractor import FinancialExtractor
 from ohada_extractor.core.schemas import OHADA_STATEMENTS
