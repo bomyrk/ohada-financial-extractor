@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ohada-financial-extractor"
-version = "0.1.0"
+version = "0.1.1"
 description = "Extract and normalize financial data from OHADA-compliant Excel financial statements (DSF)"
 readme = "README.md"
 requires-python = ">=3.10"
