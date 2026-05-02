@@ -37,6 +37,11 @@ jobs:
             
           echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Create tag
         run: |
           git tag -a "v${{ steps.version.outputs.next_version }}" -m "Release v${{ steps.version.outputs.next_version }}"
