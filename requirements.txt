@@ -5,3 +5,4 @@ xarray==2024.1.0
 pyqt5==5.15.11
 matplotlib==3.10.1
 plotly==6.5.0
+streamlit==1.56.0
