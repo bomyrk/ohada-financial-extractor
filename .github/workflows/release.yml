@@ -24,11 +24,11 @@ jobs:
       - name: Determine next version
         id: bump
         run: |
-          VERSION=$(bump-my-version show next --allow-dirty)
+          VERSION=$(bump-my-version show next )
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Apply version bump
-        run: bump-my-version bump --allow-dirty
+        run: bump-my-version bump
 
       - name: Push version bump
         uses: stefanzweifel/git-auto-commit-action@v5
