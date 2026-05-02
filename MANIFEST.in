@@ -1,0 +1,6 @@
+include docs/README.md
+include docs/output_schema.md
+include docs/ohada_standards.md
+include LICENSE
+recursive-include src/ohada_extractor *.py
+recursive-include examples *

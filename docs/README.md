@@ -2,10 +2,15 @@
 
 Extract and normalize financial data from OHADA-compliant Excel financial statements.
 
+[![PyPI version](https://badge.fury.io/py/ohada-financial-extractor.svg)](https://pypi.org/project/ohada-financial-extractor/)
+
+![CI](https://github.com/bomyrk/ohada-financial-extractor/actions/workflows/ci.yml/badge.svg)
+
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 
 ## Overview
@@ -61,7 +66,7 @@ This library eliminates those bottlenecks:
 ### Installation
 
 
-
+You can install the OHADA Financial Extractor directly from PyPI:
 ```bash
 
 pip install ohada-financial-extractor
