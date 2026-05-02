@@ -23,10 +23,6 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install dependencies
-        run: |
-          pip install setuptools_scm build twine
-
       - name: Determine next version
         id: version
         run: |
@@ -43,8 +39,17 @@ jobs:
 
       - name: Create tag
         run: |
-          git tag "v${{ steps.version.outputs.next_version }}"
+          git tag -a "v${{ steps.version.outputs.next_version }}" -m "Release v${{ steps.version.outputs.next_version }}"
           git push origin "v${{ steps.version.outputs.next_version }}"
+
+      - name: Re-checkout to include the new tag
+        uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install build tools
+        run: pip install build setuptools_scm
 
       - name: Build package
         run: python -m build
