@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ohada-financial-extractor"
+dynamic = ["version"]
 description = "Extract and normalize financial data from OHADA-compliant Excel financial statements (DSF)"
 readme = { file = "docs/README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [
-    {name = "Kamguia Wabo, Leonel B. ", email = "bomyr.kamguia@bkresearchandanalytics.com"},
-    {name = "Ndayou, Ronald V. ", email = "ronald.ndayou@bkresearchandanalytics.com"},
+    {name = "Kamguia Wabo, Leonel B.", email = "bomyr.kamguia@bkresearchandanalytics.com"},
+    {name = "Ndayou, Ronald V.", email = "ronald.ndayou@bkresearchandanalytics.com"},
 ]
 
 keywords = ["OHADA", "financial-extraction", "accounting", "Excel", "data-extraction", "financial statements"]
@@ -41,12 +42,14 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=6.0", "pytest-cov>=2.12.0"]
 
-# setuptools_scm gère la version automatiquement
-dynamic = ["version"]
+[project.urls]
+Homepage = "https://github.com/bomyrk/ohada-financial-extractor"
+Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
+
+[tool.setuptools]
+# Si votre code est dans un dossier 'src', setuptools le trouvera automatiquement
+package-dir = {"" = "src"}
+
 
 [tool.setuptools_scm]
 write_to = "src/ohada_extractor/_version.py"
-
-
-
-
