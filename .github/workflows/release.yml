@@ -18,20 +18,34 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install bump-my-version
-        run: pip install bump-my-version
+      - name: Install dependencies
+        run: |
+          pip install setuptools_scm build twine
 
       - name: Determine next version
-        id: bump
+        id: version
         run: |
-          VERSION=$(bump-my-version show next )
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # Extract last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.1.2")
+            
+          # Compute next patch version
+          BASE=${LAST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+          NEXT_PATCH=$((PATCH + 1))
+          NEXT_VERSION="$MAJOR.$MINOR.$NEXT_PATCH"
+            
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Apply version bump
-        run: bump-my-version bump
+      - name: Create tag
+        run: |
+          git tag "v${{ steps.version.outputs.next_version }}"
+          git push origin "v${{ steps.version.outputs.next_version }}"
 
-      - name: Push version bump
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: bump version to ${{ steps.bump.outputs.version }}"
-          tagging_message: "v${{ steps.bump.outputs.version }}"
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          WINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
