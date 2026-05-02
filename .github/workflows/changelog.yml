@@ -1,0 +1,51 @@
+name: Update Changelog
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog entry
+        id: changelog
+        uses: orhun/git-cliff-action@v2
+        with:
+          config: |
+            [changelog]
+            header = ""
+            body = """
+            ## [{{ version }}] - {{ date }}
+            {{ body }}
+            """
+            trim = true
+
+            [git]
+            conventional_commits = true
+            filter_commits = true
+            commit_parsers = [
+              { message = "^feat", group = "Added" },
+              { message = "^fix", group = "Fixed" },
+              { message = "^docs", group = "Documentation" },
+              { message = "^refactor", group = "Changed" },
+              { message = "^perf", group = "Performance" },
+              { message = "^test", group = "Tests" },
+              { message = "^chore", skip = true },
+            ]
+
+      - name: Update CHANGELOG.md
+        run: |
+          echo -e "${{ steps.changelog.outputs.changelog }}" | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: update changelog for release ${{ github.event.release.tag_name }}"
+          file_pattern: CHANGELOG.md
