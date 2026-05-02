@@ -20,6 +20,7 @@ wheels/
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
+src/ohada_extractor/_version.py
 .installed.cfg
 *.egg
 MANIFEST
