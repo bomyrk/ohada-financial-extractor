@@ -49,7 +49,7 @@ Issues = "https://github.com/bomyrk/ohada-financial-extractor/issues"
 dynamic = ["version"]
 
 [tool.setuptools_scm]
-write_to = "src/ohada_financial_extractor/_version.py"
+write_to = "src/ohada_extractor/_version.py"
 
 [tool.black]
 target-version = ["py310"]
