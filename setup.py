@@ -7,7 +7,7 @@ setup(
     long_description=open('docs/README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     author='Kamguia Wabo, Leonel B. ; Ndayou, Ronald V. ',
-    author_email='bomyr.kamguia@bkresearchandanalytics.com',
+    author_email='bomyr.kamguia@bkresearchandanalytics.com;  ronald.ndayou@bkresearchandanalytics.com',
     url='https://github.com/bomyrk/ohada-financial-extractor',
     license='MIT',
     packages=find_packages(where='src'),
