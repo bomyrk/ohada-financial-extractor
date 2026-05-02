@@ -3,15 +3,16 @@ current_version = "0.1.2"
 commit = false
 tag = false
 
-[bumpversion:file:pyproject.toml]
+[[bumpversion.files]]
+filename = "pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
 
-[bumpversion:part:major]
+[bumpversion.part.major]
 first_value = 0
 
-[bumpversion:part:minor]
+[bumpversion.part.minor]
 first_value = 1
 
-[bumpversion:part:patch]
+[bumpversion.part.patch]
 first_value = 0
