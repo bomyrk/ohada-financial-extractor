@@ -17,14 +17,13 @@ from openpyxl.worksheet.worksheet import Worksheet
 from .statement import FinancialStatement
 from .schemas import OHADA_STATEMENTS, OHADA_NOTES, OTHER_ACCOUNTS
 
-
 logger = logging.getLogger(__name__)
 
 
 class FinancialExtractor:
     """
     Extract financial data from OHADA-compliant Excel financial statements.
-    
+
     Supports:
     - Balance sheets (Bil-an Paysage) with Gross/Amortization/Net tracking
     - Income statements (Compte de Résultat)
@@ -43,16 +42,16 @@ class FinancialExtractor:
     # ---------------------------------------------------------
     # 2. PUBLIC API (Top-level methods)
     # ---------------------------------------------------------
-    def extract_from_excel(self, file_path: Union[str, Path]) -> 'FinancialStatement':
+    def extract_from_excel(self, file_path: Union[str, Path]) -> "FinancialStatement":
         """
         Extract financial data from a single OHADA Excel file.
-        
+
         Args:
             file_path: Path to the Excel file
-            
+
         Returns:
             FinancialStatement object with extracted data
-            
+
         Raises:
             FileNotFoundError: If file doesn't exist
             ValueError: If required sheets are missing
@@ -60,41 +59,50 @@ class FinancialExtractor:
         file_path = Path(file_path)
         if not file_path.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
-        
+
         self.workbook = openpyxl.load_workbook(file_path, data_only=True)
         self._validate_sheets()
         self._extract_all_statements()
         self._extract_all_notes()
-        
+
         # Extract periods from headers
         periods = self._extract_periods()
-        
+
         from .statement import FinancialStatement
+
         return FinancialStatement(
-            asset_data=self.raw_data.get('assets'),
-            liability_data=self.raw_data.get('liabilities'),
-            income_data=self.raw_data.get('income'),
-            cashflow_data=self.raw_data.get('cashflow'),
-            other_data=self.raw_data.get('other'),
-            notes=self.raw_data.get('notes'),
+            asset_data=self.raw_data.get("assets"),
+            liability_data=self.raw_data.get("liabilities"),
+            income_data=self.raw_data.get("income"),
+            cashflow_data=self.raw_data.get("cashflow"),
+            other_data=self.raw_data.get("other"),
+            notes=self.raw_data.get("notes"),
             periods=periods,
             file_path=str(file_path),
         )
 
-    def extract_over_period(self, file_list: List[Union[str, Path]]) -> 'FinancialStatement':
+    def extract_over_period(
+        self, file_list: List[Union[str, Path]]
+    ) -> "FinancialStatement":
         """
         Extract and consolidate financial data from multiple files across years.
-        
+
         Args:
             file_list: List of Excel file paths
-            
+
         Returns:
             Consolidated FinancialStatement
         """
         if len(file_list) < 2:
             raise ValueError("Minimum 2 files required for period analysis")
 
-        combined_asset, combined_liabilities, combined_income, combined_cashflow, combined_other = (None,) * 5
+        (
+            combined_asset,
+            combined_liabilities,
+            combined_income,
+            combined_cashflow,
+            combined_other,
+        ) = (None,) * 5
 
         statements = []
 
@@ -104,61 +112,90 @@ class FinancialExtractor:
 
         # Initialize combined arrays using the first statement
         first = statements[0]
-        combined_asset = np.hstack((np.insert(first.asset_data.copy()[:, [0, -1]], [1],
-                                              [np.nan, np.nan], axis=1), first.asset_data.copy()[:, 1:-1]))
-        combined_liabilities = np.hstack((first.liability_data.copy()[:, [0, -1]], first.liability_data.copy()[:, 1:-1]))
-        combined_income = np.hstack((first.income_data.copy()[:, [0, -1]], first.income_data.copy()[:, 1:-1]))
-        combined_cashflow = np.hstack((first.cashflow_data.copy()[:, [0, -1]], first.cashflow_data.copy()[:, 1:-1]))
-        combined_other = np.hstack((first.other_data.copy()[:, [0, -1]], first.other_data.copy()[:, 1:-1]))
+        combined_asset = np.hstack(
+            (
+                np.insert(
+                    first.asset_data.copy()[:, [0, -1]], [1], [np.nan, np.nan], axis=1
+                ),
+                first.asset_data.copy()[:, 1:-1],
+            )
+        )
+        combined_liabilities = np.hstack(
+            (
+                first.liability_data.copy()[:, [0, -1]],
+                first.liability_data.copy()[:, 1:-1],
+            )
+        )
+        combined_income = np.hstack(
+            (first.income_data.copy()[:, [0, -1]], first.income_data.copy()[:, 1:-1])
+        )
+        combined_cashflow = np.hstack(
+            (
+                first.cashflow_data.copy()[:, [0, -1]],
+                first.cashflow_data.copy()[:, 1:-1],
+            )
+        )
+        combined_other = np.hstack(
+            (first.other_data.copy()[:, [0, -1]], first.other_data.copy()[:, 1:-1])
+        )
         combined_notes = first.notes
 
         # Merge subsequent years
         for stmt in statements[1:]:
             combined_asset = self._merge_period_data(
-                combined_asset, stmt.asset_data,
+                combined_asset,
+                stmt.asset_data,
                 combined_col=combined_asset.shape[1] - 1,
                 new_col=4,
-                label="asset"
+                label="asset",
             )
 
             combined_liabilities = self._merge_period_data(
-                combined_liabilities, stmt.liability_data,
+                combined_liabilities,
+                stmt.liability_data,
                 combined_col=combined_liabilities.shape[1] - 1,
                 new_col=2,
-                label="liabilities"
+                label="liabilities",
             )
 
             combined_income = self._merge_period_data(
-                combined_income, stmt.income_data,
+                combined_income,
+                stmt.income_data,
                 combined_col=combined_income.shape[1] - 1,
                 new_col=2,
-                label="income"
+                label="income",
             )
 
             combined_cashflow = self._merge_period_data(
-                combined_cashflow, stmt.cashflow_data,
+                combined_cashflow,
+                stmt.cashflow_data,
                 combined_col=combined_cashflow.shape[1] - 1,
                 new_col=2,
-                label="cashflow"
+                label="cashflow",
             )
 
             combined_other = self._merge_period_data(
-                combined_other, stmt.other_data,
+                combined_other,
+                stmt.other_data,
                 combined_col=combined_other.shape[1] - 1,
                 new_col=2,
-                label="other"
+                label="other",
             )
 
-            combined_notes = self._merge_notes(
-                combined_notes, stmt.notes
-            )
+            combined_notes = self._merge_notes(combined_notes, stmt.notes)
 
         # Build periods list (sorted by year)
         periods = [stmt.periods[0] for stmt in statements]
         periods.insert(0, first.periods[1])
 
         # Replace None value with 0
-        for tmp_data in [combined_asset, combined_liabilities, combined_income, combined_cashflow, combined_other]:
+        for tmp_data in [
+            combined_asset,
+            combined_liabilities,
+            combined_income,
+            combined_cashflow,
+            combined_other,
+        ]:
             tmp_data[np.where(tmp_data == None)] = 0
 
         # Return a proper FinancialStatement
@@ -170,7 +207,7 @@ class FinancialExtractor:
             other_data=combined_other,
             notes=combined_notes,
             periods=periods,
-            file_path=";".join(str(p) for p in file_list)
+            file_path=";".join(str(p) for p in file_list),
         )
 
     # ---------------------------------------------------------
@@ -178,10 +215,11 @@ class FinancialExtractor:
     # ---------------------------------------------------------
     def _validate_sheets(self):
         """Check that required sheets exist in workbook."""
-        workbook_sheets = {' '.join(s.split()).lower() for s in self.workbook.sheetnames}
+        workbook_sheets = {
+            " ".join(s.split()).lower() for s in self.workbook.sheetnames
+        }
         required_sheets = {
-            stmt.sheet_name.lower() 
-            for stmt in OHADA_STATEMENTS.values()
+            stmt.sheet_name.lower() for stmt in OHADA_STATEMENTS.values()
         }
         missing = required_sheets - workbook_sheets
         if missing:
@@ -194,38 +232,39 @@ class FinancialExtractor:
             sheet = self._get_sheet(stmt_config.sheet_name)
             if sheet:
                 data = self._extract_sheet_data(
-                    sheet, 
+                    sheet,
                     stmt_config.start_account,
                     stmt_config.end_account,
                     stmt_config.account_count,
                     stmt_config.columns_idx,
-                    stmt_config.lines_idx
+                    stmt_config.lines_idx,
                 )
-                if key == 'other_last_years':
-                    data[:,0] = [item[1] for item in OTHER_ACCOUNTS]
+                if key == "other_last_years":
+                    data[:, 0] = [item[1] for item in OTHER_ACCOUNTS]
 
-                self.raw_data[key.split('_')[0]] = data
+                self.raw_data[key.split("_")[0]] = data
 
     def _get_sheet(self, sheet_name: str) -> Optional[Worksheet]:
         """Get worksheet by normalized name."""
         for ws in self.workbook.worksheets:
-            if ' '.join(ws.title.split()).lower() == sheet_name.lower():
+            if " ".join(ws.title.split()).lower() == sheet_name.lower():
                 return ws
         return None
 
     def _extract_sheet_data(
         self,
         sheet: Worksheet,
-        start_code: str, 
-        end_code: str, 
+        start_code: str,
+        end_code: str,
         length: int,
         columns: tuple[int, ...],
         lines: tuple[int, ...],
-        strict: bool = True, pre_process: bool = False
-    ) -> np.ndarray|tuple[np.ndarray, np.ndarray]:
+        strict: bool = True,
+        pre_process: bool = False,
+    ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
         """
         Extract financial data from sheet between start and end codes.
-        
+
         Args:
             sheet: Worksheet to extract from
             start_code: Starting account code (e.g., 'AD')
@@ -239,7 +278,7 @@ class FinancialExtractor:
                         rows as the number of rows specified in parameter length
             pre_process (bool): If True, the function will pre-process the data and return both raw data
                         and pre-processed data.
-            
+
         Returns:
             NumPy array with extracted data
         """
@@ -250,11 +289,11 @@ class FinancialExtractor:
         for row in sheet.iter_rows(values_only=True):
             if row[0] is None and end_code not in [str(val).upper() for val in row[1:]]:
                 continue
-                
+
             # Check if we've found the start code
             if start_code.upper() in str(row).strip().upper():
-                if start_code == 'CA' and row[liability_column_idx] is not None:
-                    if row[liability_column_idx].strip().upper() == start_code.upper() :
+                if start_code == "CA" and row[liability_column_idx] is not None:
+                    if row[liability_column_idx].strip().upper() == start_code.upper():
                         start = True
                     elif start:
                         pass
@@ -262,7 +301,7 @@ class FinancialExtractor:
                         continue
                     raw_data.append(row[liability_column_idx:])
                 else:
-                    if row[0].strip().upper() == start_code.upper() :
+                    if row[0].strip().upper() == start_code.upper():
                         start = True
                     elif start:
                         pass
@@ -271,18 +310,24 @@ class FinancialExtractor:
                     raw_data.append(row)
             # Check if we've found the end code
             elif str(end_code).upper() in [str(val).strip().upper() for val in row]:
-                if start_code == 'CA':
-                    if start and str(end_code).upper() == str(row[liability_column_idx]).strip().upper():
+                if start_code == "CA":
+                    if (
+                        start
+                        and str(end_code).upper()
+                        == str(row[liability_column_idx]).strip().upper()
+                    ):
                         raw_data.append(row[liability_column_idx:])
                         break
                 else:
-                    if start and (str(end_code).upper() == str(row[0]).strip().upper() or \
-                            str(end_code).upper() == str(row[1:]).strip().upper()):
+                    if start and (
+                        str(end_code).upper() == str(row[0]).strip().upper()
+                        or str(end_code).upper() == str(row[1:]).strip().upper()
+                    ):
                         raw_data.append(row)
                         break
             # Extract data between start and end
             elif start:
-                if start_code == 'CA':
+                if start_code == "CA":
                     if row[liability_column_idx] is None:
                         continue
                     else:
@@ -290,7 +335,9 @@ class FinancialExtractor:
                 else:
                     raw_data.append(row)
 
-        if (strict and len(raw_data) == length) or (strict is False and len(raw_data) <= length):
+        if (strict and len(raw_data) == length) or (
+            strict is False and len(raw_data) <= length
+        ):
             if columns is None:
                 if lines is None:
                     return np.array(raw_data)
@@ -309,7 +356,10 @@ class FinancialExtractor:
                     if not pre_process:
                         return np.array(raw_data)[np.ix_(lines, columns)]
                     else:
-                        return np.array(raw_data), np.array(raw_data)[np.ix_(lines, columns)]
+                        return (
+                            np.array(raw_data),
+                            np.array(raw_data)[np.ix_(lines, columns)],
+                        )
         else:
             logger.warning(
                 f"Expected {length} rows, got {len(raw_data)} "
@@ -327,23 +377,31 @@ class FinancialExtractor:
                 if cell.value:
                     # If the value is a date, format it and return
                     if isinstance(cell.value, datetime):
-                        return [cell.value.strftime('%Y-%m-%d'),
-                                (cell.value - relativedelta(years=1)).strftime('%Y-%m-%d')]  # Return as a string in YYYY-MM-DD format
+                        return [
+                            cell.value.strftime("%Y-%m-%d"),
+                            (cell.value - relativedelta(years=1)).strftime("%Y-%m-%d"),
+                        ]  # Return as a string in YYYY-MM-DD format
 
                     # If the value is a string and can be converted to a date
                     try:
-                        parsed_date = datetime.strptime(cell.value, '%Y-%m-%d')  # Adjust format if needed
+                        parsed_date = datetime.strptime(
+                            cell.value, "%Y-%m-%d"
+                        )  # Adjust format if needed
                         return [
                             str(cell.value),  # Current string value
-                            (parsed_date - relativedelta(years=1)).strftime('%Y-%m-%d')  # Date one year before
+                            (parsed_date - relativedelta(years=1)).strftime(
+                                "%Y-%m-%d"
+                            ),  # Date one year before
                         ]
                     except ValueError:
                         # Handle case where string can't be parsed as date
                         continue
         # Calculate the last day of the previous year
         last_day_last_year = datetime(datetime.now().year - 1, 12, 31)
-        return [last_day_last_year.strftime('%Y-%m-%d'),
-                (last_day_last_year - relativedelta(years=1)).strftime('%Y-%m-%d') ]  # Return formatted last day of last year
+        return [
+            last_day_last_year.strftime("%Y-%m-%d"),
+            (last_day_last_year - relativedelta(years=1)).strftime("%Y-%m-%d"),
+        ]  # Return formatted last day of last year
 
     # ---------------------------------------------------------
     # 4. NOTES EXTRACTION SUBSYSTEM
@@ -357,13 +415,10 @@ class FinancialExtractor:
         - raw + preprocessed extraction
         - multi-key notes (e.g., Fiche R2)
         """
-        self.raw_data['notes'] = {}
+        self.raw_data["notes"] = {}
 
         # Normalize sheet names for lookup
-        sheet_map = {
-            ws.title.strip().lower(): ws
-            for ws in self.workbook.worksheets
-        }
+        sheet_map = {ws.title.strip().lower(): ws for ws in self.workbook.worksheets}
 
         for note_id, cfg in OHADA_NOTES.items():
             sheet_key = cfg.sheet_name.lower().strip()
@@ -389,19 +444,19 @@ class FinancialExtractor:
                     cfg.columns_idx,
                     cfg.lines_idx,
                     strict=False,
-                    pre_process=False
+                    pre_process=False,
                 )
 
                 # FICHE R2 special processing
-                if cfg.sheet_name == 'Fiche R2':
+                if cfg.sheet_name == "Fiche R2":
                     preprocess_value = tuple(self._process_fiche_r2(raw_value))
 
                 # NOTE 5 / NOTE 30 special preprocessing
                 elif cfg.preprocess_rules:
                     preprocess_value = self._preprocess_note_data(
                         np.squeeze(raw_value),
-                        columns=cfg.preprocess_rules.get('columns'),
-                        refs=cfg.preprocess_rules.get('refs')
+                        columns=cfg.preprocess_rules.get("columns"),
+                        refs=cfg.preprocess_rules.get("refs"),
                     )
 
                 else:
@@ -419,7 +474,7 @@ class FinancialExtractor:
                     cfg.columns_idx,
                     cfg.lines_idx,
                     strict=True,
-                    pre_process=True
+                    pre_process=True,
                 )
 
             # ---------------------------------------------------------
@@ -427,19 +482,19 @@ class FinancialExtractor:
             # ---------------------------------------------------------
             if isinstance(cfg.keys, str):
                 # Single note
-                self.raw_data['notes'][cfg.keys] = {
-                    'name': cfg.names,
-                    'raw_value': raw_value,
-                    'preprocess_value': preprocess_value
+                self.raw_data["notes"][cfg.keys] = {
+                    "name": cfg.names,
+                    "raw_value": raw_value,
+                    "preprocess_value": preprocess_value,
                 }
 
             else:
                 # Multi-key note (e.g., Fiche R2)
                 for i, key in enumerate(cfg.keys):
-                    self.raw_data['notes'][key] = {
-                        'name': cfg.names[i],
-                        'raw_value': raw_value,
-                        'preprocess_value': preprocess_value[i]
+                    self.raw_data["notes"][key] = {
+                        "name": cfg.names[i],
+                        "raw_value": raw_value,
+                        "preprocess_value": preprocess_value[i],
                     }
 
     # ---------------------------------------------------------
@@ -514,7 +569,9 @@ class FinancialExtractor:
     # 6. MULTI-YEAR CONSOLIDATION
     # ---------------------------------------------------------
     @staticmethod
-    def _check_data_coherence(finStatY: np.ndarray, finStatLY: np.ndarray, i: int, j: int) -> bool:
+    def _check_data_coherence(
+        finStatY: np.ndarray, finStatLY: np.ndarray, i: int, j: int
+    ) -> bool:
         """
         Checks whether the financial data for a given column is consistent between the current year and the previous year.
 
@@ -543,7 +600,7 @@ class FinancialExtractor:
         new_data: np.ndarray,
         combined_col: int,
         new_col: int,
-        label: str
+        label: str,
     ) -> np.ndarray:
         """
         Merge multi-year financial data with coherence checking.
@@ -558,7 +615,9 @@ class FinancialExtractor:
         Returns:
             Updated combined array (or unchanged if incoherent)
         """
-        if FinancialExtractor._check_data_coherence(combined, new_data, combined_col, new_col):
+        if FinancialExtractor._check_data_coherence(
+            combined, new_data, combined_col, new_col
+        ):
             return np.hstack((combined, new_data[:, 1:-1]))
         else:
             logger.warning(f"Incoherence found in {label} data between years.")
@@ -606,7 +665,11 @@ class FinancialExtractor:
             if isinstance(pre1, tuple):
                 # Fiche R2 case: merge each element separately
                 merged_pre = tuple(
-                    np.hstack((pre1[i], pre2[i][:, 1:])) if isinstance(pre1[i], np.ndarray) else pre1[i]
+                    (
+                        np.hstack((pre1[i], pre2[i][:, 1:]))
+                        if isinstance(pre1[i], np.ndarray)
+                        else pre1[i]
+                    )
                     for i in range(len(pre1))
                 )
             else:
@@ -615,7 +678,7 @@ class FinancialExtractor:
             result[key] = {
                 "name": n1["name"],
                 "raw_value": merged_raw,
-                "preprocess_value": merged_pre
+                "preprocess_value": merged_pre,
             }
 
         return result
@@ -623,7 +686,7 @@ class FinancialExtractor:
     # ---------------------------------------------------------
     # 7. LOW-LEVEL UTILITIES
     # ---------------------------------------------------------
-    def _is_nested_tuple(self, data)->bool:
+    def _is_nested_tuple(self, data) -> bool:
         if isinstance(data, tuple):
             for element in data:
                 if isinstance(element, tuple) or self._is_nested_tuple(element):
@@ -636,20 +699,13 @@ class FinancialExtractor:
         - Column 0: original first column
         - Column 1: concatenation of remaining columns (as strings)
         """
-        result = np.empty((data.shape[0], 2), dtype='object')
+        result = np.empty((data.shape[0], 2), dtype="object")
 
         # First column unchanged
         result[:, 0] = data[:, 0]
 
         # Combine remaining columns into a single string
         for i in range(data.shape[0]):
-            result[i, 1] = ''.join(map(str, data[i, 1:]))
+            result[i, 1] = "".join(map(str, data[i, 1:]))
 
         return result
-
-
-
-
-
-
-

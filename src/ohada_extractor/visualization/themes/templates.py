@@ -5,6 +5,7 @@ Plotly templates for OHADA visualization.
 import plotly.io as pio
 from .colors import PRIMARY_BLUE, TEAL, LIGHT_GRAY, ORANGE
 
+
 def register_ohada_template():
     """Register a clean white template for OHADA dynamic plots."""
 

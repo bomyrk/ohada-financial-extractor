@@ -6,10 +6,10 @@ Shared helpers for static and dynamic plotting.
 import numpy as np
 import pandas as pd
 
-
 # ----------------------------------------------------------------------
 #  INPUT VALIDATION
 # ----------------------------------------------------------------------
+
 
 def validate_plot_inputs(data_type, plot_type, style):
     valid_data_types = {"assets", "liabilities", "income", "cashflow", "all"}
@@ -30,6 +30,7 @@ def validate_plot_inputs(data_type, plot_type, style):
 #  NORMALIZATION
 # ----------------------------------------------------------------------
 
+
 def normalize_data_type(data_type: str) -> str:
     """Normalize variations like 'liability' → 'liabilities'."""
     mapping = {
@@ -47,6 +48,7 @@ def normalize_data_type(data_type: str) -> str:
 # ----------------------------------------------------------------------
 #  DATA PREPARATION
 # ----------------------------------------------------------------------
+
 
 def prepare_data_for_plotting(statement, data_type, period="all", value_type="Net"):
     """
@@ -85,6 +87,7 @@ def prepare_data_for_plotting(statement, data_type, period="all", value_type="Ne
 # ----------------------------------------------------------------------
 #  LABEL RESOLUTION
 # ----------------------------------------------------------------------
+
 
 def get_account_label(statement, data_type, ref_code):
     """

@@ -52,9 +52,7 @@ def plot_asset_summary_dynamic(statement, period="all"):
     total_vals = total_assets_data.squeeze(drop=True).values
     pct_data = {
         ref: (
-            component_data.sel(compte=pd.IndexSlice[:, ref])
-            .squeeze(drop=True)
-            .values
+            component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values
             / total_vals
             * 100
         )
@@ -196,8 +194,6 @@ def plot_asset_summary_dynamic(statement, period="all"):
     fig.show()
 
 
-
-
 def plot_liability_summary_dynamic(statement, period="all"):
     """Dynamic summary plots for Liabilities with clean labels and centered title."""
 
@@ -240,9 +236,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
     total_vals = total_liab_data.squeeze(drop=True).values
     pct_data = {
         ref: (
-            component_data.sel(compte=pd.IndexSlice[:, ref])
-            .squeeze(drop=True)
-            .values
+            component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values
             / total_vals
             * 100
         )
@@ -380,6 +374,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
 
     fig.update_yaxes(title_text="Value", row=1, col=1)
     fig.show()
+
 
 def plot_income_summary_dynamic(statement, period="all"):
     """Dynamic summary plots for Income with grouped bars + waterfall."""
@@ -519,6 +514,7 @@ def plot_income_summary_dynamic(statement, period="all"):
     fig.update_yaxes(title_text="Value", row=1, col=2)
 
     fig.show()
+
 
 import numpy as np
 import pandas as pd

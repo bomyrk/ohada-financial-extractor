@@ -2,4 +2,4 @@
 
 from .json_formatter import OHADAJSONFormatter
 
-__all__ = ['OHADAJSONFormatter']
+__all__ = ["OHADAJSONFormatter"]

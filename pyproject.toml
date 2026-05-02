@@ -18,3 +18,7 @@ keywords = ["OHADA", "financial-extraction", "accounting", "Excel", "financial s
 [project.urls]
 Repository = "https://github.com/bomyrk/ohada-financial-extractor"
 Issues = "https://github.com/bomyrk/ohada-financial-extractor/issues"
+
+[tool.black]
+target-version = ["py310"]
+line-length = 88

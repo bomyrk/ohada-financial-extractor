@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 #  RELATIONSHIP DEFINITIONS
 # ----------------------------------------------------------------------
 
+
 def define_relationships() -> List[Tuple[str, str]]:
     """
     Define all financial relationships to validate.
@@ -41,14 +42,12 @@ def define_relationships() -> List[Tuple[str, str]]:
         ("BK=BA+BB+BC", "asset"),
         ("BT=BQ+BR+BS", "asset"),
         ("BZ=AZ+BK+BT+BU", "asset"),
-
         ("CP=CA+CB+CD+CE+CF+CG+CH+CJ+CL+CM", "liability"),
         ("DD=DA+DB+DC", "liability"),
         ("DF=CP+DD", "liability"),
         ("DP=DH+DI+DJ+DK+DM+DN", "liability"),
         ("DT=DQ+DR", "liability"),
         ("DZ=DF+DP+DT+DY", "liability"),
-
         ("XA=TA+RA+RB", "income"),
         ("XB=TA+TB+TC+TD", "income"),
         ("XC=XB+RA+RB+TE+TF+TG+TH+TI+RC+RD+RE+RF+RG+RH+RI+RJ", "income"),
@@ -58,7 +57,6 @@ def define_relationships() -> List[Tuple[str, str]]:
         ("XG=XE+XF", "income"),
         ("XH=TN+TO-RO-RP", "income"),
         ("XI=XG+XH+RQ+RS", "income"),
-
         ("ZB=FA-FB-FC-FD+FE", "cashflow"),
         ("ZC=FI+FJ-FF-FG-FH", "cashflow"),
         ("ZD=FK+FL-FM-FN", "cashflow"),
@@ -70,6 +68,7 @@ def define_relationships() -> List[Tuple[str, str]]:
 # ----------------------------------------------------------------------
 #  RELATION CLASS
 # ----------------------------------------------------------------------
+
 
 class Relation:
     """
@@ -94,7 +93,11 @@ class Relation:
         Handles + and - operators.
         """
         expr = getattr(self, f"{side}_side")
-        tokens = re.split(r'([+-])', expr.replace(" ", "")) if op_hdl else re.split(r'[+-]', expr.replace(" ", ""))
+        tokens = (
+            re.split(r"([+-])", expr.replace(" ", ""))
+            if op_hdl
+            else re.split(r"[+-]", expr.replace(" ", ""))
+        )
 
         total = 0
         sign = 1
@@ -109,10 +112,14 @@ class Relation:
                     try:
                         if self.financial_type == "asset":
                             # 3D: (compte, annee, valeur) → select Net
-                            values = self.data.sel(compte=pd.IndexSlice[:, token], valeur="Net").drop_vars("compte")
+                            values = self.data.sel(
+                                compte=pd.IndexSlice[:, token], valeur="Net"
+                            ).drop_vars("compte")
                         else:
                             # 2D: (compte, annee)
-                            values = self.data.sel(compte=pd.IndexSlice[:, token]).drop_vars("compte")
+                            values = self.data.sel(
+                                compte=pd.IndexSlice[:, token]
+                            ).drop_vars("compte")
 
                         contrib = sign * values
                         total = contrib if total is None else total + contrib
@@ -153,6 +160,7 @@ class Relation:
 # ----------------------------------------------------------------------
 #  MAIN VALIDATOR CLASS
 # ----------------------------------------------------------------------
+
 
 class CoherenceValidator:
     """
@@ -198,7 +206,11 @@ class CoherenceValidator:
         cash_idx = create_index(CASHFLOW_ACCOUNTS)
 
         n_years = len(statement.periods)
-        years = pd.Index(statement.periods, name="annee") if n_years > 2 else pd.Index(statement.periods[::-1], name="annee")
+        years = (
+            pd.Index(statement.periods, name="annee")
+            if n_years > 2
+            else pd.Index(statement.periods[::-1], name="annee")
+        )
 
         # ---------------------------------------------------------
         # Helper to reshape data into (account, year, value_type)
@@ -220,8 +232,14 @@ class CoherenceValidator:
                 # Replace None with 0
                 values = np.where(values == None, 0, values)
                 if n_types == 3:
-                    values = np.hstack((np.insert(values.copy()[:, [-1]], [0],
-                                                 [np.nan, np.nan], axis=1), values.copy()[:, 0:-1]))
+                    values = np.hstack(
+                        (
+                            np.insert(
+                                values.copy()[:, [-1]], [0], [np.nan, np.nan], axis=1
+                            ),
+                            values.copy()[:, 0:-1],
+                        )
+                    )
                 else:
                     values = np.hstack((values.copy()[:, [-1]], values.copy()[:, 0:-1]))
 
@@ -234,39 +252,65 @@ class CoherenceValidator:
                 )
 
             # Reshape into (account, year, value_type)
-            reshaped = values.reshape(values.shape[0], n_years, n_types) if n_types > 1 else values
+            reshaped = (
+                values.reshape(values.shape[0], n_years, n_types)
+                if n_types > 1
+                else values
+            )
             return reshaped
 
         # ---------------------------------------------------------
         # Build xarray DataArrays
         # ---------------------------------------------------------
-        asset_xr = xr.DataArray(
-            data=reshape_statement(statement.asset_data, ["Gross", "Amortissement", "Net"]),
-            coords={"compte": asset_idx, "annee": years, "valeur": ["Gross", "Amortissement", "Net"]},
-            dims=("compte", "annee", "valeur"),
-            name="asset"
-        ).astype(float).round(2)
+        asset_xr = (
+            xr.DataArray(
+                data=reshape_statement(
+                    statement.asset_data, ["Gross", "Amortissement", "Net"]
+                ),
+                coords={
+                    "compte": asset_idx,
+                    "annee": years,
+                    "valeur": ["Gross", "Amortissement", "Net"],
+                },
+                dims=("compte", "annee", "valeur"),
+                name="asset",
+            )
+            .astype(float)
+            .round(2)
+        )
 
-        liab_xr = xr.DataArray(
-            data=reshape_statement(statement.liability_data, ["Net"]),
-            coords={"compte": liab_idx, "annee": years},
-            dims=("compte", "annee"),
-            name="liabilities"
-        ).astype(float).round(2)
+        liab_xr = (
+            xr.DataArray(
+                data=reshape_statement(statement.liability_data, ["Net"]),
+                coords={"compte": liab_idx, "annee": years},
+                dims=("compte", "annee"),
+                name="liabilities",
+            )
+            .astype(float)
+            .round(2)
+        )
 
-        income_xr = xr.DataArray(
-            data=reshape_statement(statement.income_data, ["Net"]),
-            coords={"compte": income_idx, "annee": years},
-            dims=("compte", "annee"),
-            name="income"
-        ).astype(float).round(2)
+        income_xr = (
+            xr.DataArray(
+                data=reshape_statement(statement.income_data, ["Net"]),
+                coords={"compte": income_idx, "annee": years},
+                dims=("compte", "annee"),
+                name="income",
+            )
+            .astype(float)
+            .round(2)
+        )
 
-        cash_xr = xr.DataArray(
-            data=reshape_statement(statement.cashflow_data, ["Net"]),
-            coords={"compte": cash_idx, "annee": years},
-            dims=("compte", "annee"),
-            name="cashflow"
-        ).astype(float).round(2)
+        cash_xr = (
+            xr.DataArray(
+                data=reshape_statement(statement.cashflow_data, ["Net"]),
+                coords={"compte": cash_idx, "annee": years},
+                dims=("compte", "annee"),
+                name="cashflow",
+            )
+            .astype(float)
+            .round(2)
+        )
 
         return CoherenceValidator(asset_xr, liab_xr, income_xr, cash_xr, years)
 
@@ -282,15 +326,16 @@ class CoherenceValidator:
 
         if not valid:
             logger.error(
-                f" Balance sheet validation failed: "
-                f"Assets (BZ) ≠ Liabilities (DZ)"
+                f" Balance sheet validation failed: " f"Assets (BZ) ≠ Liabilities (DZ)"
             )
 
         return valid
 
     def validate_income_statement(self) -> bool:
         net_income = self.income.sel(compte=pd.IndexSlice[:, "XI"])
-        net_income_report_liabilities = self.liability.sel(compte=pd.IndexSlice[:, "CJ"])
+        net_income_report_liabilities = self.liability.sel(
+            compte=pd.IndexSlice[:, "CJ"]
+        )
 
         valid = np.allclose(net_income, net_income_report_liabilities)
 
@@ -305,18 +350,15 @@ class CoherenceValidator:
     def validate_cash_flow_statement(self) -> bool:
         net_cash_flow = self.cashflow.sel(compte=pd.IndexSlice[:, "ZG"])
         expected = (
-            self.cashflow.sel(compte=pd.IndexSlice[:, "ZB"]) +
-            self.cashflow.sel(compte=pd.IndexSlice[:, "ZC"]) +
-            self.cashflow.sel(compte=pd.IndexSlice[:, "ZF"])
+            self.cashflow.sel(compte=pd.IndexSlice[:, "ZB"])
+            + self.cashflow.sel(compte=pd.IndexSlice[:, "ZC"])
+            + self.cashflow.sel(compte=pd.IndexSlice[:, "ZF"])
         )
 
         valid = np.allclose(net_cash_flow, expected)
 
         if not valid:
-            logger.error(
-                f" Cash flow validation failed: "
-                f"ZG ≠ ZB + ZC + ZF"
-            )
+            logger.error(f" Cash flow validation failed: " f"ZG ≠ ZB + ZC + ZF")
 
         return valid
 

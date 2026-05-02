@@ -31,8 +31,12 @@ def plot_asset_summary_static(statement, period="all"):
     labels = {ref: get_account_label(statement, "assets", ref) for ref in refs}
     total_label = get_account_label(statement, "assets", total_ref)
 
-    component_data = asset_data.sel(compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt)
-    total_data = asset_data.sel(compte=pd.IndexSlice[:, total_ref], annee=years_to_plot_dt).squeeze()
+    component_data = asset_data.sel(
+        compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt
+    )
+    total_data = asset_data.sel(
+        compte=pd.IndexSlice[:, total_ref], annee=years_to_plot_dt
+    ).squeeze()
 
     # --- Remove zero-only components ---
     non_zero_mask = component_data.values.max(axis=0) != 0
@@ -44,7 +48,8 @@ def plot_asset_summary_static(statement, period="all"):
     pct_data = {
         ref: (
             component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze().values
-            / total_data.values * 100
+            / total_data.values
+            * 100
         )
         for ref in refs
     }
@@ -151,8 +156,12 @@ def plot_liability_summary_static(statement, period="all"):
     labels = {ref: get_account_label(statement, "liabilities", ref) for ref in refs}
     total_label = get_account_label(statement, "liabilities", total_ref)
 
-    component_data = liab_data.sel(compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt)
-    total_data = liab_data.sel(compte=pd.IndexSlice[:, total_ref], annee=years_to_plot_dt).squeeze()
+    component_data = liab_data.sel(
+        compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt
+    )
+    total_data = liab_data.sel(
+        compte=pd.IndexSlice[:, total_ref], annee=years_to_plot_dt
+    ).squeeze()
 
     # --- Remove zero-only components ---
     non_zero_mask = component_data.values.max(axis=0) != 0
@@ -164,7 +173,8 @@ def plot_liability_summary_static(statement, period="all"):
     pct_data = {
         ref: (
             component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze().values
-            / total_data.values * 100
+            / total_data.values
+            * 100
         )
         for ref in refs
     }
@@ -266,7 +276,9 @@ def plot_income_summary_static(statement, period="all"):
     refs = ["XE", "XF", "XH", "RS", "XI"]
     labels = {ref: get_account_label(statement, "income", ref) for ref in refs}
 
-    income_data = statement.income.sel(compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt)
+    income_data = statement.income.sel(
+        compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt
+    )
 
     # --- Remove zero-only components ---
     non_zero_mask = income_data.values.max(axis=0) != 0
@@ -367,7 +379,9 @@ def plot_cashflow_summary_static(statement, period="all"):
     refs = ["ZB", "ZC", "ZF", "ZG"]
     labels = {ref: get_account_label(statement, "cashflow", ref) for ref in refs}
 
-    cash_data = statement.cashflow.sel(compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt)
+    cash_data = statement.cashflow.sel(
+        compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt
+    )
 
     # --- Remove zero-only components ---
     non_zero_mask = cash_data.values.max(axis=0) != 0

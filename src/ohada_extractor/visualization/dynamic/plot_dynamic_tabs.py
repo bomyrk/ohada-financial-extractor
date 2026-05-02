@@ -49,9 +49,7 @@ def plot_ohada_tabs_dynamic(statement):
 
     for idx, (title, data_array, refs, total_ref) in enumerate(groups):
 
-        component_data = data_array.sel(
-            compte=pd.IndexSlice[:, refs], annee=years_dt
-        )
+        component_data = data_array.sel(compte=pd.IndexSlice[:, refs], annee=years_dt)
         total_data = data_array.sel(
             compte=pd.IndexSlice[:, total_ref], annee=years_dt
         ).squeeze(drop=True)
@@ -104,10 +102,7 @@ def plot_ohada_tabs_dynamic(statement):
 
             growth_data[ref] = growth
 
-        labels = {
-            ref: get_account_label(statement, title.lower(), ref)
-            for ref in refs
-        }
+        labels = {ref: get_account_label(statement, title.lower(), ref) for ref in refs}
         total_label = get_account_label(statement, title.lower(), total_ref)
 
         # ============================================================

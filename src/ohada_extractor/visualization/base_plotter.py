@@ -34,13 +34,20 @@ from .dynamic.plot_dynamic_summary import (
     plot_cashflow_summary_dynamic,
 )
 
-
 # ----------------------------------------------------------------------
 #  MAIN ROUTER
 # ----------------------------------------------------------------------
 
-def plot_router(statement, data_type="assets", plot_type="static",
-                style="bar", period="all", value_type="Net", summary=False):
+
+def plot_router(
+    statement,
+    data_type="assets",
+    plot_type="static",
+    style="bar",
+    period="all",
+    value_type="Net",
+    summary=False,
+):
     """
     Central router for all visualization calls.
 
@@ -79,6 +86,7 @@ def plot_router(statement, data_type="assets", plot_type="static",
 #  STATIC ROUTING
 # ----------------------------------------------------------------------
 
+
 def _route_static(statement, data_type, style, period, value_type):
     if data_type == "all":
         return plot_all_static(statement, style, period, value_type)
@@ -90,6 +98,7 @@ def _route_static(statement, data_type, style, period, value_type):
 #  DYNAMIC ROUTING
 # ----------------------------------------------------------------------
 
+
 def _route_dynamic(statement, data_type, style, period, value_type):
     if data_type == "all":
         return plot_all_dynamic(statement, style, period, value_type)
@@ -100,6 +109,7 @@ def _route_dynamic(statement, data_type, style, period, value_type):
 # ----------------------------------------------------------------------
 #  SUMMARY ROUTING
 # ----------------------------------------------------------------------
+
 
 def _route_summary(statement, data_type, plot_type, period):
     if data_type == "assets":

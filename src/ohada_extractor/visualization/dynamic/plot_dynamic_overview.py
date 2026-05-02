@@ -23,10 +23,14 @@ def plot_overview_dashboard_clean(statement):
         rows=4,
         cols=2,
         subplot_titles=[
-            "Assets – Grouped", "Assets – Stacked",
-            "Liabilities – Grouped", "Liabilities – Stacked",
-            "Income – Grouped", "Income – Waterfall",
-            "Cashflow – Grouped", "Cashflow – Waterfall",
+            "Assets – Grouped",
+            "Assets – Stacked",
+            "Liabilities – Grouped",
+            "Liabilities – Stacked",
+            "Income – Grouped",
+            "Income – Waterfall",
+            "Cashflow – Grouped",
+            "Cashflow – Waterfall",
         ],
         specs=[
             [{"secondary_y": False}, {"secondary_y": False}],
@@ -58,7 +62,9 @@ def plot_overview_dashboard_clean(statement):
         annee=years_dt,
     ).squeeze()
 
-    asset_labels = {ref: get_account_label(statement, "assets", ref) for ref in asset_refs}
+    asset_labels = {
+        ref: get_account_label(statement, "assets", ref) for ref in asset_refs
+    }
 
     # Remove zero-only components
     asset_labels = {ref: asset_labels[ref] for ref in asset_refs}
@@ -115,7 +121,9 @@ def plot_overview_dashboard_clean(statement):
         annee=years_dt,
     ).squeeze()
 
-    liab_labels = {ref: get_account_label(statement, "liabilities", ref) for ref in liab_refs}
+    liab_labels = {
+        ref: get_account_label(statement, "liabilities", ref) for ref in liab_refs
+    }
 
     # Remove zero-only components
     liab_labels = {ref: liab_labels[ref] for ref in liab_refs}
@@ -165,7 +173,9 @@ def plot_overview_dashboard_clean(statement):
         annee=years_dt,
     )
 
-    income_labels = {ref: get_account_label(statement, "income", ref) for ref in income_refs}
+    income_labels = {
+        ref: get_account_label(statement, "income", ref) for ref in income_refs
+    }
 
     # Remove zero-only components
 
@@ -214,7 +224,9 @@ def plot_overview_dashboard_clean(statement):
         annee=years_dt,
     )
 
-    cash_labels = {ref: get_account_label(statement, "cashflow", ref) for ref in cash_refs}
+    cash_labels = {
+        ref: get_account_label(statement, "cashflow", ref) for ref in cash_refs
+    }
 
     # Remove zero-only components
 
@@ -266,8 +278,8 @@ def plot_overview_dashboard_clean(statement):
         template="plotly_white",
         hovermode="x unified",
         barmode="stack",
-        showlegend=False,   # ← REMOVE LEGEND
-        margin=dict(t=80, b=40)
+        showlegend=False,  # ← REMOVE LEGEND
+        margin=dict(t=80, b=40),
     )
 
     fig.show()

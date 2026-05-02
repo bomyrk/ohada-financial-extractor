@@ -103,4 +103,3 @@ def plot_single_static(statement, data_type, style, period, value_type):
     plt.tight_layout()
     plt.show(block=False)
     plt.pause(0.001)
-

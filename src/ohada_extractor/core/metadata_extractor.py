@@ -17,7 +17,7 @@ from .schemas import (
     fetch_regime_fiscal,
     LEGAL_FORMS,
     SIEGE_SOCIAL,
-    CODES_FISCAUX
+    CODES_FISCAUX,
 )
 
 
@@ -56,14 +56,16 @@ class CompanyMetadataExtractor:
             legal_form=fetch_legal_form(legal_form_code, LEGAL_FORMS),
             country=fetch_headquarter_country(country_code, SIEGE_SOCIAL),
             year_creation=int(year_creation) if str(year_creation).isdigit() else None,
-            regime_fiscal=fetch_regime_fiscal(regime_fiscal_code, CODES_FISCAUX)
+            regime_fiscal=fetch_regime_fiscal(regime_fiscal_code, CODES_FISCAUX),
         )
 
     # ---------------------------------------------------------
     # NOTE 31 (other_data) — Dividend, Shares, Employees
     # ---------------------------------------------------------
     @staticmethod
-    def extract_kpis_from_other(other_data: Optional[np.ndarray]) -> Dict[str, Optional[np.ndarray]]:
+    def extract_kpis_from_other(
+        other_data: Optional[np.ndarray],
+    ) -> Dict[str, Optional[np.ndarray]]:
         """
         Extract dividend, number of shares, and number of employees from NOTE 31.
 
@@ -83,8 +85,16 @@ class CompanyMetadataExtractor:
         values = other_data[:, 1:]
 
         dividend = values[9, :] if values.shape[0] > 9 else None
-        number_of_shares = np.sum(values[1:4:, :], axis=0, where=(values[1:4:, :] != None), initial=0) if values.shape[0] > 4 else None
-        number_of_employees = np.sum(values[-2:, :], axis=0, where=(values[-2:, :] != None), initial=0) if values.shape[0] >= 2 else None
+        number_of_shares = (
+            np.sum(values[1:4:, :], axis=0, where=(values[1:4:, :] != None), initial=0)
+            if values.shape[0] > 4
+            else None
+        )
+        number_of_employees = (
+            np.sum(values[-2:, :], axis=0, where=(values[-2:, :] != None), initial=0)
+            if values.shape[0] >= 2
+            else None
+        )
 
         return {
             "dividend": dividend,

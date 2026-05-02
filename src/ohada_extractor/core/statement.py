@@ -21,11 +21,13 @@ from .schemas import (
 #  COMPANY METADATA MODEL
 # ----------------------------------------------------------------------
 
+
 @dataclass
 class CompanyMetadata:
     """
     Structured company metadata extracted from Fiche R2.
     """
+
     currency: Optional[str] = None
     legal_form: Optional[str] = None
     country: Optional[str] = None
@@ -65,7 +67,7 @@ class CompanyMetadata:
 class FinancialStatement:
     """
     Container for extracted financial statement data.
-    
+
     Attributes:
         asset_data: NumPy array of balance sheet assets
         liability_data: NumPy array of balance sheet liabilities
@@ -76,11 +78,12 @@ class FinancialStatement:
         periods: List of period dates (e.g., ['2023-12-31', '2024-12-31'])
         file_path: Original Excel file path
     """
+
     asset_data: Optional[np.ndarray] = None
     liability_data: Optional[np.ndarray] = None
     income_data: Optional[np.ndarray] = None
     cashflow_data: Optional[np.ndarray] = None
-    other_data: Optional[np.ndarray]=None
+    other_data: Optional[np.ndarray] = None
     # Notes (annexes)
     notes: Optional[Dict[str, Dict[str, Any]]] = None
 
@@ -122,11 +125,17 @@ class FinancialStatement:
         """
 
         if not self.periods:
-            raise ValueError("FinancialStatement.periods is empty — cannot build xarray objects.")
+            raise ValueError(
+                "FinancialStatement.periods is empty — cannot build xarray objects."
+            )
 
         n_years = len(self.periods)
         # Convert periods to datetime index
-        self.years = pd.Index(pd.to_datetime(self.periods), name="annee") if n_years > 2 else pd.Index(pd.to_datetime(self.periods[::-1]), name="annee")
+        self.years = (
+            pd.Index(pd.to_datetime(self.periods), name="annee")
+            if n_years > 2
+            else pd.Index(pd.to_datetime(self.periods[::-1]), name="annee")
+        )
 
         def create_index(data):
             return pd.MultiIndex.from_tuples(data, names=["Label", "Reference"])
@@ -153,8 +162,14 @@ class FinancialStatement:
                 # Replace None with 0
                 values = np.where(values == None, 0, values)
                 if n_types == 3:
-                    values = np.hstack((np.insert(values.copy()[:, [-1]], [0],
-                                                 [np.nan, np.nan], axis=1), values.copy()[:, 0:-1]))
+                    values = np.hstack(
+                        (
+                            np.insert(
+                                values.copy()[:, [-1]], [0], [np.nan, np.nan], axis=1
+                            ),
+                            values.copy()[:, 0:-1],
+                        )
+                    )
                 else:
                     values = np.hstack((values.copy()[:, [-1]], values.copy()[:, 0:-1]))
 
@@ -166,43 +181,65 @@ class FinancialStatement:
                     f"Invalid shape for statement: expected {expected_cols} columns, got {values.shape[1]}"
                 )
 
-            reshaped = values.reshape(values.shape[0], n_years, n_types) if n_types > 1 else values
+            reshaped = (
+                values.reshape(values.shape[0], n_years, n_types)
+                if n_types > 1
+                else values
+            )
             return reshaped
 
         # --------------------------------------------------------------
         # Build xarray DataArrays
         # --------------------------------------------------------------
-        self.asset = xr.DataArray(
-            data=reshape_statement(self.asset_data, ["Gross", "Amortissement", "Net"]),
-            coords={
-                "compte": self.asset_accounts,
-                "annee": self.years,
-                "valeur": ["Gross", "Amortissement", "Net"],
-            },
-            dims=("compte", "annee", "valeur"),
-            name="asset",
-        ).astype(float).round(2)
+        self.asset = (
+            xr.DataArray(
+                data=reshape_statement(
+                    self.asset_data, ["Gross", "Amortissement", "Net"]
+                ),
+                coords={
+                    "compte": self.asset_accounts,
+                    "annee": self.years,
+                    "valeur": ["Gross", "Amortissement", "Net"],
+                },
+                dims=("compte", "annee", "valeur"),
+                name="asset",
+            )
+            .astype(float)
+            .round(2)
+        )
 
-        self.liability = xr.DataArray(
-            data=reshape_statement(self.liability_data, ["Net"]),
-            coords={"compte": self.liabilities_accounts, "annee": self.years},
-            dims=("compte", "annee"),
-            name="liabilities",
-        ).astype(float).round(2)
+        self.liability = (
+            xr.DataArray(
+                data=reshape_statement(self.liability_data, ["Net"]),
+                coords={"compte": self.liabilities_accounts, "annee": self.years},
+                dims=("compte", "annee"),
+                name="liabilities",
+            )
+            .astype(float)
+            .round(2)
+        )
 
-        self.income = xr.DataArray(
-            data=reshape_statement(self.income_data, ["Net"]),
-            coords={"compte": self.income_accounts, "annee": self.years},
-            dims=("compte", "annee"),
-            name="income",
-        ).astype(float).round(2)
+        self.income = (
+            xr.DataArray(
+                data=reshape_statement(self.income_data, ["Net"]),
+                coords={"compte": self.income_accounts, "annee": self.years},
+                dims=("compte", "annee"),
+                name="income",
+            )
+            .astype(float)
+            .round(2)
+        )
 
-        self.cashflow = xr.DataArray(
-            data=reshape_statement(self.cashflow_data, ["Net"]),
-            coords={"compte": self.cashflow_accounts, "annee": self.years},
-            dims=("compte", "annee"),
-            name="cashflow",
-        ).astype(float).round(2)
+        self.cashflow = (
+            xr.DataArray(
+                data=reshape_statement(self.cashflow_data, ["Net"]),
+                coords={"compte": self.cashflow_accounts, "annee": self.years},
+                dims=("compte", "annee"),
+                name="cashflow",
+            )
+            .astype(float)
+            .round(2)
+        )
 
         return self  # allow chaining
 
@@ -224,7 +261,7 @@ class FinancialStatement:
                 "name": entry.get("name"),
                 "raw_value": self._convert_array(entry.get("raw_value")),
                 "preprocess_value": self._convert_array(entry.get("preprocess_value")),
-                }
+            }
         return out
 
     # ---------------------------------------------------------
@@ -328,7 +365,11 @@ class FinancialStatement:
 
         for key, entry in self.notes.items():
             if entry.get("name", "").strip().lower() == name:
-                return entry.get("preprocess_value") if processed else entry.get("raw_value")
+                return (
+                    entry.get("preprocess_value")
+                    if processed
+                    else entry.get("raw_value")
+                )
 
         return None
 
@@ -337,4 +378,5 @@ class FinancialStatement:
     #
     def plot(self, *args, **kwargs):
         from ohada_extractor.visualization.base_plotter import plot_router
+
         plot_router(self, *args, **kwargs)

@@ -38,9 +38,7 @@ def plot_single_dynamic(statement, data_type, style, period, value_type):
             year_label = str(year)[:10]
 
             if style == "bar":
-                fig.add_trace(
-                    go.Bar(name=year_label, x=labels, y=year_data.values)
-                )
+                fig.add_trace(go.Bar(name=year_label, x=labels, y=year_data.values))
             elif style == "line":
                 fig.add_trace(
                     go.Scatter(
@@ -63,13 +61,9 @@ def plot_single_dynamic(statement, data_type, style, period, value_type):
         if style == "bar":
             fig.add_trace(go.Bar(x=labels, y=data.values))
         elif style == "line":
-            fig.add_trace(
-                go.Scatter(x=labels, y=data.values, mode="lines+markers")
-            )
+            fig.add_trace(go.Scatter(x=labels, y=data.values, mode="lines+markers"))
         elif style == "area":
-            fig.add_trace(
-                go.Scatter(x=labels, y=data.values, fill="tozeroy")
-            )
+            fig.add_trace(go.Scatter(x=labels, y=data.values, fill="tozeroy"))
 
     title_value = value_type if data_type == "assets" else "Net"
 

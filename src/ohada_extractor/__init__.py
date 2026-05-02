@@ -1,8 +1,8 @@
 """
 OHADA Financial Statement Extractor
 
-A Python library for extracting and normalizing financial data from 
-Excel files following OHADA (Organization for the Harmonization of 
+A Python library for extracting and normalizing financial data from
+Excel files following OHADA (Organization for the Harmonization of
 African Business Law) accounting standards.
 
 Key Features:
@@ -20,14 +20,14 @@ Example:
     >>> json_output = data.to_json()
 """
 
-__version__ = '0.1.0'
-__author__ = 'Leonel B. Kamguia Wabo'
+__version__ = "0.1.0"
+__author__ = "Leonel B. Kamguia Wabo"
 
 from .core.extractor import FinancialExtractor
 from .core.schemas import OHADA_STATEMENTS, ASSETS_ACCOUNTS
 
 __all__ = [
-    'FinancialExtractor',
-    'OHADA_STATEMENTS',
-    'ASSETS_ACCOUNTS',
+    "FinancialExtractor",
+    "OHADA_STATEMENTS",
+    "ASSETS_ACCOUNTS",
 ]
