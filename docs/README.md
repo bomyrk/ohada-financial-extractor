@@ -2,13 +2,36 @@
 
 Extract and normalize financial data from OHADA-compliant Excel financial statements.
 
-[![PyPI version](https://badge.fury.io/py/ohada-financial-extractor.svg)](https://pypi.org/project/ohada-financial-extractor/)
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+<p align="center">
 
-![CI](https://github.com/bomyrk/ohada-financial-extractor/actions/workflows/ci.yml/badge.svg)
+  <!-- Version PyPI -->
+  <a href="https://pypi.org/project/ohada-financial-extractor/">
+    <img src="https://img.shields.io/pypi/v/ohada-financial-extractor?color=4c1&label=PyPI%20Version" alt="PyPI Version">
+  </a>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  <!-- Python versions -->
+  <a href="https://www.python.org/downloads/">
+    <img src="https://img.shields.io/pypi/pyversions/ohada-financial-extractor?label=Python&color=306998" alt="Python Versions">
+  </a>
+
+  <!-- Build Status -->
+  <a href="https://github.com/bomyrk/ohada-financial-extractor/actions/workflows/ci.yml">
+    <img src="https://github.com/bomyrk/ohada-financial-extractor/actions/workflows/ci.yml/badge.svg" alt="CI Status">
+  </a>
+
+  <!-- Downloads -->
+  <a href="https://pypistats.org/packages/ohada-financial-extractor">
+    <img src="https://img.shields.io/pypi/dm/ohada-financial-extractor?label=Downloads&color=blue" alt="Downloads">
+  </a>
+
+  <!-- License -->
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License">
+  </a>
+
+</p>
+
 
 
 
