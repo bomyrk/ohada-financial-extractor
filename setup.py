@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ohada-financial-extractor',
-    version='0.1.0',
+    version='0.1.2',
     description='Extract and normalize financial data from OHADA-compliant Excel financial statements (DSF)',
     long_description=open('docs/README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',

@@ -20,8 +20,8 @@ Example:
     >>> json_output = data.to_json()
 """
 
-__version__ = "0.1.0"
-__author__ = "Leonel B. Kamguia Wabo"
+__version__ = "0.1.2"
+__author__ = "Kamguia Wabo Leonel B. "
 
 from .core.extractor import FinancialExtractor
 from .core.schemas import OHADA_STATEMENTS, ASSETS_ACCOUNTS
