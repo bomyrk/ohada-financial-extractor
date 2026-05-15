@@ -50,6 +50,8 @@ Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
 # Si votre code est dans un dossier 'src', setuptools le trouvera automatiquement
 package-dir = {"" = "src"}
 
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools_scm]
 write_to = "src/ohada_extractor/_version.py"
