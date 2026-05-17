@@ -132,7 +132,7 @@ print(f"Total Assets: {data['balance_sheet']['assets'][-1]}")
 - Tracks: Operating, financial, and extraordinary results
 
 **Cash Flow Statement (Tableau des Flux de Trésorerie)**
-- 25 accounts (ZA-ZH)
+- **25 accounts** (ZA-ZH)
 - Operating, investing, financing activities
 - Beginning and ending cash positions
 

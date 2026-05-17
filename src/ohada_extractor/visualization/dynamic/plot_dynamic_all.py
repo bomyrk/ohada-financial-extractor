@@ -1,16 +1,15 @@
-"""
-Dynamic (plotly) plotting for all financial data types in a 2×2 grid.
-"""
+"""Dynamic (plotly) plotting for all financial data types in a 2×2 grid."""
 
+import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from ..utils import prepare_data_for_plotting
+from ..utils import get_account_label, prepare_data_for_plotting
 
 
 def plot_all_dynamic(statement, style, period="all", value_type="Net"):
-    """
-    Create dynamic plot for all financial data types using plotly.
+    """Create dynamic plot for all financial data types using plotly.
 
     Args:
         statement: FinancialStatement instance
@@ -26,7 +25,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
         rows=2,
         cols=2,
         subplot_titles=("Assets", "Liabilities", "Income", "Cash Flow"),
-        vertical_spacing=0.12,
+        vertical_spacing=0.15,  # Augmenté légèrement pour laisser de la place aux étiquettes inclinées
         horizontal_spacing=0.1,
     )
 
@@ -34,28 +33,60 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
         row = (idx - 1) // 2 + 1
         col = (idx - 1) % 2 + 1
 
-        data = prepare_data_for_plotting(statement, data_type, period, value_type)
+        data = prepare_data_for_plotting(
+            statement, data_type, period, value_type
+        )
 
-        # Remove accounts that are zero for all periods
-        # non_zero_mask = data.values.max(axis=0) != 0
-        # data = data[:, non_zero_mask]
+        # --------------------------------------------------------
+        # NETTOYAGE XARRAY : Éliminer les comptes entièrement à zéro
+        # --------------------------------------------------------
+        # Calcule la valeur absolue maximale sur l'axe du temps ('annee') ou globalement
+        dim_to_reduce = "annee" if "annee" in data.dims else None
+        if dim_to_reduce:
+            max_vals = np.abs(data.values).max(
+                axis=data.dims.index(dim_to_reduce)
+            )
+        else:
+            max_vals = np.abs(data.values)
 
-        if isinstance(data.compte.values[0], tuple):
+        non_zero_indices = np.where(max_vals > 1e-2)[0]
+        if len(non_zero_indices) > 0:
+            data = data.isel(compte=non_zero_indices)
+
+        # --------------------------------------------------------
+        # EXTRACTION ROBUSTE DES LABELS (Nomenclature OHADA)
+        # --------------------------------------------------------
+        if "Reference" in data.coords:
+            labels = [
+                get_account_label(statement, data_type, ref)
+                for ref in data.coords["Reference"].values
+            ]
+        elif (
+            hasattr(data.compte, "values")
+            and len(data.compte.values) > 0
+            and isinstance(data.compte.values[0], tuple)
+        ):
             labels = [item[0] for item in data.compte.values]
         else:
-            labels = data.compte.values
+            # Fallback de secours si l'index est aplati
+            labels = [str(c) for c in data.compte.values]
 
+        # --------------------------------------------------------
+        # SÉLECTION ET AJOUT DES TRACES
+        # --------------------------------------------------------
         if period == "all":
             for year in data.annee.values:
                 year_data = data.sel(annee=year)
-                year_label = str(year)[:10]
+                # Conversion sécurisée en chaîne propre (ex: "2026")
+                year_label = str(pd.to_datetime(year).year)
+                trace_vals = year_data.values.flatten()
 
                 if style == "bar":
                     fig.add_trace(
                         go.Bar(
                             name=f"{data_type.capitalize()} {year_label}",
                             x=labels,
-                            y=year_data.values,
+                            y=trace_vals,
                             marker_color=color,
                             legendgroup=data_type,
                         ),
@@ -67,7 +98,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
                         go.Scatter(
                             name=f"{data_type.capitalize()} {year_label}",
                             x=labels,
-                            y=year_data.values,
+                            y=trace_vals,
                             mode="lines+markers",
                             line=dict(color=color),
                             legendgroup=data_type,
@@ -80,7 +111,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
                         go.Scatter(
                             name=f"{data_type.capitalize()} {year_label}",
                             x=labels,
-                            y=year_data.values,
+                            y=trace_vals,
                             fill="tozeroy",
                             line=dict(color=color),
                             legendgroup=data_type,
@@ -89,13 +120,15 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
                         col=col,
                     )
         else:
-            period_label = str(period)[:10]
+            period_label = str(pd.to_datetime(period).year)
+            trace_vals = data.values.flatten()
+
             if style == "bar":
                 fig.add_trace(
                     go.Bar(
                         name=f"{data_type.capitalize()} {period_label}",
                         x=labels,
-                        y=data.values,
+                        y=trace_vals,
                         marker_color=color,
                     ),
                     row=row,
@@ -106,7 +139,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
                     go.Scatter(
                         name=f"{data_type.capitalize()} {period_label}",
                         x=labels,
-                        y=data.values,
+                        y=trace_vals,
                         mode="lines+markers",
                         line=dict(color=color),
                     ),
@@ -118,7 +151,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
                     go.Scatter(
                         name=f"{data_type.capitalize()} {period_label}",
                         x=labels,
-                        y=data.values,
+                        y=trace_vals,
                         fill="tozeroy",
                         line=dict(color=color),
                     ),
@@ -126,21 +159,23 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
                     col=col,
                 )
 
-        fig.update_xaxes(title_text="Accounts", row=row, col=col, tickangle=45)
+        fig.update_xaxes(
+            title_text="Accounts", row=row, col=col, tickangle=45
+        )
         fig.update_yaxes(title_text="Values", row=row, col=col)
 
     if style == "bar" and period == "all":
         fig.update_layout(barmode="group")
 
     fig.update_layout(
-        height=800,
-        width=1200,
+        height=900,  # Légèrement augmenté pour éviter la superposition des titres d'axes
+        width=1300,
         title_text=f"Financial Data Analysis ({'All Periods' if period == 'all' else period})",
         showlegend=True,
         template="plotly_white",
         title_x=0.5,
         legend_title_text="Data Type / Year",
-        margin=dict(b=100),
+        margin=dict(b=120, t=100),
     )
 
     fig.show()

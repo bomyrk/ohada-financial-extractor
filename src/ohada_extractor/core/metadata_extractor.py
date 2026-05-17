@@ -125,7 +125,7 @@ class CompanyMetadataExtractor:
         metadata = CompanyMetadataExtractor.from_fiche_r2(f2a)
 
         # Add KPIs from NOTE 31
-        kpis = CompanyMetadataExtractor.extract_kpis_from_other(statement.other_data)
+        kpis = CompanyMetadataExtractor.extract_kpis_from_other(statement._other_data)
 
         metadata.dividend = kpis["dividend"]
         metadata.number_of_shares = kpis["number_of_shares"]

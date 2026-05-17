@@ -12,6 +12,22 @@ from pathlib import Path
 from ohada_extractor import FinancialExtractor
 from ohada_extractor.formatters import OHADAJSONFormatter
 
+extractor = FinancialExtractor()
+sample_file = 'examples/data/DSF_Normal_Tantanpion_2024.xlsx'
+
+statement = extractor.extract_from_excel(sample_file)
+
+matrices = statement.to_numpy
+print(matrices["asset"].shape)  # Renvoie ex: (29, 2, 3) -> Prêt pour le calcul !
+
+raw_matrices = statement.to_raw_numpy
+print(raw_matrices["asset"][:, 0])  # Renvoie la première colonne entière -> ['AD', 'AE', 'CA'...]
+
+# Export complet, propre et sécurisé pour le web
+payload = statement.to_dict(include_notes=False)
+
+sample_files = ['examples/data/DSF_Normal_Tantanpion_2024.xlsx', 'examples/data/DSF_Normal_Tantanpion_2025.xlsx']
+
 
 def main():
     # Path to sample Excel file

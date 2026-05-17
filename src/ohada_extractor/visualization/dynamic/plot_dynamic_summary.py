@@ -18,7 +18,7 @@ def plot_asset_summary_dynamic(statement, period="all"):
 
     # --- Period selection ---
     if period != "all":
-        period_dt = pd.Timestamp(period)
+        period_dt = pd.Timestamp(int(period),12,31)
         if period_dt not in years_dt:
             raise ValueError(f"Period {period} not found. Available: {years_str}")
         years_to_plot_dt = [period_dt]
@@ -97,7 +97,7 @@ def plot_asset_summary_dynamic(statement, period="all"):
         series = component_data.squeeze(drop=True)
         labels = [
             component_labels[ref]
-            for ref in series["compte"].to_index().get_level_values(1)
+            for ref in series.coords["Reference"].values
         ]
 
         fig.add_trace(
@@ -148,12 +148,12 @@ def plot_asset_summary_dynamic(statement, period="all"):
         total_arr = total_assets_data.values.flatten()
         total_value = total_arr[0] if total_arr.size == 1 else np.nan
 
-        refs = series.to_series()
-        if isinstance(refs.index, pd.MultiIndex):
-            refs.index = refs.index.get_level_values("Reference")
+        # refs = series.to_series()
+        # if isinstance(refs.index, pd.MultiIndex):
+        #     refs.index = refs.index.get_level_values("Reference")
 
-        for ref in refs.index:
-            val = float(refs.loc[ref])
+        for ref in series.coords["Reference"].values:
+            val = float(series.sel(compte=pd.IndexSlice[:, ref]).values)
             pct = val / total_value * 100
 
             fig.add_trace(
@@ -202,7 +202,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
 
     # --- Period selection ---
     if period != "all":
-        period_dt = pd.Timestamp(period)
+        period_dt = pd.Timestamp(int(period),12,31)
         if period_dt not in years_dt:
             raise ValueError(f"Period {period} not found. Available: {years_str}")
         years_to_plot_dt = [period_dt]
@@ -281,7 +281,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
         series = component_data.squeeze(drop=True)
         labels = [
             component_labels[ref]
-            for ref in series["compte"].to_index().get_level_values(1)
+            for ref in series.coords["Reference"].values
         ]
 
         fig.add_trace(
@@ -330,12 +330,12 @@ def plot_liability_summary_dynamic(statement, period="all"):
         total_arr = total_liab_data.values.flatten()
         total_value = total_arr[0] if total_arr.size == 1 else np.nan
 
-        refs = series.to_series()
-        if isinstance(refs.index, pd.MultiIndex):
-            refs.index = refs.index.get_level_values("Reference")
+        # refs = series.to_series()
+        # if isinstance(refs.index, pd.MultiIndex):
+        #     refs.index = refs.index.get_level_values("Reference")
 
-        for ref in refs.index:
-            val = float(refs.loc[ref])
+        for ref in series.coords["Reference"].values:
+            val = float(series.sel(compte=pd.IndexSlice[:, ref]).values.item())
             pct = val / total_value * 100
 
             fig.add_trace(
@@ -384,7 +384,7 @@ def plot_income_summary_dynamic(statement, period="all"):
 
     # --- Period selection ---
     if period != "all":
-        period_dt = pd.Timestamp(period)
+        period_dt = pd.Timestamp(int(period),12,31)
         if period_dt not in years_dt:
             raise ValueError(f"Period {period} not found. Available: {years_str}")
         years_to_plot_dt = [period_dt]
@@ -532,7 +532,7 @@ def plot_cashflow_summary_dynamic(statement, period="all"):
 
     # --- Period selection ---
     if period != "all":
-        period_dt = pd.Timestamp(period)
+        period_dt = pd.Timestamp(int(period),12,31)
         if period_dt not in years_dt:
             raise ValueError(f"Period {period} not found. Available: {years_str}")
         years_to_plot_dt = [period_dt]

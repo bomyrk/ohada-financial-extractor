@@ -13,6 +13,12 @@ from ohada_extractor import FinancialExtractor
 from ohada_extractor.formatters import OHADAJSONFormatter
 
 
+file_list = ['examples/data/DSF_Normal_Tantanpion_2024.xlsx', 'examples/data/DSF_Normal_Tantanpion_2025.xlsx']
+extractor = FinancialExtractor()
+
+# Extract data
+statements = extractor.extract_over_period(file_list)
+
 def process_multiple_files(file_list):
     """
     Process multiple OHADA financial statement files.

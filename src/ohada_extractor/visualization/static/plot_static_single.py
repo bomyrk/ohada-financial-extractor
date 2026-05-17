@@ -1,19 +1,17 @@
-"""
-Static (matplotlib) plotting for a single financial data type.
-"""
+"""Static (matplotlib) plotting for a single financial data type."""
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from ..utils import (
-    prepare_data_for_plotting,
     get_account_label,
+    prepare_data_for_plotting,
 )
 
 
 def plot_single_static(statement, data_type, style, period, value_type):
-    """
-    Create static plot for a single financial data type.
+    """Create static plot for a single financial data type.
 
     Args:
         statement: FinancialStatement instance
@@ -26,13 +24,40 @@ def plot_single_static(statement, data_type, style, period, value_type):
     # Prepare xarray slice
     data = prepare_data_for_plotting(statement, data_type, period, value_type)
 
-    # Extract labels from MultiIndex
-    if isinstance(data.compte.values[0], tuple):
+    # --------------------------------------------------------
+    # NETTOYAGE XARRAY : Éliminer les comptes entièrement à zéro
+    # --------------------------------------------------------
+    dim_to_reduce = "annee" if "annee" in data.dims else None
+    if dim_to_reduce:
+        max_vals = np.abs(data.values).max(axis=data.dims.index(dim_to_reduce))
+    else:
+        max_vals = np.abs(data.values)
+
+    non_zero_indices = np.where(max_vals > 1e-2)[0]
+    if len(non_zero_indices) == 0:
+        print(f"Aucune donnée non nulle à afficher pour '{data_type}'.")
+        return
+
+    data = data.isel(compte=non_zero_indices)
+
+    # --------------------------------------------------------
+    # EXTRACTION ROBUSTE DES LABELS (Nomenclature OHADA)
+    # --------------------------------------------------------
+    if "Reference" in data.coords:
+        labels = [
+            get_account_label(statement, data_type, ref)
+            for ref in data.coords["Reference"].values
+        ]
+    elif (
+        hasattr(data.compte, "values")
+        and len(data.compte.values) > 0
+        and isinstance(data.compte.values[0], tuple)
+    ):
         labels = [item[0] for item in data.compte.values]
     else:
-        labels = data.compte.values
+        labels = [str(c) for c in data.compte.values]
 
-    plt.figure(figsize=(15, 8))
+    fig, ax = plt.subplots(figsize=(15, 8))
 
     # -----------------------------
     # BAR PLOT
@@ -43,14 +68,21 @@ def plot_single_static(statement, data_type, style, period, value_type):
             width = 0.8 / len(data.annee)
 
             for idx, year in enumerate(data.annee.values):
-                plt.bar(
+                year_label = str(pd.to_datetime(year).year)
+                # .flatten() ou .values pour casser le conteneur xarray
+                vals = data.sel(annee=year).values.flatten()
+                ax.bar(
                     x + idx * width,
-                    data.sel(annee=year),
+                    vals,
                     width=width,
-                    label=str(year)[:10],
+                    label=year_label,
                 )
+            ax.set_xticks(x + width * (len(data.annee) - 1) / 2)
+            ax.set_xticklabels(labels, rotation=45, ha="right")
         else:
-            plt.bar(labels, data.values)
+            vals = data.values.flatten()
+            ax.bar(labels, vals)
+            ax.set_xticklabels(labels, rotation=45, ha="right")
 
     # -----------------------------
     # LINE PLOT
@@ -58,14 +90,18 @@ def plot_single_static(statement, data_type, style, period, value_type):
     elif style == "line":
         if period == "all":
             for year in data.annee.values:
-                plt.plot(
+                year_label = str(pd.to_datetime(year).year)
+                vals = data.sel(annee=year).values.flatten()
+                ax.plot(
                     labels,
-                    data.sel(annee=year),
+                    vals,
                     marker="o",
-                    label=str(year)[:10],
+                    label=year_label,
                 )
         else:
-            plt.plot(labels, data.values, marker="o")
+            vals = data.values.flatten()
+            ax.plot(labels, vals, marker="o")
+        ax.set_xticklabels(labels, rotation=45, ha="right")
 
     # -----------------------------
     # AREA PLOT
@@ -73,33 +109,71 @@ def plot_single_static(statement, data_type, style, period, value_type):
     elif style == "area":
         if period == "all":
             for year in data.annee.values:
-                plt.fill_between(
+                year_label = str(pd.to_datetime(year).year)
+                vals = data.sel(annee=year).values.flatten()
+                ax.fill_between(
                     labels,
-                    data.sel(annee=year),
+                    vals,
                     alpha=0.3,
-                    label=str(year)[:10],
+                    label=year_label,
                 )
         else:
-            plt.fill_between(labels, data.values, alpha=0.5)
+            vals = data.values.flatten()
+            ax.fill_between(labels, vals, alpha=0.5)
+        ax.set_xticklabels(labels, rotation=45, ha="right")
 
     # -----------------------------
-    # PIE PLOT
+    # PIE PLOT (Sécurisé pour la finance)
     # -----------------------------
     elif style == "pie":
         if period == "all":
-            raise ValueError("Pie charts require a single period, not 'all'.")
-        plt.pie(data.values, labels=labels, autopct="%1.1f%%")
+            raise ValueError(
+                "Les graphiques en secteurs (Pie charts) requièrent une seule période, pas 'all'."
+            )
+
+        vals = data.values.flatten()
+
+        # Filtrage strict contre les valeurs négatives ou nulles (ex: pertes, cashflow négatif)
+        positive_mask = vals > 0
+        filtered_vals = vals[positive_mask]
+        filtered_labels = [l for l, keep in zip(labels, positive_mask) if keep]
+
+        if len(filtered_vals) == 0:
+            raise ValueError(
+                f"Impossible de générer un Pie Chart : toutes les valeurs pour {data_type} sont négatives ou nulles."
+            )
+
+        ax.pie(
+            filtered_vals,
+            labels=filtered_labels,
+            autopct="%1.1f%%",
+            startangle=140,
+        )
+        # Supprime les labels d'axes inutiles pour un Pie chart
+        ax.set_xlabel("")
+        ax.set_ylabel("")
 
     # -----------------------------
     # Formatting
     # -----------------------------
-    title_value = value_type if data_type == "assets" else "Net"
-    plt.title(f"{data_type.capitalize()} Analysis ({title_value})")
-    plt.xlabel("Accounts")
-    plt.ylabel("Values")
-    plt.xticks(rotation=45, ha="right")
-    plt.grid(True, alpha=0.3)
-    plt.legend()
+    title_value = (
+        f"Value Type: {value_type}" if data_type == "assets" else "Net Values"
+    )
+    period_title = (
+        "All Periods" if period == "all" else str(pd.to_datetime(period).year)
+    )
+
+    ax.set_title(
+        f"{data_type.capitalize()} Structural Analysis ({period_title} - {title_value})",
+        fontsize=14,
+        fontweight="bold",
+    )
+
+    if style != "pie":
+        ax.set_xlabel("Financial Accounts / Rubrics", fontsize=11)
+        ax.set_ylabel("Amounts", fontsize=11)
+        ax.grid(True, linestyle="--", alpha=0.5)
+        ax.legend(title="Periods")
+
     plt.tight_layout()
-    plt.show(block=False)
-    plt.pause(0.001)
+    plt.show()

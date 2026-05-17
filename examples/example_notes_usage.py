@@ -50,8 +50,6 @@ def main():
     print("\n--- Extracting statement from DSF Excel file ---")
     statement = extractor.extract_from_excel(sample_file)
 
-    # Build xarray (recommended)
-    statement.to_xarray()
 
     print(f"Extracted {len(statement.notes)} notes.")
 

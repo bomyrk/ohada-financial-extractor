@@ -19,7 +19,6 @@ To run Streamlit:
 
 from pathlib import Path
 import streamlit as st
-
 from ohada_extractor.core.extractor import FinancialExtractor
 
 # Visualization functions
@@ -37,9 +36,6 @@ def load_statement():
 
     extractor = FinancialExtractor()
     statement = extractor.extract_from_excel(sample_file)
-
-    # Build xarray (recommended)
-    statement.to_xarray()
 
     return statement
 

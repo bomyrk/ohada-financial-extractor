@@ -18,8 +18,8 @@ class TestFinancialExtractor(unittest.TestCase):
 
     def test_extractor_initialization(self):
         """Test that extractor initializes correctly."""
-        self.assertIsNone(self.extractor.workbook)
-        self.assertEqual(len(self.extractor.raw_data), 0)
+        self.assertIsNone(self.extractor._workbook)
+        self.assertEqual(len(self.extractor._raw_data), 0)
 
     def test_schemas_defined(self):
         """Test that all required statements are defined."""

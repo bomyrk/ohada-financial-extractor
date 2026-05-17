@@ -4,7 +4,7 @@ Dynamic (plotly) plotting for a single financial data type.
 
 import plotly.graph_objects as go
 
-from ..utils import prepare_data_for_plotting
+from ..utils import get_account_label, prepare_data_for_plotting
 
 
 def plot_single_dynamic(statement, data_type, style, period, value_type):
@@ -23,12 +23,16 @@ def plot_single_dynamic(statement, data_type, style, period, value_type):
 
     # Remove accounts that are zero for this period
     non_zero_mask = data.values != 0
-    data = data[non_zero_mask]
+    data = data.where(non_zero_mask, drop=True)  # Version xarray native de filtrage
 
-    if isinstance(data.compte.values[0], tuple):
-        labels = [item[0] for item in data.compte.values]
+    # CORRECTION : Extraction propre des labels via notre utilitaire unifié
+    if "Reference" in data.coords:
+        labels = [
+            get_account_label(statement, data_type, ref) 
+            for ref in data.coords["Reference"].values
+        ]
     else:
-        labels = data.compte.values
+        labels = [str(c) for c in data.compte.values]
 
     fig = go.Figure()
 

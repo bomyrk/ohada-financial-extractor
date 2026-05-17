@@ -1,0 +1,19 @@
+{
+    "currency": "XAF",
+    "legal_form": "Société à Responsabilité Limitée (SARL)",
+    "country": "Cameroun",
+    "year_creation": 2008,
+    "regime_fiscal": "Réel normal",
+    "dividend": [
+        null,
+        null
+    ],
+    "number_of_shares": [
+        8000,
+        8000
+    ],
+    "number_of_employees": [
+        2086,
+        3643
+    ]
+}
