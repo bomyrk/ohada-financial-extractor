@@ -16,7 +16,7 @@ jobs:
 
       - name: Generate changelog entry
         id: changelog
-        uses: orhun/git-cliff-action@v2
+        uses: orhun/git-cliff-action@v3
         with:
           config: |
             [changelog]

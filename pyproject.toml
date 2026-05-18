@@ -3,7 +3,7 @@ requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ohada-extractor"
+name = "ohada-financial-extractor"
 dynamic = ["version"]
 description = "Extract and normalize financial data from OHADA-compliant Excel financial statements (DSF)"
 readme = { file = "docs/README.md", content-type = "text/markdown" }
