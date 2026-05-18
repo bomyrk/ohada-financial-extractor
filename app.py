@@ -1,29 +1,23 @@
 import os
 import tempfile
+
 import streamlit as st
-import pandas as pd
-import numpy as np
 
 # Import your FinancialExtractor
-
 from src.ohada_extractor import FinancialExtractor
 
 # Import your visualization functions
 from src.ohada_extractor.visualization.dynamic.plot_dynamic_overview import (
     plot_overview_dashboard_clean,
 )
-from src.ohada_extractor.visualization.dynamic.plot_dynamic_tabs import (
-    plot_ohada_tabs_dynamic,
-)
 from src.ohada_extractor.visualization.dynamic.plot_dynamic_summary import (
     plot_asset_summary_dynamic,
+    plot_cashflow_summary_dynamic,
+    plot_income_summary_dynamic,
     plot_liability_summary_dynamic,
 )
-from src.ohada_extractor.visualization.dynamic.plot_dynamic_summary import (
-    plot_income_summary_dynamic,
-)
-from src.ohada_extractor.visualization.dynamic.plot_dynamic_summary import (
-    plot_cashflow_summary_dynamic,
+from src.ohada_extractor.visualization.dynamic.plot_dynamic_tabs import (
+    plot_ohada_tabs_dynamic,
 )
 
 # ============================================================
@@ -66,7 +60,8 @@ files_identifier = (
     [(f.name, f.size) for f in uploaded_excels] if uploaded_excels else []
 )
 
-# Si l'utilisateur supprime ou change les fichiers, on réinitialise l'état pour forcer un nouveau clic
+# Si l'utilisateur supprime ou change les fichiers, 
+# on réinitialise l'état pour forcer un nouveau clic
 if files_identifier != st.session_state.current_files_processed:
     st.session_state.statement = None
 

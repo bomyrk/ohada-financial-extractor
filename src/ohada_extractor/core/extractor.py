@@ -6,16 +6,17 @@ OHADA accounting standards.
 """
 
 import logging
-import openpyxl
-import numpy as np
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional, Union
+
+import numpy as np
+import openpyxl
 from dateutil.relativedelta import relativedelta
 from openpyxl.worksheet.worksheet import Worksheet
 
+from .schemas import OHADA_NOTES, OHADA_STATEMENTS, OTHER_ACCOUNTS
 from .statement import FinancialStatement
-from .schemas import OHADA_STATEMENTS, OHADA_NOTES, OTHER_ACCOUNTS
 
 logger = logging.getLogger(__name__)
 
@@ -421,7 +422,7 @@ class FinancialExtractor:
         # Normalize sheet names for lookup
         sheet_map = {ws.title.strip().lower(): ws for ws in self._workbook.worksheets}
 
-        for note_id, cfg in OHADA_NOTES.items():
+        for _note_id, cfg in OHADA_NOTES.items():
             sheet_key = cfg.sheet_name.lower().strip()
 
             # Skip missing sheets (notes are optional)
@@ -574,8 +575,8 @@ class FinancialExtractor:
         finStatY: np.ndarray, finStatLY: np.ndarray, i: int, j: int
     ) -> bool:
         """
-        Checks whether the financial data for a given column is consistent between 
-        the current year and the previous year.
+        Checks whether the financial data for a given column is consistent 
+        between the current year and the previous year.
 
         Args:
             finStatY (np.ndarray): Financial statements for the current year.

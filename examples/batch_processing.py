@@ -9,6 +9,7 @@ This example demonstrates:
 
 import json
 from pathlib import Path
+
 from ohada_extractor import FinancialExtractor
 from ohada_extractor.formatters import OHADAJSONFormatter
 
@@ -28,7 +29,7 @@ def process_multiple_files(file_list):
     # Extract data
     statements = extractor.extract_over_period(file_list)
 
-    print(f"\n✓ Extraction successful!")
+    print("\n✓ Extraction successful!")
     print(f"  Periods: {statements.periods}")
     print(f"  File: {statements.file_path}")
 
@@ -44,7 +45,7 @@ def process_multiple_files(file_list):
 
     # Display sample
     data = json.loads(json_output)
-    print(f"\nSample output structure:")
+    print("\nSample output structure:")
     print(f"  Assets count: {len(data['balance_sheet']['assets'])}")
     print(f"  Liabilities count: {len(data['balance_sheet']['liabilities'])}")
     print(f"  Income items count: {len(data['income_statement'])}")

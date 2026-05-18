@@ -6,19 +6,21 @@ using the preprocessed note values produced by the extraction engine.
 """
 
 from __future__ import annotations
-from typing import Optional, Dict
+
+from typing import Dict, Optional
+
 import numpy as np
 
-from .statement import CompanyMetadata
 from .schemas import (
-    fetch_currency,
-    fetch_legal_form,
-    fetch_headquarter_country,
-    fetch_regime_fiscal,
+    CODES_FISCAUX,
     LEGAL_FORMS,
     SIEGE_SOCIAL,
-    CODES_FISCAUX,
+    fetch_currency,
+    fetch_headquarter_country,
+    fetch_legal_form,
+    fetch_regime_fiscal,
 )
+from .statement import CompanyMetadata
 
 
 class CompanyMetadataExtractor:

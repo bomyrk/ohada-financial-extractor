@@ -25,7 +25,7 @@ def plot_all_static(statement, style, period, value_type):
 
     data_types = ["assets", "liabilities", "income", "cashflow"]
 
-    for ax, data_type in zip(axes, data_types):
+    for ax, data_type in zip(axes, data_types, strict=False):
 
         data = prepare_data_for_plotting(statement, data_type, period, value_type)
 

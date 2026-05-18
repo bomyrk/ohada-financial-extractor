@@ -8,28 +8,28 @@ It dispatches to:
     - summary dashboards
 """
 
-from .utils import (
-    normalize_data_type,
-    validate_plot_inputs,
-)
-
-# Static plot modules
-from .static.plot_static_single import plot_single_static
-from .static.plot_static_all import plot_all_static
-from .static.plot_static_summary import (
-    plot_asset_summary_static,
-    plot_liability_summary_static,
-    plot_income_summary_static,
-)
+from .dynamic.plot_dynamic_all import plot_all_dynamic
 
 # Dynamic plot modules
 from .dynamic.plot_dynamic_single import plot_single_dynamic
-from .dynamic.plot_dynamic_all import plot_all_dynamic
 from .dynamic.plot_dynamic_summary import (
     plot_asset_summary_dynamic,
-    plot_liability_summary_dynamic,
-    plot_income_summary_dynamic,
     plot_cashflow_summary_dynamic,
+    plot_income_summary_dynamic,
+    plot_liability_summary_dynamic,
+)
+from .static.plot_static_all import plot_all_static
+
+# Static plot modules
+from .static.plot_static_single import plot_single_static
+from .static.plot_static_summary import (
+    plot_asset_summary_static,
+    plot_income_summary_static,
+    plot_liability_summary_static,
+)
+from .utils import (
+    normalize_data_type,
+    validate_plot_inputs,
 )
 
 # ----------------------------------------------------------------------

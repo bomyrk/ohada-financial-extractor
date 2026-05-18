@@ -454,7 +454,7 @@ def plot_income_summary_dynamic(statement, period="all"):
 
     if period == "all":
         # One waterfall per year
-        for i, year in enumerate(years_to_plot_dt):
+        for _i, year in enumerate(years_to_plot_dt):
             year_data = component_data.sel(annee=year).squeeze(drop=True).values
 
             fig.add_trace(
@@ -508,6 +508,9 @@ def plot_income_summary_dynamic(statement, period="all"):
     fig.update_yaxes(title_text="Value", row=1, col=2)
 
     fig.show()
+
+
+
 
 
 def plot_cashflow_summary_dynamic(statement, period="all"):

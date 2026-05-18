@@ -47,7 +47,7 @@ def plot_ohada_tabs_dynamic(statement):
     # 3) BUILD TRACES FOR EACH TAB
     # ============================================================
 
-    for idx, (title, data_array, refs, total_ref) in enumerate(groups):
+    for _idx, (title, data_array, refs, total_ref) in enumerate(groups):
 
         component_data = data_array.sel(compte=pd.IndexSlice[:, refs], annee=years_dt)
         total_data = data_array.sel(

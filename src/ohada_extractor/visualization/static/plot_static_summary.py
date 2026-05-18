@@ -6,7 +6,7 @@ from ..utils import get_account_label
 
 
 def _extract_xarray_data(data_array, refs, years):
-    """Sélectionne de manière robuste les données xarray pour une liste de références."""
+    """Sélectionne de manière robuste les données xarray pour une liste de références"""
     # Gestion du MultiIndex ou de l'index simple pour la dimension 'compte'
     if "Reference" in data_array.coords:
         # Si la coordonnée Reference existe explicitement
@@ -70,7 +70,7 @@ def plot_asset_summary_static(statement, period="all"):
         return
 
     component_data = component_data.isel(compte=non_zero_mask)
-    refs = [r for r, keep in zip(refs, non_zero_mask) if keep]
+    refs = [r for r, keep in zip(refs, non_zero_mask, strict=False) if keep]
     labels = {ref: labels[ref] for ref in refs}
 
     # --- Figure ---
@@ -139,13 +139,13 @@ def plot_asset_summary_static(statement, period="all"):
         # Calcul du pourcentage sécurisé contre la division par zéro
         pcts = np.where(total_data != 0, (series_vals / total_data) * 100, 0)
 
-        for i, (b, v, p) in enumerate(zip(bottom, series_vals, pcts)):
+        for i, (b, v, p) in enumerate(zip(bottom, series_vals, pcts, strict=False)):
             if abs(v) > 0:
                 ax2.text(
                     years_to_plot_str[i],
                     b
                     + v
-                    / 2,  # Centre le texte au milieu du segment pour une meilleure lisibilité
+                    / 2,  # Centre le texte pour une meilleure lisibilité
                     f"{p:.1f}%",
                     ha="center",
                     va="center",
@@ -212,7 +212,7 @@ def plot_liability_summary_static(statement, period="all"):
         return
 
     component_data = component_data.isel(compte=non_zero_mask)
-    refs = [r for r, keep in zip(refs, non_zero_mask) if keep]
+    refs = [r for r, keep in zip(refs, non_zero_mask, strict=False) if keep]
     labels = {ref: labels[ref] for ref in refs}
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
@@ -262,7 +262,7 @@ def plot_liability_summary_static(statement, period="all"):
         ax2.bar(years_to_plot_str, series_vals, bottom=bottom, label=labels[ref])
         pcts = np.where(total_data != 0, (series_vals / total_data) * 100, 0)
 
-        for i, (b, v, p) in enumerate(zip(bottom, series_vals, pcts)):
+        for i, (b, v, p) in enumerate(zip(bottom, series_vals, pcts, strict=False)):
             if abs(v) > 0:
                 ax2.text(
                     years_to_plot_str[i],
@@ -310,7 +310,7 @@ def plot_income_summary_static(statement, period="all"):
     )
     non_zero_mask = max_vals > 1e-2
     income_data = income_data.isel(compte=non_zero_mask)
-    refs = [r for r, keep in zip(refs, non_zero_mask) if keep]
+    refs = [r for r, keep in zip(refs, non_zero_mask, strict=False) if keep]
     labels = {ref: labels[ref] for ref in refs}
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
@@ -378,7 +378,8 @@ def plot_income_summary_static(statement, period="all"):
                 weight="bold",
             )
     else:
-        # Si multi-période : Graphique par année pour éviter les collisions destructrices
+        # Si multi-période : Graphique par année pour éviter 
+        # les collisions destructrices
         ax2.set_title("Net Income Cascade Trends", fontsize=14)
         x_labels = list(labels.values())
         x_indices = np.arange(len(x_labels))
@@ -429,7 +430,7 @@ def plot_cashflow_summary_static(statement, period="all"):
     )
     non_zero_mask = max_vals > 1e-2
     cash_data = cash_data.isel(compte=non_zero_mask)
-    refs = [r for r, keep in zip(refs, non_zero_mask) if keep]
+    refs = [r for r, keep in zip(refs, non_zero_mask, strict=False) if keep]
     labels = {ref: labels[ref] for ref in refs}
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
