@@ -17,6 +17,7 @@ from pathlib import Path
 from ohada_extractor.core.extractor import FinancialExtractor
 from ohada_extractor.core.metadata_extractor import CompanyMetadataExtractor
 
+
 def to_python_value(value):
     """Convert numpy values to JSON‑friendly Python types."""
     import numpy as np
@@ -31,13 +32,14 @@ def to_python_value(value):
 
     return value
 
+
 def main():
     # -------------------------------------------------------------------
     # 1. Load a DSF Excel file
     # -------------------------------------------------------------------
 
     # Replace with your own DSF file path
-    sample_file = Path(__file__).parent / 'data' / 'DSF_Normal_Tantanpion_2024.xlsx'
+    sample_file = Path(__file__).parent / "data" / "DSF_Normal_Tantanpion_2024.xlsx"
 
     if not sample_file.exists():
         print(f"Error: Sample file not found at {sample_file}")
@@ -47,7 +49,6 @@ def main():
 
     print("\n--- Extracting metadata from DSF Excel file ---")
     statement = extractor.extract_from_excel(sample_file)
-
 
     # -------------------------------------------------------------------
     # 2. Build metadata from the statement
@@ -68,7 +69,7 @@ def main():
     print("\n--- Company Metadata ---")
     print(f"Legal Form:          {metadata.legal_form}")
     print(f"Country:             {metadata.country}")
-    #print(f"Sector:              {metadata.activity_sector}")
+    # print(f"Sector:              {metadata.activity_sector}")
     print(f"Fiscal Regime:       {metadata.regime_fiscal}")
     print(f"Currency:            {metadata.currency}")
     print(f"Year of Creation:    {metadata.year_creation}")
@@ -96,8 +97,7 @@ def main():
     # -------------------------------------------------------------------
 
     metadata_dict = {
-        field: to_python_value(value)
-        for field, value in metadata.__dict__.items()
+        field: to_python_value(value) for field, value in metadata.__dict__.items()
     }
 
     metadata_json = json.dumps(metadata_dict, indent=4, ensure_ascii=False)
@@ -110,13 +110,15 @@ def main():
     # -------------------------------------------------------------------
 
     import os
+
     os.makedirs("output", exist_ok=True)
-    output_path = sample_file.parent.parent / "output"/ "company_metadata.json"
+    output_path = sample_file.parent.parent / "output" / "company_metadata.json"
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(metadata_json)
 
     print(f"\nMetadata saved to: {output_path}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

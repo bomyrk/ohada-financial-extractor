@@ -212,7 +212,7 @@ class FinancialExtractor:
 
         if not self._workbook:
             raise ValueError("No active workbook loaded.")
-        
+
         workbook_sheets = {
             " ".join(s.split()).lower() for s in self._workbook.sheetnames
         }
@@ -246,7 +246,7 @@ class FinancialExtractor:
         """Get worksheet by normalized name."""
         if not self._workbook:
             return None
-        
+
         for ws in self._workbook.worksheets:
             if " ".join(ws.title.split()).lower() == sheet_name.lower():
                 return ws

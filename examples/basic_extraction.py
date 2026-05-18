@@ -15,37 +15,34 @@ from ohada_extractor.formatters import OHADAJSONFormatter
 
 def main():
     # Path to sample Excel file
-    sample_file = Path(__file__).parent / 'data' / 'DSF_Normal_Tantanpion_2024.xlsx'
-    
+    sample_file = Path(__file__).parent / "data" / "DSF_Normal_Tantanpion_2024.xlsx"
+
     if not sample_file.exists():
         print(f"Error: Sample file not found at {sample_file}")
         return
 
     print(f"Extracting financial data from: {sample_file}")
-    
+
     # Initialize extractor
     extractor = FinancialExtractor()
-    
+
     # Extract data
     statement = extractor.extract_from_excel(sample_file)
-    
+
     print(f"\n✓ Extraction successful!")
     print(f"  Periods: {statement.periods[::-1]}")
     print(f"  File: {statement.file_path}")
-    
+
     # Convert to JSON
-    json_output = OHADAJSONFormatter.to_json(
-        statement=statement,
-        indent=2
-    )
-    
+    json_output = OHADAJSONFormatter.to_json(statement=statement, indent=2)
+
     # Save to file
-    output_file = sample_file.parent.parent / 'output_extraction.json'
-    with open(output_file, 'w') as f:
+    output_file = sample_file.parent.parent / "output_extraction.json"
+    with open(output_file, "w") as f:
         f.write(json_output)
-    
+
     print(f"\n✓ JSON output saved to: {output_file}")
-    
+
     # Display sample
     data = json.loads(json_output)
     print(f"\nSample output structure:")
@@ -55,5 +52,6 @@ def main():
     print(f"  Cashflow items count: {len(data['cashflow_statement'])}")
     print(f"  Other items count: {len(data['other_data'])}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

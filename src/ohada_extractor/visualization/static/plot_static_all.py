@@ -27,18 +27,14 @@ def plot_all_static(statement, style, period, value_type):
 
     for ax, data_type in zip(axes, data_types):
 
-        data = prepare_data_for_plotting(
-            statement, data_type, period, value_type
-        )
+        data = prepare_data_for_plotting(statement, data_type, period, value_type)
 
         # --------------------------------------------------------
         # NETTOYAGE XARRAY : Nettoyage des lignes à zéro
         # --------------------------------------------------------
         dim_to_reduce = "annee" if "annee" in data.dims else None
         if dim_to_reduce:
-            max_vals = np.abs(data.values).max(
-                axis=data.dims.index(dim_to_reduce)
-            )
+            max_vals = np.abs(data.values).max(axis=data.dims.index(dim_to_reduce))
         else:
             max_vals = np.abs(data.values)
 
@@ -65,9 +61,7 @@ def plot_all_static(statement, style, period, value_type):
 
         # Résolution de la chaîne descriptive de la période
         period_label = (
-            "All Periods"
-            if period == "all"
-            else str(pd.to_datetime(period).year)
+            "All Periods" if period == "all" else str(pd.to_datetime(period).year)
         )
 
         # -----------------------------
@@ -132,9 +126,7 @@ def plot_all_static(statement, style, period, value_type):
         # -----------------------------
         # Formatting & Cleanup
         # -----------------------------
-        title_context = (
-            f" ({value_type})" if data_type == "assets" else " (Net)"
-        )
+        title_context = f" ({value_type})" if data_type == "assets" else " (Net)"
         ax.set_title(
             f"{data_type.capitalize()}{title_context} - {period_label}",
             fontsize=12,

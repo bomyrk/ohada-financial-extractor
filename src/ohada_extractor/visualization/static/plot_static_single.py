@@ -156,9 +156,7 @@ def plot_single_static(statement, data_type, style, period, value_type):
     # -----------------------------
     # Formatting
     # -----------------------------
-    title_value = (
-        f"Value Type: {value_type}" if data_type == "assets" else "Net Values"
-    )
+    title_value = f"Value Type: {value_type}" if data_type == "assets" else "Net Values"
     period_title = (
         "All Periods" if period == "all" else str(pd.to_datetime(period).year)
     )

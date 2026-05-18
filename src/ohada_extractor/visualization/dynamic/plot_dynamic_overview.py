@@ -125,15 +125,12 @@ def plot_overview_dashboard_clean(statement):
     ).values.flatten()
 
     liab_labels = {
-        ref: get_account_label(statement, "liabilities", ref)
-        for ref in liab_refs
+        ref: get_account_label(statement, "liabilities", ref) for ref in liab_refs
     }
 
     # Grouped bars (left)
     for ref in liab_refs:
-        series_vals = liab_components.sel(
-            compte=pd.IndexSlice[:, ref]
-        ).values.flatten()
+        series_vals = liab_components.sel(compte=pd.IndexSlice[:, ref]).values.flatten()
         fig.add_trace(
             go.Bar(
                 name=liab_labels[ref],
@@ -149,9 +146,7 @@ def plot_overview_dashboard_clean(statement):
 
     # Stacked bars (right)
     for ref in liab_refs:
-        series_vals = liab_components.sel(
-            compte=pd.IndexSlice[:, ref]
-        ).values.flatten()
+        series_vals = liab_components.sel(compte=pd.IndexSlice[:, ref]).values.flatten()
 
         # Safe division
         pct = np.zeros_like(series_vals, dtype=float)
@@ -245,9 +240,7 @@ def plot_overview_dashboard_clean(statement):
 
     # Grouped bars (left)
     for ref in cash_refs:
-        series_vals = cash_components.sel(
-            compte=pd.IndexSlice[:, ref]
-        ).values.flatten()
+        series_vals = cash_components.sel(compte=pd.IndexSlice[:, ref]).values.flatten()
         fig.add_trace(
             go.Bar(
                 name=cash_labels[ref],

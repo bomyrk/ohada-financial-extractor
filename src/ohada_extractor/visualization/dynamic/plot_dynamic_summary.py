@@ -18,7 +18,7 @@ def plot_asset_summary_dynamic(statement, period="all"):
 
     # --- Period selection ---
     if period != "all":
-        period_dt = pd.Timestamp(int(period),12,31)
+        period_dt = pd.Timestamp(int(period), 12, 31)
         if period_dt not in years_dt:
             raise ValueError(f"Period {period} not found. Available: {years_str}")
         years_to_plot_dt = [period_dt]
@@ -95,10 +95,7 @@ def plot_asset_summary_dynamic(statement, period="all"):
 
     else:
         series = component_data.squeeze(drop=True)
-        labels = [
-            component_labels[ref]
-            for ref in series.coords["Reference"].values
-        ]
+        labels = [component_labels[ref] for ref in series.coords["Reference"].values]
 
         fig.add_trace(
             go.Bar(
@@ -202,7 +199,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
 
     # --- Period selection ---
     if period != "all":
-        period_dt = pd.Timestamp(int(period),12,31)
+        period_dt = pd.Timestamp(int(period), 12, 31)
         if period_dt not in years_dt:
             raise ValueError(f"Period {period} not found. Available: {years_str}")
         years_to_plot_dt = [period_dt]
@@ -279,10 +276,7 @@ def plot_liability_summary_dynamic(statement, period="all"):
 
     else:
         series = component_data.squeeze(drop=True)
-        labels = [
-            component_labels[ref]
-            for ref in series.coords["Reference"].values
-        ]
+        labels = [component_labels[ref] for ref in series.coords["Reference"].values]
 
         fig.add_trace(
             go.Bar(
@@ -384,7 +378,7 @@ def plot_income_summary_dynamic(statement, period="all"):
 
     # --- Period selection ---
     if period != "all":
-        period_dt = pd.Timestamp(int(period),12,31)
+        period_dt = pd.Timestamp(int(period), 12, 31)
         if period_dt not in years_dt:
             raise ValueError(f"Period {period} not found. Available: {years_str}")
         years_to_plot_dt = [period_dt]
@@ -532,7 +526,7 @@ def plot_cashflow_summary_dynamic(statement, period="all"):
 
     # --- Period selection ---
     if period != "all":
-        period_dt = pd.Timestamp(int(period),12,31)
+        period_dt = pd.Timestamp(int(period), 12, 31)
         if period_dt not in years_dt:
             raise ValueError(f"Period {period} not found. Available: {years_str}")
         years_to_plot_dt = [period_dt]

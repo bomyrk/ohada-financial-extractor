@@ -45,19 +45,19 @@ class OHADAJSONFormatter:
     def parse_years(datetime_index: Union[pd.DatetimeIndex, List]) -> Dict[str, str]:
         """
         Convert a DatetimeIndex or list of dates to a dictionary with standardized period keys.
-        
+
         Maps periods to 'net', 'net1', 'net2', etc., where 'net' is the most recent period.
         This ensures consistent year labeling across multi-period financial statements.
-        
+
         Args:
             datetime_index: pd.DatetimeIndex or list of dates/strings
-            
+
         Returns:
             Dictionary with keys like {'net': '2023-12-31', 'net1': '2022-12-31', ...}
-            
+
         Raises:
             ValueError: If fewer than 2 dates provided
-            
+
         Example:
             >>> dates = pd.DatetimeIndex(['2021-12-31', '2022-12-31', '2023-12-31'])
             >>> OHADAJSONFormatter.parse_years(dates)
@@ -69,24 +69,24 @@ class OHADAJSONFormatter:
         elif isinstance(datetime_index, list):
             # Try to convert strings to datetime if needed
             dates = [
-                pd.Timestamp(d) if isinstance(d, str) else d 
-                for d in datetime_index
+                pd.Timestamp(d) if isinstance(d, str) else d for d in datetime_index
             ]
         else:
-            raise TypeError(f"Expected pd.DatetimeIndex or list, got {type(datetime_index)}")
-        
+            raise TypeError(
+                f"Expected pd.DatetimeIndex or list, got {type(datetime_index)}"
+            )
+
         if len(dates) < 2:
             raise ValueError("Date index must contain at least two dates.")
-        
+
         # Create dictionary with net, net1, net2, ... keys
         date_dict = {
             f"net{len(dates) - 1 - idx}": dates[idx].isoformat()
             for idx in range(len(dates) - 1)
         }
         date_dict["net"] = dates[-1].isoformat()  # Most recent as 'net'
-        
-        return date_dict
 
+        return date_dict
 
     @staticmethod
     def format_notes(notes_dict: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
@@ -253,7 +253,7 @@ class OHADAJSONFormatter:
             LIABILITIES_ACCOUNTS,
             INCOME_ACCOUNTS,
             CASHFLOW_ACCOUNTS,
-            OTHER_ACCOUNTS
+            OTHER_ACCOUNTS,
         )
 
         periods = (

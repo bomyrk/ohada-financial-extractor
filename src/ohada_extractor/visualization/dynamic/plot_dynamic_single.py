@@ -28,7 +28,7 @@ def plot_single_dynamic(statement, data_type, style, period, value_type):
     # CORRECTION : Extraction propre des labels via notre utilitaire unifié
     if "Reference" in data.coords:
         labels = [
-            get_account_label(statement, data_type, ref) 
+            get_account_label(statement, data_type, ref)
             for ref in data.coords["Reference"].values
         ]
     else:

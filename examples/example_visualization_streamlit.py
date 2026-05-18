@@ -58,15 +58,13 @@ def run_dynamic_tabs(statement):
 
 def main():
     st.title("OHADA Financial Visualization Example")
-    st.write(
-        """
+    st.write("""
         This example demonstrates how to visualize OHADA DSF statements using:
 
         - Static dashboards (4×2 layout)
         - Dynamic tabbed dashboards
         - Streamlit integration
-        """
-    )
+        """)
 
     # ---------------------------------------------------------------
     # Load statement
