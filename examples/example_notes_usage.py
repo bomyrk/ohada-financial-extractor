@@ -15,9 +15,9 @@ Run:
     python examples/example_notes_usage.py
 """
 
-from pathlib import Path
 import json
 import os
+from pathlib import Path
 
 from ohada_extractor.core.extractor import FinancialExtractor
 

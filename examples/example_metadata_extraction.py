@@ -14,6 +14,7 @@ This example demonstrates how to:
 
 import json
 from pathlib import Path
+
 from ohada_extractor.core.extractor import FinancialExtractor
 from ohada_extractor.core.metadata_extractor import CompanyMetadataExtractor
 

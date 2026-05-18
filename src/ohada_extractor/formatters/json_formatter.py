@@ -4,11 +4,12 @@ JSON Formatter for OHADA Financial Statements
 Converts extracted arrays into JSON-serializable format.
 """
 
-from typing import Dict, List, Any, Optional, Union
 import json
+from datetime import date, datetime
+from typing import Any, Dict, List, Optional, Union
+
 import numpy as np
 import pandas as pd
-from datetime import date, datetime
 
 
 class OHADAJSONFormatter:
@@ -165,7 +166,7 @@ class OHADAJSONFormatter:
             num_periods = len(periods)
             value_idx = 1
 
-            for period_idx, period in enumerate(periods):
+            for period_idx, _period in enumerate(periods):
                 period_key = "" if period_idx == 0 else str(num_periods - period_idx)
 
                 gross_key = f"gross{period_key}" if period_key else "gross"
@@ -224,7 +225,7 @@ class OHADAJSONFormatter:
 
             num_periods = len(periods)
 
-            for period_idx, period in enumerate(periods):
+            for period_idx, _period in enumerate(periods):
                 period_key = "" if period_idx == 0 else str(num_periods - period_idx)
                 net_key = f"net{period_key}" if period_key else "net"
 
@@ -250,9 +251,9 @@ class OHADAJSONFormatter:
         """
         from ..core.schemas import (
             ASSETS_ACCOUNTS,
-            LIABILITIES_ACCOUNTS,
-            INCOME_ACCOUNTS,
             CASHFLOW_ACCOUNTS,
+            INCOME_ACCOUNTS,
+            LIABILITIES_ACCOUNTS,
             OTHER_ACCOUNTS,
         )
 

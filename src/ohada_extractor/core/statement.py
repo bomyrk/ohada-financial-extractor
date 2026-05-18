@@ -5,16 +5,17 @@ Represents extracted and structured financial data from OHADA Excel files.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from .schemas import (
     ASSETS_ACCOUNTS,
-    LIABILITIES_ACCOUNTS,
-    INCOME_ACCOUNTS,
     CASHFLOW_ACCOUNTS,
+    INCOME_ACCOUNTS,
+    LIABILITIES_ACCOUNTS,
     OTHER_ACCOUNTS,
 )
 
@@ -443,7 +444,7 @@ class FinancialStatement:
 
         name = name.strip().lower()
 
-        for key, entry in self.notes.items():
+        for _key, entry in self.notes.items():
             if entry.get("name", "").strip().lower() == name:
                 return (
                     entry.get("preprocess_value")

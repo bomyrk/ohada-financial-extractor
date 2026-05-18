@@ -94,7 +94,8 @@ def get_account_label(statement, data_type, ref_code):
     Works with MultiIndex accounts.
     """
 
-    # Determine which MultiIndex to use, Mat data_type to the actuaal xarray DataArray attribute on the statement
+    # Determine which MultiIndex to use, Mat data_type to 
+    # the actuaal xarray DataArray attribute on the statement
     attr_map = {
         "assets": "asset",
         "liabilities": "liability",

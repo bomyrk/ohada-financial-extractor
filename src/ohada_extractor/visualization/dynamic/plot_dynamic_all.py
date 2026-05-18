@@ -29,7 +29,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
         horizontal_spacing=0.1,
     )
 
-    for idx, (data_type, color) in enumerate(zip(data_types, colors), 1):
+    for idx, (data_type, color) in enumerate(zip(data_types, colors, strict=False), 1):
         row = (idx - 1) // 2 + 1
         col = (idx - 1) % 2 + 1
 
