@@ -10,14 +10,14 @@ and validates:
 """
 
 from __future__ import annotations
+
 import logging
+import re
+from typing import List, Tuple
+
 import numpy as np
 import pandas as pd
 import xarray as xr
-import re
-
-from typing import List, Tuple
-
 from xarray import DataArray
 
 logger = logging.getLogger(__name__)
@@ -192,9 +192,9 @@ class CoherenceValidator:
         # Build MultiIndex accounts
         from ohada_extractor.core.schemas import (
             ASSETS_ACCOUNTS,
-            LIABILITIES_ACCOUNTS,
-            INCOME_ACCOUNTS,
             CASHFLOW_ACCOUNTS,
+            INCOME_ACCOUNTS,
+            LIABILITIES_ACCOUNTS,
         )
 
         def create_index(data):

@@ -18,7 +18,9 @@ To run Streamlit:
 """
 
 from pathlib import Path
+
 import streamlit as st
+
 from ohada_extractor.core.extractor import FinancialExtractor
 
 # Visualization functions

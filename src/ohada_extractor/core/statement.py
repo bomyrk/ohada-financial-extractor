@@ -13,9 +13,9 @@ import xarray as xr
 
 from .schemas import (
     ASSETS_ACCOUNTS,
-    LIABILITIES_ACCOUNTS,
-    INCOME_ACCOUNTS,
     CASHFLOW_ACCOUNTS,
+    INCOME_ACCOUNTS,
+    LIABILITIES_ACCOUNTS,
     OTHER_ACCOUNTS,
 )
 
@@ -444,7 +444,7 @@ class FinancialStatement:
 
         name = name.strip().lower()
 
-        for key, entry in self.notes.items():
+        for _key, entry in self.notes.items():
             if entry.get("name", "").strip().lower() == name:
                 return (
                     entry.get("preprocess_value")

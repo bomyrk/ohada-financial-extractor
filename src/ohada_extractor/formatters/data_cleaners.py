@@ -4,7 +4,7 @@ Data Cleaning Utilities for OHADA Financial Statements
 Provides functions to clean, validate, and normalize extracted financial data.
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 def remove_empty(data: List[Dict]) -> List[Dict]:

@@ -7,7 +7,7 @@ financial statements across 18 African countries.
 
 import logging
 from dataclasses import dataclass
-from typing import Tuple, List, Optional, Union, Dict
+from typing import Dict, List, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
 

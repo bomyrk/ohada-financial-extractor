@@ -136,11 +136,12 @@ def plot_single_static(statement, data_type, style, period, value_type):
         # Filtrage strict contre les valeurs négatives ou nulles (ex: pertes, cashflow négatif)
         positive_mask = vals > 0
         filtered_vals = vals[positive_mask]
-        filtered_labels = [lab for lab, keep in zip(labels, positive_mask) if keep]
+        filtered_labels = [lab for lab, keep in zip(labels, positive_mask, strict=False) if keep]
 
         if len(filtered_vals) == 0:
             raise ValueError(
-                f"Impossible de générer un Pie Chart : toutes les valeurs pour {data_type} sont négatives ou nulles."
+                f"Impossible de générer un Pie Chart : toutes" 
+                f"les valeurs pour {data_type} sont négatives ou nulles."
             )
 
         ax.pie(
@@ -162,7 +163,7 @@ def plot_single_static(statement, data_type, style, period, value_type):
     )
 
     ax.set_title(
-        f"{data_type.capitalize()} Structural Analysis ({period_title} - {title_value})",
+        f"{data_type.capitalize()} Structural Analysis ({period_title} -{title_value})",
         fontsize=14,
         fontweight="bold",
     )

@@ -9,6 +9,7 @@ This example demonstrates:
 
 import json
 from pathlib import Path
+
 from ohada_extractor import FinancialExtractor
 from ohada_extractor.formatters import OHADAJSONFormatter
 

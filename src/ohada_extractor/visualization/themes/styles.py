@@ -3,7 +3,8 @@ Matplotlib style presets for OHADA visualization.
 """
 
 import matplotlib.pyplot as plt
-from .colors import PRIMARY_BLUE, LIGHT_GRAY, TEAL
+
+from .colors import LIGHT_GRAY, PRIMARY_BLUE, TEAL
 
 
 def apply_ohada_style():

@@ -28,7 +28,7 @@ except ImportError:
 __author__ = "Kamguia Wabo Leonel B. "
 
 from .core.extractor import FinancialExtractor
-from .core.schemas import OHADA_STATEMENTS, ASSETS_ACCOUNTS
+from .core.schemas import ASSETS_ACCOUNTS, OHADA_STATEMENTS
 
 __all__ = [
     "FinancialExtractor",

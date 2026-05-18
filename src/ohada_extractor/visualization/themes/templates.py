@@ -3,7 +3,8 @@ Plotly templates for OHADA visualization.
 """
 
 import plotly.io as pio
-from .colors import PRIMARY_BLUE, TEAL, LIGHT_GRAY, ORANGE
+
+from .colors import LIGHT_GRAY, ORANGE, PRIMARY_BLUE, TEAL
 
 
 def register_ohada_template():

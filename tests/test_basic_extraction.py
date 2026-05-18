@@ -4,6 +4,7 @@ Unit tests for basic extraction functionality
 
 import unittest
 from pathlib import Path
+
 from ohada_extractor import FinancialExtractor
 from ohada_extractor.core.schemas import OHADA_STATEMENTS
 
@@ -71,7 +72,7 @@ class TestOHADAStatements(unittest.TestCase):
 
     def test_all_accounts_have_codes(self):
         """Test that all accounts have valid codes."""
-        for stmt_key, stmt in OHADA_STATEMENTS.items():
+        for _stmt_key, stmt in OHADA_STATEMENTS.items():
             for label, code in stmt.accounts:
                 self.assertIsInstance(label, str)
                 self.assertIsInstance(code, str)
