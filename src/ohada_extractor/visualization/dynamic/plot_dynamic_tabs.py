@@ -50,9 +50,7 @@ def plot_ohada_tabs_dynamic(statement):
     for _idx, (title, data_array, refs, total_ref) in enumerate(groups):
 
         component_data = data_array.sel(compte=pd.IndexSlice[:, refs], annee=years_dt)
-        total_data = data_array.sel(
-            compte=pd.IndexSlice[:, total_ref], annee=years_dt
-        ).squeeze(drop=True)
+        total_data = data_array.sel(compte=pd.IndexSlice[:, total_ref], annee=years_dt).squeeze(drop=True)
 
         # Track which traces belong to this tab
         tab_trace_indices = []
@@ -64,11 +62,7 @@ def plot_ohada_tabs_dynamic(statement):
         total_vals = total_data.values.flatten().astype(float)
 
         for ref in refs:
-            vals = (
-                component_data.sel(compte=pd.IndexSlice[:, ref])
-                .values.flatten()
-                .astype(float)
-            )
+            vals = component_data.sel(compte=pd.IndexSlice[:, ref]).values.flatten().astype(float)
 
             pct = np.full_like(vals, np.nan, dtype=float)
             mask = total_vals != 0
@@ -82,11 +76,7 @@ def plot_ohada_tabs_dynamic(statement):
         # --------------------------------------------------------
         growth_data = {}
         for ref in refs:
-            vals = (
-                component_data.sel(compte=pd.IndexSlice[:, ref])
-                .values.flatten()
-                .astype(float)
-            )
+            vals = component_data.sel(compte=pd.IndexSlice[:, ref]).values.flatten().astype(float)
 
             if len(vals) == 0:
                 growth = np.array([], dtype=float)
@@ -112,20 +102,13 @@ def plot_ohada_tabs_dynamic(statement):
         # ============================================================
 
         for ref in refs:
-            series = (
-                component_data.sel(compte=pd.IndexSlice[:, ref])
-                .values.flatten()
-                .astype(float)
-            )
+            series = component_data.sel(compte=pd.IndexSlice[:, ref]).values.flatten().astype(float)
 
             trace = go.Bar(
                 name=labels[ref],
                 x=years_str,
                 y=series,
-                text=[
-                    f"{v:.1f}%" if (v is not None and not np.isnan(v)) else ""
-                    for v in pct_data[ref]
-                ],
+                text=[f"{v:.1f}%" if (v is not None and not np.isnan(v)) else "" for v in pct_data[ref]],
                 textposition="inside",
                 legendgroup=f"{title}_stack",
                 offsetgroup=f"{title}_stack",

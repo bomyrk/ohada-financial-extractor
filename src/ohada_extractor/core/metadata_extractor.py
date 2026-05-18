@@ -88,14 +88,10 @@ class CompanyMetadataExtractor:
 
         dividend = values[9, :] if values.shape[0] > 9 else None
         number_of_shares = (
-            np.sum(values[1:4:, :], axis=0, where=(values[1:4:, :] != None), initial=0)
-            if values.shape[0] > 4
-            else None
+            np.sum(values[1:4:, :], axis=0, where=(values[1:4:, :] != None), initial=0) if values.shape[0] > 4 else None
         )
         number_of_employees = (
-            np.sum(values[-2:, :], axis=0, where=(values[-2:, :] != None), initial=0)
-            if values.shape[0] >= 2
-            else None
+            np.sum(values[-2:, :], axis=0, where=(values[-2:, :] != None), initial=0) if values.shape[0] >= 2 else None
         )
 
         return {

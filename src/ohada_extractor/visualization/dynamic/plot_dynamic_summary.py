@@ -36,26 +36,16 @@ def plot_asset_summary_dynamic(statement, period="all"):
     bz_ref = "BZ"
     component_refs = [az_ref, bk_ref, bt_ref]
 
-    component_labels = {
-        ref: get_account_label(statement, "assets", ref) for ref in component_refs
-    }
+    component_labels = {ref: get_account_label(statement, "assets", ref) for ref in component_refs}
     bz_label = get_account_label(statement, "assets", bz_ref)
 
-    component_data = asset_data.sel(
-        compte=pd.IndexSlice[:, component_refs], annee=years_to_plot_dt
-    )
-    total_assets_data = asset_data.sel(
-        compte=pd.IndexSlice[:, bz_ref], annee=years_to_plot_dt
-    )
+    component_data = asset_data.sel(compte=pd.IndexSlice[:, component_refs], annee=years_to_plot_dt)
+    total_assets_data = asset_data.sel(compte=pd.IndexSlice[:, bz_ref], annee=years_to_plot_dt)
 
     # --- Compute % of total ---
     total_vals = total_assets_data.squeeze(drop=True).values
     pct_data = {
-        ref: (
-            component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values
-            / total_vals
-            * 100
-        )
+        ref: (component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values / total_vals * 100)
         for ref in component_refs
     }
 
@@ -217,26 +207,16 @@ def plot_liability_summary_dynamic(statement, period="all"):
     dz_ref = "DZ"
     component_refs = [df_ref, dp_ref, dt_ref]
 
-    component_labels = {
-        ref: get_account_label(statement, "liabilities", ref) for ref in component_refs
-    }
+    component_labels = {ref: get_account_label(statement, "liabilities", ref) for ref in component_refs}
     dz_label = get_account_label(statement, "liabilities", dz_ref)
 
-    component_data = liability_data.sel(
-        compte=pd.IndexSlice[:, component_refs], annee=years_to_plot_dt
-    )
-    total_liab_data = liability_data.sel(
-        compte=pd.IndexSlice[:, dz_ref], annee=years_to_plot_dt
-    )
+    component_data = liability_data.sel(compte=pd.IndexSlice[:, component_refs], annee=years_to_plot_dt)
+    total_liab_data = liability_data.sel(compte=pd.IndexSlice[:, dz_ref], annee=years_to_plot_dt)
 
     # --- Compute % of total ---
     total_vals = total_liab_data.squeeze(drop=True).values
     pct_data = {
-        ref: (
-            component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values
-            / total_vals
-            * 100
-        )
+        ref: (component_data.sel(compte=pd.IndexSlice[:, ref]).squeeze(drop=True).values / total_vals * 100)
         for ref in component_refs
     }
 
@@ -395,9 +375,7 @@ def plot_income_summary_dynamic(statement, period="all"):
     refs = ["XE", "XF", "XH", "RS", "XI"]
     labels = {ref: get_account_label(statement, "income", ref) for ref in refs}
 
-    component_data = income_data.sel(
-        compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt
-    )
+    component_data = income_data.sel(compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt)
 
     # --- Figure ---
     fig = make_subplots(
@@ -510,9 +488,6 @@ def plot_income_summary_dynamic(statement, period="all"):
     fig.show()
 
 
-
-
-
 def plot_cashflow_summary_dynamic(statement, period="all"):
     """Dynamic summary plots for Cashflow with grouped bars + waterfall."""
 
@@ -538,9 +513,7 @@ def plot_cashflow_summary_dynamic(statement, period="all"):
     refs = ["ZB", "ZC", "ZF", "ZG"]
     labels = {ref: get_account_label(statement, "cashflow", ref) for ref in refs}
 
-    component_data = cash_data.sel(
-        compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt
-    )
+    component_data = cash_data.sel(compte=pd.IndexSlice[:, refs], annee=years_to_plot_dt)
 
     # --- Figure ---
     fig = make_subplots(

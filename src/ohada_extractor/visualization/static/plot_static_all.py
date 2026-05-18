@@ -46,23 +46,16 @@ def plot_all_static(statement, style, period, value_type):
         # EXTRACTION ROBUSTE DES LABELS
         # --------------------------------------------------------
         if "Reference" in data.coords:
-            labels = [
-                get_account_label(statement, data_type, ref)
-                for ref in data.coords["Reference"].values
-            ]
+            labels = [get_account_label(statement, data_type, ref) for ref in data.coords["Reference"].values]
         elif (
-            hasattr(data.compte, "values")
-            and len(data.compte.values) > 0
-            and isinstance(data.compte.values[0], tuple)
+            hasattr(data.compte, "values") and len(data.compte.values) > 0 and isinstance(data.compte.values[0], tuple)
         ):
             labels = [item[0] for item in data.compte.values]
         else:
             labels = [str(c) for c in data.compte.values]
 
         # Résolution de la chaîne descriptive de la période
-        period_label = (
-            "All Periods" if period == "all" else str(pd.to_datetime(period).year)
-        )
+        period_label = "All Periods" if period == "all" else str(pd.to_datetime(period).year)
 
         # -----------------------------
         # BAR PLOT

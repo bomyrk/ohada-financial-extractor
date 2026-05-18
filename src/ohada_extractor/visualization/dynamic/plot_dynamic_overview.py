@@ -60,15 +60,11 @@ def plot_overview_dashboard_clean(statement):
         annee=years_dt,
     ).values.flatten()
 
-    asset_labels = {
-        ref: get_account_label(statement, "assets", ref) for ref in asset_refs
-    }
+    asset_labels = {ref: get_account_label(statement, "assets", ref) for ref in asset_refs}
 
     # Grouped bars (left)
     for ref in asset_refs:
-        series_vals = asset_components.sel(
-            compte=pd.IndexSlice[:, ref]
-        ).values.flatten()
+        series_vals = asset_components.sel(compte=pd.IndexSlice[:, ref]).values.flatten()
         fig.add_trace(
             go.Bar(
                 name=asset_labels[ref],
@@ -84,9 +80,7 @@ def plot_overview_dashboard_clean(statement):
 
     # Stacked bars (right)
     for ref in asset_refs:
-        series_vals = asset_components.sel(
-            compte=pd.IndexSlice[:, ref]
-        ).values.flatten()
+        series_vals = asset_components.sel(compte=pd.IndexSlice[:, ref]).values.flatten()
 
         # Safe division
         pct = np.zeros_like(series_vals, dtype=float)
@@ -124,9 +118,7 @@ def plot_overview_dashboard_clean(statement):
         annee=years_dt,
     ).values.flatten()
 
-    liab_labels = {
-        ref: get_account_label(statement, "liabilities", ref) for ref in liab_refs
-    }
+    liab_labels = {ref: get_account_label(statement, "liabilities", ref) for ref in liab_refs}
 
     # Grouped bars (left)
     for ref in liab_refs:
@@ -177,15 +169,11 @@ def plot_overview_dashboard_clean(statement):
         annee=years_dt,
     )
 
-    income_labels = {
-        ref: get_account_label(statement, "income", ref) for ref in income_refs
-    }
+    income_labels = {ref: get_account_label(statement, "income", ref) for ref in income_refs}
 
     # Grouped bars (left)
     for ref in income_refs:
-        series_vals = income_components.sel(
-            compte=pd.IndexSlice[:, ref]
-        ).values.flatten()
+        series_vals = income_components.sel(compte=pd.IndexSlice[:, ref]).values.flatten()
         fig.add_trace(
             go.Bar(
                 name=income_labels[ref],
@@ -203,12 +191,7 @@ def plot_overview_dashboard_clean(statement):
     for year in income_components.annee.values:
         # Sécurisation de l'alignement et de l'ordre des références
         year_vals = [
-            float(
-                income_components.sel(
-                    compte=pd.IndexSlice[:, ref], annee=year
-                ).values.item()
-            )
-            for ref in income_refs
+            float(income_components.sel(compte=pd.IndexSlice[:, ref], annee=year).values.item()) for ref in income_refs
         ]
 
         fig.add_trace(
@@ -234,9 +217,7 @@ def plot_overview_dashboard_clean(statement):
         annee=years_dt,
     )
 
-    cash_labels = {
-        ref: get_account_label(statement, "cashflow", ref) for ref in cash_refs
-    }
+    cash_labels = {ref: get_account_label(statement, "cashflow", ref) for ref in cash_refs}
 
     # Grouped bars (left)
     for ref in cash_refs:
@@ -258,12 +239,7 @@ def plot_overview_dashboard_clean(statement):
     for year in cash_components.annee.values:
         # Sécurisation de l'alignement et de l'ordre des références
         year_vals = [
-            float(
-                cash_components.sel(
-                    compte=pd.IndexSlice[:, ref], annee=year
-                ).values.item()
-            )
-            for ref in cash_refs
+            float(cash_components.sel(compte=pd.IndexSlice[:, ref], annee=year).values.item()) for ref in cash_refs
         ]
 
         fig.add_trace(

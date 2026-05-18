@@ -84,9 +84,7 @@ class FinancialExtractor:
             file_path=str(file_path),
         )
 
-    def extract_over_period(
-        self, file_list: List[Union[str, Path]]
-    ) -> "FinancialStatement":
+    def extract_over_period(self, file_list: List[Union[str, Path]]) -> "FinancialStatement":
         """
         Extract and consolidate financial data from multiple files across years.
 
@@ -109,9 +107,7 @@ class FinancialExtractor:
         first = statements[0]
         combined_asset = np.hstack(
             (
-                np.insert(
-                    first._asset_data.copy()[:, [0, -1]], [1], [np.nan, np.nan], axis=1
-                ),
+                np.insert(first._asset_data.copy()[:, [0, -1]], [1], [np.nan, np.nan], axis=1),
                 first._asset_data.copy()[:, 1:-1],
             )
         )
@@ -121,18 +117,14 @@ class FinancialExtractor:
                 first._liability_data.copy()[:, 1:-1],
             )
         )
-        combined_income = np.hstack(
-            (first._income_data.copy()[:, [0, -1]], first._income_data.copy()[:, 1:-1])
-        )
+        combined_income = np.hstack((first._income_data.copy()[:, [0, -1]], first._income_data.copy()[:, 1:-1]))
         combined_cashflow = np.hstack(
             (
                 first._cashflow_data.copy()[:, [0, -1]],
                 first._cashflow_data.copy()[:, 1:-1],
             )
         )
-        combined_other = np.hstack(
-            (first._other_data.copy()[:, [0, -1]], first._other_data.copy()[:, 1:-1])
-        )
+        combined_other = np.hstack((first._other_data.copy()[:, [0, -1]], first._other_data.copy()[:, 1:-1]))
         combined_notes = first.notes
 
         # Merge subsequent years
@@ -214,12 +206,8 @@ class FinancialExtractor:
         if not self._workbook:
             raise ValueError("No active workbook loaded.")
 
-        workbook_sheets = {
-            " ".join(s.split()).lower() for s in self._workbook.sheetnames
-        }
-        required_sheets = {
-            stmt.sheet_name.lower() for stmt in OHADA_STATEMENTS.values()
-        }
+        workbook_sheets = {" ".join(s.split()).lower() for s in self._workbook.sheetnames}
+        required_sheets = {stmt.sheet_name.lower() for stmt in OHADA_STATEMENTS.values()}
         missing = required_sheets - workbook_sheets
         if missing:
             raise ValueError(f"Missing required sheets: {missing}")
@@ -313,11 +301,7 @@ class FinancialExtractor:
             # Check if we've found the end code
             elif str(end_code).upper() in [str(val).strip().upper() for val in row]:
                 if start_code == "CA":
-                    if (
-                        start
-                        and str(end_code).upper()
-                        == str(row[liability_column_idx]).strip().upper()
-                    ):
+                    if start and str(end_code).upper() == str(row[liability_column_idx]).strip().upper():
                         raw_data.append(row[liability_column_idx:])
                         break
                 else:
@@ -337,9 +321,7 @@ class FinancialExtractor:
                 else:
                     raw_data.append(row)
 
-        if (strict and len(raw_data) == length) or (
-            strict is False and len(raw_data) <= length
-        ):
+        if (strict and len(raw_data) == length) or (strict is False and len(raw_data) <= length):
             if columns is None:
                 if lines is None:
                     return np.array(raw_data)
@@ -363,10 +345,7 @@ class FinancialExtractor:
                             np.array(raw_data)[np.ix_(lines, columns)],
                         )
         else:
-            logger.warning(
-                f"Expected {length} rows, got {len(raw_data)} "
-                f"for range {start_code}-{end_code}"
-            )
+            logger.warning(f"Expected {length} rows, got {len(raw_data)} " f"for range {start_code}-{end_code}")
             return np.array(raw_data)
 
     def _extract_periods(self) -> List[str]:
@@ -386,14 +365,10 @@ class FinancialExtractor:
 
                     # If the value is a string and can be converted to a date
                     try:
-                        parsed_date = datetime.strptime(
-                            cell.value, "%Y-%m-%d"
-                        )  # Adjust format if needed
+                        parsed_date = datetime.strptime(cell.value, "%Y-%m-%d")  # Adjust format if needed
                         return [
                             str(cell.value),  # Current string value
-                            (parsed_date - relativedelta(years=1)).strftime(
-                                "%Y-%m-%d"
-                            ),  # Date one year before
+                            (parsed_date - relativedelta(years=1)).strftime("%Y-%m-%d"),  # Date one year before
                         ]
                     except ValueError:
                         # Handle case where string can't be parsed as date
@@ -544,14 +519,10 @@ class FinancialExtractor:
         data = np.array([tuple(0 if x is None else x for x in row) for row in raw_data])
 
         # Block A: legal form, HQ, number of establishments
-        a = self._convert_array(
-            np.insert(data[np.ix_((0, 2, 3), (0, 5, 6, 7))], 1, 0, axis=1)
-        )
+        a = self._convert_array(np.insert(data[np.ix_((0, 2, 3), (0, 5, 6, 7))], 1, 0, axis=1))
 
         # Block B: tax regime, establishments abroad
-        b = self._convert_array(
-            np.insert(data[np.ix_((1, 4), (0, 5, 6))], (1, 2), 0, axis=1)
-        )
+        b = self._convert_array(np.insert(data[np.ix_((1, 4), (0, 5, 6))], (1, 2), 0, axis=1))
 
         # Block C: first year of operation
         c = self._convert_array(data[np.ix_([5], (0, 5, 6, 7, 8, 9))])
@@ -571,11 +542,9 @@ class FinancialExtractor:
     # 6. MULTI-YEAR CONSOLIDATION
     # ---------------------------------------------------------
     @staticmethod
-    def _check_data_coherence(
-        finStatY: np.ndarray, finStatLY: np.ndarray, i: int, j: int
-    ) -> bool:
+    def _check_data_coherence(finStatY: np.ndarray, finStatLY: np.ndarray, i: int, j: int) -> bool:
         """
-        Checks whether the financial data for a given column is consistent 
+        Checks whether the financial data for a given column is consistent
         between the current year and the previous year.
 
         Args:
@@ -621,9 +590,7 @@ class FinancialExtractor:
         Returns:
             Updated combined array (or unchanged if incoherent)
         """
-        if FinancialExtractor._check_data_coherence(
-            combined, new_data, combined_col, new_col
-        ):
+        if FinancialExtractor._check_data_coherence(combined, new_data, combined_col, new_col):
             return np.hstack((combined, new_data[:, 1:-1]))
         else:
             logger.warning(f"Incoherence found in {label} data between years.")
@@ -671,11 +638,7 @@ class FinancialExtractor:
             if isinstance(pre1, tuple):
                 # Fiche R2 case: merge each element separately
                 merged_pre = tuple(
-                    (
-                        np.hstack((pre1[i], pre2[i][:, 1:]))
-                        if isinstance(pre1[i], np.ndarray)
-                        else pre1[i]
-                    )
+                    (np.hstack((pre1[i], pre2[i][:, 1:])) if isinstance(pre1[i], np.ndarray) else pre1[i])
                     for i in range(len(pre1))
                 )
             else:
