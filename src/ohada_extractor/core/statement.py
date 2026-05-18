@@ -100,9 +100,7 @@ class FinancialStatement:
     metadata: Optional[CompanyMetadata] = None
 
     # Cached xarray Datasets
-    _arrays_cache: Optional[Dict[str, xr.DataArray]] = field(
-        default=None, init=False, repr=False
-    )
+    _arrays_cache: Optional[Dict[str, xr.DataArray]] = field(default=None, init=False, repr=False)
 
     @property
     def arrays(self) -> Dict[str, xr.DataArray]:
@@ -159,9 +157,7 @@ class FinancialStatement:
         """
 
         if not self.periods:
-            raise ValueError(
-                "Periods must be populated to build the analytical dataset."
-            )
+            raise ValueError("Periods must be populated to build the analytical dataset.")
 
         n_years = len(self.periods)
         # Convert periods to datetime index
@@ -204,9 +200,7 @@ class FinancialStatement:
                 if n_types == 3:
                     values = np.hstack(
                         (
-                            np.insert(
-                                values.copy()[:, [-1]], [0], [np.nan, np.nan], axis=1
-                            ),
+                            np.insert(values.copy()[:, [-1]], [0], [np.nan, np.nan], axis=1),
                             values.copy()[:, 0:-1],
                         )
                     )
@@ -221,11 +215,7 @@ class FinancialStatement:
                     f"Invalid shape for statement: expected {expected_cols} columns, got {values.shape[1]}"
                 )
 
-            reshaped = (
-                values.reshape(values.shape[0], n_years, n_types)
-                if n_types > 1
-                else values
-            )
+            reshaped = values.reshape(values.shape[0], n_years, n_types) if n_types > 1 else values
             return reshaped
 
         # --------------------------------------------------------------
@@ -233,9 +223,7 @@ class FinancialStatement:
         # --------------------------------------------------------------
         asset_da = (
             xr.DataArray(
-                data=reshape_statement(
-                    self._asset_data, ["Gross", "Amortissement", "Net"]
-                ),
+                data=reshape_statement(self._asset_data, ["Gross", "Amortissement", "Net"]),
                 coords={
                     "compte": asset_accounts,
                     "annee": years_idx,
@@ -345,9 +333,7 @@ class FinancialStatement:
             "other": self._other_data,
         }
 
-    def to_dict(
-        self, include_metadata: bool = True, include_notes: bool = True
-    ) -> Dict[str, Any]:
+    def to_dict(self, include_metadata: bool = True, include_notes: bool = True) -> Dict[str, Any]:
         """
         Convertit l'état financier en un dictionnaire JSON-serializable.
         Contient les données brutes AVEC les colonnes de référence.
@@ -446,11 +432,7 @@ class FinancialStatement:
 
         for _key, entry in self.notes.items():
             if entry.get("name", "").strip().lower() == name:
-                return (
-                    entry.get("preprocess_value")
-                    if processed
-                    else entry.get("raw_value")
-                )
+                return entry.get("preprocess_value") if processed else entry.get("raw_value")
 
         return None
 

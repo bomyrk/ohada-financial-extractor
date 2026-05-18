@@ -26,15 +26,11 @@ class OHADAJSONFormatter:
         elif isinstance(obj, np.floating):
             return round(float(obj), 2)
         elif isinstance(obj, np.ndarray):
-            return [
-                OHADAJSONFormatter.numpy_to_serializable(item) for item in obj.tolist()
-            ]
+            return [OHADAJSONFormatter.numpy_to_serializable(item) for item in obj.tolist()]
         elif isinstance(obj, (date, datetime)):
             return obj.isoformat()
         elif isinstance(obj, dict):
-            return {
-                k: OHADAJSONFormatter.numpy_to_serializable(v) for k, v in obj.items()
-            }
+            return {k: OHADAJSONFormatter.numpy_to_serializable(v) for k, v in obj.items()}
         elif isinstance(obj, (list, tuple)):
             return [OHADAJSONFormatter.numpy_to_serializable(item) for item in obj]
         return obj
@@ -69,22 +65,15 @@ class OHADAJSONFormatter:
             dates = datetime_index.tolist()
         elif isinstance(datetime_index, list):
             # Try to convert strings to datetime if needed
-            dates = [
-                pd.Timestamp(d) if isinstance(d, str) else d for d in datetime_index
-            ]
+            dates = [pd.Timestamp(d) if isinstance(d, str) else d for d in datetime_index]
         else:
-            raise TypeError(
-                f"Expected pd.DatetimeIndex or list, got {type(datetime_index)}"
-            )
+            raise TypeError(f"Expected pd.DatetimeIndex or list, got {type(datetime_index)}")
 
         if len(dates) < 2:
             raise ValueError("Date index must contain at least two dates.")
 
         # Create dictionary with net, net1, net2, ... keys
-        date_dict = {
-            f"net{len(dates) - 1 - idx}": dates[idx].isoformat()
-            for idx in range(len(dates) - 1)
-        }
+        date_dict = {f"net{len(dates) - 1 - idx}": dates[idx].isoformat() for idx in range(len(dates) - 1)}
         date_dict["net"] = dates[-1].isoformat()  # Most recent as 'net'
 
         return date_dict
@@ -106,12 +95,8 @@ class OHADAJSONFormatter:
         for key, entry in notes_dict.items():
             formatted[key] = {
                 "name": entry.get("name"),
-                "raw_value": OHADAJSONFormatter.numpy_to_serializable(
-                    entry.get("raw_value")
-                ),
-                "preprocess_value": OHADAJSONFormatter.numpy_to_serializable(
-                    entry.get("preprocess_value")
-                ),
+                "raw_value": OHADAJSONFormatter.numpy_to_serializable(entry.get("raw_value")),
+                "preprocess_value": OHADAJSONFormatter.numpy_to_serializable(entry.get("preprocess_value")),
             }
 
         return formatted
@@ -130,21 +115,15 @@ class OHADAJSONFormatter:
             "year_creation": metadata_obj.year_creation,
             "regime_fiscal": metadata_obj.regime_fiscal,
             "dividend": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.dividend),
-            "number_of_shares": OHADAJSONFormatter.numpy_to_serializable(
-                metadata_obj.number_of_shares
-            ),
-            "number_of_employees": OHADAJSONFormatter.numpy_to_serializable(
-                metadata_obj.number_of_employees
-            ),
+            "number_of_shares": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_shares),
+            "number_of_employees": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_employees),
         }
 
     # ---------------------------------------------------------
     # ASSETS FORMATTER
     # ---------------------------------------------------------
     @staticmethod
-    def format_assets(
-        asset_data: np.ndarray, periods: List[str], accounts: List[tuple]
-    ) -> List[Dict[str, Any]]:
+    def format_assets(asset_data: np.ndarray, periods: List[str], accounts: List[tuple]) -> List[Dict[str, Any]]:
         """
         Format balance sheet assets to JSON structure.
 
@@ -174,21 +153,13 @@ class OHADAJSONFormatter:
                 net_key = f"net{period_key}" if period_key else "net"
 
                 if value_idx != (len(row) - 1):
-                    record[gross_key] = OHADAJSONFormatter.numpy_to_serializable(
-                        row[value_idx]
-                    )
-                    record[amort_key] = OHADAJSONFormatter.numpy_to_serializable(
-                        row[value_idx + 1]
-                    )
-                    record[net_key] = OHADAJSONFormatter.numpy_to_serializable(
-                        row[value_idx + 2]
-                    )
+                    record[gross_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx])
+                    record[amort_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx + 1])
+                    record[net_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx + 2])
                 else:
                     record[gross_key] = None
                     record[amort_key] = None
-                    record[net_key] = OHADAJSONFormatter.numpy_to_serializable(
-                        row[value_idx]
-                    )
+                    record[net_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx])
 
                 value_idx += 3
 
@@ -230,9 +201,7 @@ class OHADAJSONFormatter:
                 net_key = f"net{period_key}" if period_key else "net"
 
                 value_idx = period_idx + 1
-                record[net_key] = OHADAJSONFormatter.numpy_to_serializable(
-                    row[value_idx]
-                )
+                record[net_key] = OHADAJSONFormatter.numpy_to_serializable(row[value_idx])
 
             result.append(record)
 
@@ -257,9 +226,7 @@ class OHADAJSONFormatter:
             OTHER_ACCOUNTS,
         )
 
-        periods = (
-            statement.periods if len(statement.periods) > 2 else statement.periods[::-1]
-        )
+        periods = statement.periods if len(statement.periods) > 2 else statement.periods[::-1]
         return {
             "metadata": OHADAJSONFormatter.format_metadata(statement.metadata),
             "extraction_metadata": {
@@ -275,9 +242,7 @@ class OHADAJSONFormatter:
                 ],
             },
             "balance_sheet": {
-                "assets": OHADAJSONFormatter.format_assets(
-                    statement._asset_data, periods, ASSETS_ACCOUNTS
-                ),
+                "assets": OHADAJSONFormatter.format_assets(statement._asset_data, periods, ASSETS_ACCOUNTS),
                 "liabilities": OHADAJSONFormatter.format_statement(
                     statement._liability_data,
                     periods,
@@ -312,6 +277,4 @@ class OHADAJSONFormatter:
             JSON string
         """
         data = OHADAJSONFormatter.format_statement_data(statement)
-        return json.dumps(
-            data, indent=indent, default=OHADAJSONFormatter.numpy_to_serializable
-        )
+        return json.dumps(data, indent=indent, default=OHADAJSONFormatter.numpy_to_serializable)

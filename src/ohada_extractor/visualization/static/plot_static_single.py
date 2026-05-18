@@ -44,15 +44,8 @@ def plot_single_static(statement, data_type, style, period, value_type):
     # EXTRACTION ROBUSTE DES LABELS (Nomenclature OHADA)
     # --------------------------------------------------------
     if "Reference" in data.coords:
-        labels = [
-            get_account_label(statement, data_type, ref)
-            for ref in data.coords["Reference"].values
-        ]
-    elif (
-        hasattr(data.compte, "values")
-        and len(data.compte.values) > 0
-        and isinstance(data.compte.values[0], tuple)
-    ):
+        labels = [get_account_label(statement, data_type, ref) for ref in data.coords["Reference"].values]
+    elif hasattr(data.compte, "values") and len(data.compte.values) > 0 and isinstance(data.compte.values[0], tuple):
         labels = [item[0] for item in data.compte.values]
     else:
         labels = [str(c) for c in data.compte.values]
@@ -127,9 +120,7 @@ def plot_single_static(statement, data_type, style, period, value_type):
     # -----------------------------
     elif style == "pie":
         if period == "all":
-            raise ValueError(
-                "Les graphiques en secteurs (Pie charts) requièrent une seule période, pas 'all'."
-            )
+            raise ValueError("Les graphiques en secteurs (Pie charts) requièrent une seule période, pas 'all'.")
 
         vals = data.values.flatten()
 
@@ -140,8 +131,7 @@ def plot_single_static(statement, data_type, style, period, value_type):
 
         if len(filtered_vals) == 0:
             raise ValueError(
-                f"Impossible de générer un Pie Chart : toutes" 
-                f"les valeurs pour {data_type} sont négatives ou nulles."
+                f"Impossible de générer un Pie Chart : toutes" f"les valeurs pour {data_type} sont négatives ou nulles."
             )
 
         ax.pie(
@@ -158,9 +148,7 @@ def plot_single_static(statement, data_type, style, period, value_type):
     # Formatting
     # -----------------------------
     title_value = f"Value Type: {value_type}" if data_type == "assets" else "Net Values"
-    period_title = (
-        "All Periods" if period == "all" else str(pd.to_datetime(period).year)
-    )
+    period_title = "All Periods" if period == "all" else str(pd.to_datetime(period).year)
 
     ax.set_title(
         f"{data_type.capitalize()} Structural Analysis ({period_title} -{title_value})",

@@ -97,9 +97,7 @@ def main():
     # 5. Export metadata to dict / JSON
     # -------------------------------------------------------------------
 
-    metadata_dict = {
-        field: to_python_value(value) for field, value in metadata.__dict__.items()
-    }
+    metadata_dict = {field: to_python_value(value) for field, value in metadata.__dict__.items()}
 
     metadata_json = json.dumps(metadata_dict, indent=4, ensure_ascii=False)
 

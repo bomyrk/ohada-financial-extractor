@@ -189,9 +189,7 @@ class OHADAStatement:
 
     def __post_init__(self):
         if self.value_types is None:
-            self.value_types = (
-                ["Brut", "Amortissement", "Net"] if self.has_value_types else ["Net"]
-            )
+            self.value_types = ["Brut", "Amortissement", "Net"] if self.has_value_types else ["Net"]
 
 
 # OHADA Statement Configurations
@@ -604,9 +602,7 @@ def fetch_legal_form(code: str, legal_forms: List[Tuple[int, str]]) -> Optional[
     return None
 
 
-def fetch_headquarter_country(
-    code: str, country_list: List[Tuple[int, str]]
-) -> Optional[str]:
+def fetch_headquarter_country(code: str, country_list: List[Tuple[int, str]]) -> Optional[str]:
     """Return the country name for a given headquarters code."""
     code_int = _safe_int(code)
     if code_int is None:
@@ -630,16 +626,11 @@ def fetch_currency(code: str) -> Optional[str]:
     if currency:
         return currency
 
-    logger.error(
-        f"Unknown currency code '{code_int}'. "
-        f"Valid currencies: {set(CURRENCY_MAPPING.values())}"
-    )
+    logger.error(f"Unknown currency code '{code_int}'. " f"Valid currencies: {set(CURRENCY_MAPPING.values())}")
     return None
 
 
-def fetch_regime_fiscal(
-    code: str, regime_fiscaux: List[Tuple[int, str]]
-) -> Optional[str]:
+def fetch_regime_fiscal(code: str, regime_fiscaux: List[Tuple[int, str]]) -> Optional[str]:
     """Return the fiscal regime label for a given code."""
     code_int = _safe_int(code)
     if code_int is None:

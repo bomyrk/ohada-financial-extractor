@@ -53,14 +53,9 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
         # EXTRACTION ROBUSTE DES LABELS (Nomenclature OHADA)
         # --------------------------------------------------------
         if "Reference" in data.coords:
-            labels = [
-                get_account_label(statement, data_type, ref)
-                for ref in data.coords["Reference"].values
-            ]
+            labels = [get_account_label(statement, data_type, ref) for ref in data.coords["Reference"].values]
         elif (
-            hasattr(data.compte, "values")
-            and len(data.compte.values) > 0
-            and isinstance(data.compte.values[0], tuple)
+            hasattr(data.compte, "values") and len(data.compte.values) > 0 and isinstance(data.compte.values[0], tuple)
         ):
             labels = [item[0] for item in data.compte.values]
         else:

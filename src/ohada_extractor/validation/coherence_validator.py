@@ -93,11 +93,7 @@ class Relation:
         Handles + and - operators.
         """
         expr = getattr(self, f"{side}_side")
-        tokens = (
-            re.split(r"([+-])", expr.replace(" ", ""))
-            if op_hdl
-            else re.split(r"[+-]", expr.replace(" ", ""))
-        )
+        tokens = re.split(r"([+-])", expr.replace(" ", "")) if op_hdl else re.split(r"[+-]", expr.replace(" ", ""))
 
         total = 0
         sign = 1
@@ -112,14 +108,10 @@ class Relation:
                     try:
                         if self.financial_type == "asset":
                             # 3D: (compte, annee, valeur) → select Net
-                            values = self.data.sel(
-                                compte=pd.IndexSlice[:, token], valeur="Net"
-                            ).drop_vars("compte")
+                            values = self.data.sel(compte=pd.IndexSlice[:, token], valeur="Net").drop_vars("compte")
                         else:
                             # 2D: (compte, annee)
-                            values = self.data.sel(
-                                compte=pd.IndexSlice[:, token]
-                            ).drop_vars("compte")
+                            values = self.data.sel(compte=pd.IndexSlice[:, token]).drop_vars("compte")
 
                         contrib = sign * values
                         total = contrib if total is None else total + contrib
@@ -174,10 +166,7 @@ class CoherenceValidator:
         self.cashflow = cashflow
         self.periods = periods
 
-        self.relations = [
-            Relation(expr, ftype, getattr(self, ftype))
-            for expr, ftype in define_relationships()
-        ]
+        self.relations = [Relation(expr, ftype, getattr(self, ftype)) for expr, ftype in define_relationships()]
 
     # ---------------------------------------------------------
     #  FACTORY METHOD
@@ -234,9 +223,7 @@ class CoherenceValidator:
                 if n_types == 3:
                     values = np.hstack(
                         (
-                            np.insert(
-                                values.copy()[:, [-1]], [0], [np.nan, np.nan], axis=1
-                            ),
+                            np.insert(values.copy()[:, [-1]], [0], [np.nan, np.nan], axis=1),
                             values.copy()[:, 0:-1],
                         )
                     )
@@ -252,11 +239,7 @@ class CoherenceValidator:
                 )
 
             # Reshape into (account, year, value_type)
-            reshaped = (
-                values.reshape(values.shape[0], n_years, n_types)
-                if n_types > 1
-                else values
-            )
+            reshaped = values.reshape(values.shape[0], n_years, n_types) if n_types > 1 else values
             return reshaped
 
         # ---------------------------------------------------------
@@ -264,9 +247,7 @@ class CoherenceValidator:
         # ---------------------------------------------------------
         asset_xr = (
             xr.DataArray(
-                data=reshape_statement(
-                    statement.asset_data, ["Gross", "Amortissement", "Net"]
-                ),
+                data=reshape_statement(statement.asset_data, ["Gross", "Amortissement", "Net"]),
                 coords={
                     "compte": asset_idx,
                     "annee": years,
@@ -325,25 +306,18 @@ class CoherenceValidator:
         valid = np.allclose(total_assets, total_liabilities)
 
         if not valid:
-            logger.error(
-                " Balance sheet validation failed: " "Assets (BZ) ≠ Liabilities (DZ)"
-            )
+            logger.error(" Balance sheet validation failed: " "Assets (BZ) ≠ Liabilities (DZ)")
 
         return valid
 
     def validate_income_statement(self) -> bool:
         net_income = self.income.sel(compte=pd.IndexSlice[:, "XI"])
-        net_income_report_liabilities = self.liability.sel(
-            compte=pd.IndexSlice[:, "CJ"]
-        )
+        net_income_report_liabilities = self.liability.sel(compte=pd.IndexSlice[:, "CJ"])
 
         valid = np.allclose(net_income, net_income_report_liabilities)
 
         if not valid:
-            logger.error(
-                " Income statement validation failed: "
-                "Net income (XI) ≠ Net income reported (CJ)"
-            )
+            logger.error(" Income statement validation failed: " "Net income (XI) ≠ Net income reported (CJ)")
 
         return valid
 

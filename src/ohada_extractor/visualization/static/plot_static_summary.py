@@ -6,7 +6,7 @@ from ..utils import get_account_label
 
 
 def _extract_xarray_data(data_array, refs, years):
-    """Sélectionne de manière robuste les données xarray pour une liste de références"""
+    """Sélectionne de manière robuste les données xarray pour une liste de références."""
     # Gestion du MultiIndex ou de l'index simple pour la dimension 'compte'
     if "Reference" in data_array.coords:
         # Si la coordonnée Reference existe explicitement
@@ -47,21 +47,13 @@ def plot_asset_summary_static(statement, period="all"):
     # Extraction propre du total
     if "Reference" in asset_data.coords:
         total_mask = asset_data.coords["Reference"].values == total_ref
-        total_data = (
-            asset_data.isel(compte=total_mask)
-            .sel(annee=years_to_plot_dt)
-            .values.flatten()
-        )
+        total_data = asset_data.isel(compte=total_mask).sel(annee=years_to_plot_dt).values.flatten()
     else:
-        total_data = asset_data.sel(
-            compte=total_ref, annee=years_to_plot_dt
-        ).values.flatten()
+        total_data = asset_data.sel(compte=total_ref, annee=years_to_plot_dt).values.flatten()
 
     # --- Remove zero-only components ---
     max_vals = (
-        np.abs(component_data.values).max(axis=0)
-        if component_data.values.ndim > 1
-        else np.abs(component_data.values)
+        np.abs(component_data.values).max(axis=0) if component_data.values.ndim > 1 else np.abs(component_data.values)
     )
     non_zero_mask = max_vals > 1e-2
 
@@ -70,7 +62,7 @@ def plot_asset_summary_static(statement, period="all"):
         return
 
     component_data = component_data.isel(compte=non_zero_mask)
-    refs = [r for r, keep in zip(refs, non_zero_mask, strict=False) if keep]
+    refs = [r for r, keep in zip(refs, non_zero_mask) if keep]
     labels = {ref: labels[ref] for ref in refs}
 
     # --- Figure ---
@@ -139,20 +131,16 @@ def plot_asset_summary_static(statement, period="all"):
         # Calcul du pourcentage sécurisé contre la division par zéro
         pcts = np.where(total_data != 0, (series_vals / total_data) * 100, 0)
 
-        for i, (b, v, p) in enumerate(zip(bottom, series_vals, pcts, strict=False)):
+        for i, (b, v, p) in enumerate(zip(bottom, series_vals, pcts)):
             if abs(v) > 0:
                 ax2.text(
                     years_to_plot_str[i],
-                    b
-                    + v
-                    / 2,  # Centre le texte pour une meilleure lisibilité
+                    b + v / 2,  # Centre le texte au milieu du segment pour une meilleure lisibilité
                     f"{p:.1f}%",
                     ha="center",
                     va="center",
                     fontsize=9,
-                    color=(
-                        "white" if b + v > 1e6 else "black"
-                    ),  # Petit trick visuel contrasté
+                    color=("white" if b + v > 1e6 else "black"),  # Petit trick visuel contrasté
                 )
         bottom += series_vals
 
@@ -190,20 +178,12 @@ def plot_liability_summary_static(statement, period="all"):
 
     if "Reference" in liab_data.coords:
         total_mask = liab_data.coords["Reference"].values == total_ref
-        total_data = (
-            liab_data.isel(compte=total_mask)
-            .sel(annee=years_to_plot_dt)
-            .values.flatten()
-        )
+        total_data = liab_data.isel(compte=total_mask).sel(annee=years_to_plot_dt).values.flatten()
     else:
-        total_data = liab_data.sel(
-            compte=total_ref, annee=years_to_plot_dt
-        ).values.flatten()
+        total_data = liab_data.sel(compte=total_ref, annee=years_to_plot_dt).values.flatten()
 
     max_vals = (
-        np.abs(component_data.values).max(axis=0)
-        if component_data.values.ndim > 1
-        else np.abs(component_data.values)
+        np.abs(component_data.values).max(axis=0) if component_data.values.ndim > 1 else np.abs(component_data.values)
     )
     non_zero_mask = max_vals > 1e-2
 
@@ -212,7 +192,7 @@ def plot_liability_summary_static(statement, period="all"):
         return
 
     component_data = component_data.isel(compte=non_zero_mask)
-    refs = [r for r, keep in zip(refs, non_zero_mask, strict=False) if keep]
+    refs = [r for r, keep in zip(refs, non_zero_mask) if keep]
     labels = {ref: labels[ref] for ref in refs}
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
@@ -262,7 +242,7 @@ def plot_liability_summary_static(statement, period="all"):
         ax2.bar(years_to_plot_str, series_vals, bottom=bottom, label=labels[ref])
         pcts = np.where(total_data != 0, (series_vals / total_data) * 100, 0)
 
-        for i, (b, v, p) in enumerate(zip(bottom, series_vals, pcts, strict=False)):
+        for i, (b, v, p) in enumerate(zip(bottom, series_vals, pcts)):
             if abs(v) > 0:
                 ax2.text(
                     years_to_plot_str[i],
@@ -303,14 +283,10 @@ def plot_income_summary_static(statement, period="all"):
 
     income_data = _extract_xarray_data(statement.income, refs, years_to_plot_dt)
 
-    max_vals = (
-        np.abs(income_data.values).max(axis=0)
-        if income_data.values.ndim > 1
-        else np.abs(income_data.values)
-    )
+    max_vals = np.abs(income_data.values).max(axis=0) if income_data.values.ndim > 1 else np.abs(income_data.values)
     non_zero_mask = max_vals > 1e-2
     income_data = income_data.isel(compte=non_zero_mask)
-    refs = [r for r, keep in zip(refs, non_zero_mask, strict=False) if keep]
+    refs = [r for r, keep in zip(refs, non_zero_mask) if keep]
     labels = {ref: labels[ref] for ref in refs}
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
@@ -349,9 +325,7 @@ def plot_income_summary_static(statement, period="all"):
     # ============================================================
     if len(years_to_plot_dt) == 1:
         # VRAI WATERFALL (Pour une année spécifique)
-        ax2.set_title(
-            f"Income Waterfall Evolution ({years_to_plot_str[0]})", fontsize=14
-        )
+        ax2.set_title(f"Income Waterfall Evolution ({years_to_plot_str[0]})", fontsize=14)
         vals = income_data.values.flatten()
 
         # Construction des marches cumulatives
@@ -378,8 +352,7 @@ def plot_income_summary_static(statement, period="all"):
                 weight="bold",
             )
     else:
-        # Si multi-période : Graphique par année pour éviter 
-        # les collisions destructrices
+        # Si multi-période : Graphique par année pour éviter les collisions destructrices
         ax2.set_title("Net Income Cascade Trends", fontsize=14)
         x_labels = list(labels.values())
         x_indices = np.arange(len(x_labels))
@@ -423,14 +396,10 @@ def plot_cashflow_summary_static(statement, period="all"):
 
     cash_data = _extract_xarray_data(statement.cashflow, refs, years_to_plot_dt)
 
-    max_vals = (
-        np.abs(cash_data.values).max(axis=0)
-        if cash_data.values.ndim > 1
-        else np.abs(cash_data.values)
-    )
+    max_vals = np.abs(cash_data.values).max(axis=0) if cash_data.values.ndim > 1 else np.abs(cash_data.values)
     non_zero_mask = max_vals > 1e-2
     cash_data = cash_data.isel(compte=non_zero_mask)
-    refs = [r for r, keep in zip(refs, non_zero_mask, strict=False) if keep]
+    refs = [r for r, keep in zip(refs, non_zero_mask) if keep]
     labels = {ref: labels[ref] for ref in refs}
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
@@ -466,9 +435,7 @@ def plot_cashflow_summary_static(statement, period="all"):
 
     # Subplot 2 — Waterfall ou Multi-barres séquentiel
     if len(years_to_plot_dt) == 1:
-        ax2.set_title(
-            f"Cashflow Structural Change ({years_to_plot_str[0]})", fontsize=14
-        )
+        ax2.set_title(f"Cashflow Structural Change ({years_to_plot_str[0]})", fontsize=14)
         vals = cash_data.values.flatten()
         cumulative = np.zeros(len(vals) + 1)
         cumulative[1:] = np.cumsum(vals)

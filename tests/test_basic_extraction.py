@@ -15,12 +15,7 @@ class TestFinancialExtractor(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.extractor = FinancialExtractor()
-        self.sample_file = (
-            Path(__file__).parent.parent
-            / "examples"
-            / "data"
-            / "DSF_Normal_Tantanpion_2024.xlsx"
-        )
+        self.sample_file = Path(__file__).parent.parent / "examples" / "data" / "DSF_Normal_Tantanpion_2024.xlsx"
 
     def test_extractor_initialization(self):
         """Test that extractor initializes correctly."""
