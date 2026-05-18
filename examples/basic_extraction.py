@@ -29,7 +29,7 @@ def main():
     # Extract data
     statement = extractor.extract_from_excel(sample_file)
 
-    print(f"\n✓ Extraction successful!")
+    print("\n✓ Extraction successful!")
     print(f"  Periods: {statement.periods[::-1]}")
     print(f"  File: {statement.file_path}")
 
@@ -45,7 +45,7 @@ def main():
 
     # Display sample
     data = json.loads(json_output)
-    print(f"\nSample output structure:")
+    print("\nSample output structure:")
     print(f"  Assets count: {len(data['balance_sheet']['assets'])}")
     print(f"  Liabilities count: {len(data['balance_sheet']['liabilities'])}")
     print(f"  Income items count: {len(data['income_statement'])}")

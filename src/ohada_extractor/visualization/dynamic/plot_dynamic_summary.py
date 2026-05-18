@@ -510,12 +510,7 @@ def plot_income_summary_dynamic(statement, period="all"):
     fig.show()
 
 
-import numpy as np
-import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
-from ..utils import get_account_label
 
 
 def plot_cashflow_summary_dynamic(statement, period="all"):

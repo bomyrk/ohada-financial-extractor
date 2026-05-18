@@ -6,7 +6,7 @@ using the preprocessed note values produced by the extraction engine.
 """
 
 from __future__ import annotations
-from typing import Optional, Dict, Any
+from typing import Optional, Dict
 import numpy as np
 
 from .statement import CompanyMetadata

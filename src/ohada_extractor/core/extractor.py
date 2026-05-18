@@ -222,7 +222,7 @@ class FinancialExtractor:
         missing = required_sheets - workbook_sheets
         if missing:
             raise ValueError(f"Missing required sheets: {missing}")
-        logger.info(f"Workbook validated: all required sheets present")
+        logger.info("Workbook validated: all required sheets present")
 
     def _extract_all_statements(self):
         """Extract data from all financial statement sheets."""

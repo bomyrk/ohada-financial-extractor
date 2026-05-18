@@ -11,8 +11,6 @@ It dispatches to:
 from .utils import (
     normalize_data_type,
     validate_plot_inputs,
-    prepare_data_for_plotting,
-    get_account_label,
 )
 
 # Static plot modules

@@ -59,3 +59,13 @@ write_to = "src/ohada_extractor/_version.py"
 [tool.black]
 line-length = 120
 target-version = ["py310"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import sorting
+    "B",   # bugbear
+]
+
+ignore = ["E711"]

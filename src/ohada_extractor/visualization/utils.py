@@ -4,7 +4,6 @@ Shared helpers for static and dynamic plotting.
 """
 
 import numpy as np
-import pandas as pd
 
 # ----------------------------------------------------------------------
 #  INPUT VALIDATION

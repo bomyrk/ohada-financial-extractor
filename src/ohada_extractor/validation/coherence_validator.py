@@ -326,7 +326,7 @@ class CoherenceValidator:
 
         if not valid:
             logger.error(
-                f" Balance sheet validation failed: " f"Assets (BZ) ≠ Liabilities (DZ)"
+                " Balance sheet validation failed: " "Assets (BZ) ≠ Liabilities (DZ)"
             )
 
         return valid
@@ -341,8 +341,8 @@ class CoherenceValidator:
 
         if not valid:
             logger.error(
-                f" Income statement validation failed: "
-                f"Net income (XI) ≠ Net income reported (CJ)"
+                " Income statement validation failed: "
+                "Net income (XI) ≠ Net income reported (CJ)"
             )
 
         return valid
@@ -358,14 +358,14 @@ class CoherenceValidator:
         valid = np.allclose(net_cash_flow, expected)
 
         if not valid:
-            logger.error(f" Cash flow validation failed: " f"ZG ≠ ZB + ZC + ZF")
+            logger.error(" Cash flow validation failed: " "ZG ≠ ZB + ZC + ZF")
 
         return valid
 
     def validate_all_relationships(self) -> bool:
         results = [rel.verify() for rel in self.relations]
         if not all(results):
-            logger.error(f" Financial relationship validation failed.")
+            logger.error(" Financial relationship validation failed.")
         return all(results)
 
     def validate(self) -> bool:
@@ -380,8 +380,8 @@ class CoherenceValidator:
         ]
 
         if not all(checks):
-            logger.error(f" Financial statement coherence check FAILED.")
+            logger.error(" Financial statement coherence check FAILED.")
             return False
 
-        logger.info(f" All financial statement coherence checks PASSED.")
+        logger.info(" All financial statement coherence checks PASSED.")
         return True

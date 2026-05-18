@@ -6,7 +6,6 @@ Represents extracted and structured financial data from OHADA Excel files.
 
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
-from decimal import Decimal
 import numpy as np
 import pandas as pd
 import xarray as xr
