@@ -61,18 +61,20 @@ def plot_ohada_tabs_dynamic(statement):
         # % of total (safe division with masking)
         # --------------------------------------------------------
         pct_data = {}
-        total_vals = total_data.values.astype(float)
+        total_vals = total_data.values.flatten().astype(float)
 
         for ref in refs:
             vals = (
                 component_data.sel(compte=pd.IndexSlice[:, ref])
-                .squeeze(drop=True)
-                .values.astype(float)
+                .values.flatten()
+                .astype(float)
             )
 
             pct = np.full_like(vals, np.nan, dtype=float)
             mask = total_vals != 0
-            pct[mask] = vals[mask] / total_vals[mask] * 100
+            # Sécurité si les dimensions ne matchaient pas parfaitement après un squeeze imparfait
+            min_len = min(len(pct), len(mask))
+            pct[mask[:min_len]] = vals[:min_len] / total_vals[:min_len] * 100
             pct_data[ref] = pct
 
         # --------------------------------------------------------
@@ -82,8 +84,8 @@ def plot_ohada_tabs_dynamic(statement):
         for ref in refs:
             vals = (
                 component_data.sel(compte=pd.IndexSlice[:, ref])
-                .squeeze(drop=True)
-                .values.astype(float)
+                .values.flatten()
+                .astype(float)
             )
 
             if len(vals) == 0:
@@ -112,8 +114,8 @@ def plot_ohada_tabs_dynamic(statement):
         for ref in refs:
             series = (
                 component_data.sel(compte=pd.IndexSlice[:, ref])
-                .squeeze(drop=True)
-                .values.astype(float)
+                .values.flatten()
+                .astype(float)
             )
 
             trace = go.Bar(

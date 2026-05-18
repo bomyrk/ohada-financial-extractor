@@ -48,8 +48,6 @@ def main():
     print("\n--- Extracting metadata from DSF Excel file ---")
     statement = extractor.extract_from_excel(sample_file)
 
-    # Ensure xarray is built (optional but recommended)
-    statement.to_xarray()
 
     # -------------------------------------------------------------------
     # 2. Build metadata from the statement

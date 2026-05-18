@@ -4,14 +4,15 @@ JSON Formatter for OHADA Financial Statements
 Converts extracted arrays into JSON-serializable format.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 import json
 import numpy as np
+import pandas as pd
 from datetime import date, datetime
 
 
 class OHADAJSONFormatter:
-    """Convert financial statement arrays + notes + metadata to JSON-compatible format."""
+    """Convert financial statement arrays + other data + notes + metadata to JSON-compatible format."""
 
     # ---------------------------------------------------------
     # GENERIC NUMPY SERIALIZER (with 2-decimal rounding)
@@ -38,8 +39,55 @@ class OHADAJSONFormatter:
         return obj
 
     # ---------------------------------------------------------
-    # NOTES FORMATTER (NEW)
+    # YEAR/PERIOD PARSER
     # ---------------------------------------------------------
+    @staticmethod
+    def parse_years(datetime_index: Union[pd.DatetimeIndex, List]) -> Dict[str, str]:
+        """
+        Convert a DatetimeIndex or list of dates to a dictionary with standardized period keys.
+        
+        Maps periods to 'net', 'net1', 'net2', etc., where 'net' is the most recent period.
+        This ensures consistent year labeling across multi-period financial statements.
+        
+        Args:
+            datetime_index: pd.DatetimeIndex or list of dates/strings
+            
+        Returns:
+            Dictionary with keys like {'net': '2023-12-31', 'net1': '2022-12-31', ...}
+            
+        Raises:
+            ValueError: If fewer than 2 dates provided
+            
+        Example:
+            >>> dates = pd.DatetimeIndex(['2021-12-31', '2022-12-31', '2023-12-31'])
+            >>> OHADAJSONFormatter.parse_years(dates)
+            {'net2': '2021-12-31', 'net1': '2022-12-31', 'net': '2023-12-31'}
+        """
+        # Convert to list if necessary
+        if isinstance(datetime_index, pd.DatetimeIndex):
+            dates = datetime_index.tolist()
+        elif isinstance(datetime_index, list):
+            # Try to convert strings to datetime if needed
+            dates = [
+                pd.Timestamp(d) if isinstance(d, str) else d 
+                for d in datetime_index
+            ]
+        else:
+            raise TypeError(f"Expected pd.DatetimeIndex or list, got {type(datetime_index)}")
+        
+        if len(dates) < 2:
+            raise ValueError("Date index must contain at least two dates.")
+        
+        # Create dictionary with net, net1, net2, ... keys
+        date_dict = {
+            f"net{len(dates) - 1 - idx}": dates[idx].isoformat()
+            for idx in range(len(dates) - 1)
+        }
+        date_dict["net"] = dates[-1].isoformat()  # Most recent as 'net'
+        
+        return date_dict
+
+
     @staticmethod
     def format_notes(notes_dict: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         """
@@ -205,6 +253,7 @@ class OHADAJSONFormatter:
             LIABILITIES_ACCOUNTS,
             INCOME_ACCOUNTS,
             CASHFLOW_ACCOUNTS,
+            OTHER_ACCOUNTS
         )
 
         periods = (
@@ -217,28 +266,32 @@ class OHADAJSONFormatter:
                 "statement_types": [
                     "balance_sheet_assets",
                     "balance_sheet_liabilities",
-                    "income_statement",
+                    "income",
                     "cashflow",
+                    "other_data",
                     "notes",
                     "metadata",
                 ],
             },
             "balance_sheet": {
                 "assets": OHADAJSONFormatter.format_assets(
-                    statement.asset_data, periods, ASSETS_ACCOUNTS
+                    statement._asset_data, periods, ASSETS_ACCOUNTS
                 ),
                 "liabilities": OHADAJSONFormatter.format_statement(
-                    statement.liability_data,
+                    statement._liability_data,
                     periods,
                     LIABILITIES_ACCOUNTS,
                     "liabilities",
                 ),
             },
             "income_statement": OHADAJSONFormatter.format_statement(
-                statement.income_data, periods, INCOME_ACCOUNTS, "income"
+                statement._income_data, periods, INCOME_ACCOUNTS, "income"
             ),
             "cashflow_statement": OHADAJSONFormatter.format_statement(
-                statement.cashflow_data, periods, CASHFLOW_ACCOUNTS, "cashflow"
+                statement._cashflow_data, periods, CASHFLOW_ACCOUNTS, "cashflow"
+            ),
+            "other_data": OHADAJSONFormatter.format_statement(
+                statement._other_data, periods, OTHER_ACCOUNTS, "other_data"
             ),
             "notes": OHADAJSONFormatter.format_notes(statement.notes),
         }

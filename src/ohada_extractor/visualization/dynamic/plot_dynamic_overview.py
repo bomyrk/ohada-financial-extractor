@@ -7,8 +7,8 @@ from ..utils import get_account_label
 
 
 def plot_overview_dashboard_clean(statement):
-    """
-    Clean 4‑Panel OHADA Overview Dashboard:
+    """Clean 4‑Panel OHADA Overview Dashboard:
+
     - Assets (grouped + stacked)
     - Liabilities (grouped + stacked)
     - Income (grouped + waterfall)
@@ -17,7 +17,7 @@ def plot_overview_dashboard_clean(statement):
 
     # Use statement.years as the canonical time axis
     years_dt = statement.years
-    years_str = years_dt.year.astype(str).to_list()
+    years_str = years_dt.strftime("%Y")
 
     fig = make_subplots(
         rows=4,
@@ -45,13 +45,11 @@ def plot_overview_dashboard_clean(statement):
     # ============================================================
     # 1) ASSETS (AZ, BK, BT, BZ)
     # ============================================================
-
     asset_refs = ["AZ", "BK", "BT"]
     asset_total = "BZ"
 
     asset_data = statement.asset.sel(valeur="Net")
 
-    # Select using the original years_dt (whatever type annee uses)
     asset_components = asset_data.sel(
         compte=pd.IndexSlice[:, asset_refs],
         annee=years_dt,
@@ -60,24 +58,23 @@ def plot_overview_dashboard_clean(statement):
     asset_total_data = asset_data.sel(
         compte=pd.IndexSlice[:, asset_total],
         annee=years_dt,
-    ).squeeze()
+    ).values.flatten()
 
     asset_labels = {
         ref: get_account_label(statement, "assets", ref) for ref in asset_refs
     }
 
-    # Remove zero-only components
-    asset_labels = {ref: asset_labels[ref] for ref in asset_refs}
-
     # Grouped bars (left)
     for ref in asset_refs:
-        series = asset_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        series_vals = asset_components.sel(
+            compte=pd.IndexSlice[:, ref]
+        ).values.flatten()
         fig.add_trace(
             go.Bar(
                 name=asset_labels[ref],
                 x=years_str,
-                y=series.values,
-                text=[f"{v:,.0f}" for v in series.values],
+                y=series_vals,
+                text=[f"{v:,.0f}" for v in series_vals],
                 textposition="outside",
                 offsetgroup=ref,
             ),
@@ -87,13 +84,20 @@ def plot_overview_dashboard_clean(statement):
 
     # Stacked bars (right)
     for ref in asset_refs:
-        series = asset_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
-        pct = series.values / asset_total_data.values * 100
+        series_vals = asset_components.sel(
+            compte=pd.IndexSlice[:, ref]
+        ).values.flatten()
+
+        # Safe division
+        pct = np.zeros_like(series_vals, dtype=float)
+        mask = asset_total_data != 0
+        pct[mask] = series_vals[mask] / asset_total_data[mask] * 100
+
         fig.add_trace(
             go.Bar(
                 name=asset_labels[ref],
                 x=years_str,
-                y=series.values,
+                y=series_vals,
                 text=[f"{p:.1f}%" for p in pct],
                 textposition="outside",
                 offsetgroup="stack",
@@ -105,7 +109,6 @@ def plot_overview_dashboard_clean(statement):
     # ============================================================
     # 2) LIABILITIES (DF, DP, DT, DZ)
     # ============================================================
-
     liab_refs = ["DF", "DP", "DT"]
     liab_total = "DZ"
 
@@ -119,24 +122,24 @@ def plot_overview_dashboard_clean(statement):
     liab_total_data = liab_data.sel(
         compte=pd.IndexSlice[:, liab_total],
         annee=years_dt,
-    ).squeeze()
+    ).values.flatten()
 
     liab_labels = {
-        ref: get_account_label(statement, "liabilities", ref) for ref in liab_refs
+        ref: get_account_label(statement, "liabilities", ref)
+        for ref in liab_refs
     }
-
-    # Remove zero-only components
-    liab_labels = {ref: liab_labels[ref] for ref in liab_refs}
 
     # Grouped bars (left)
     for ref in liab_refs:
-        series = liab_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        series_vals = liab_components.sel(
+            compte=pd.IndexSlice[:, ref]
+        ).values.flatten()
         fig.add_trace(
             go.Bar(
                 name=liab_labels[ref],
                 x=years_str,
-                y=series.values,
-                text=[f"{v:,.0f}" for v in series.values],
+                y=series_vals,
+                text=[f"{v:,.0f}" for v in series_vals],
                 textposition="outside",
                 offsetgroup=ref,
             ),
@@ -146,13 +149,20 @@ def plot_overview_dashboard_clean(statement):
 
     # Stacked bars (right)
     for ref in liab_refs:
-        series = liab_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
-        pct = series.values / liab_total_data.values * 100
+        series_vals = liab_components.sel(
+            compte=pd.IndexSlice[:, ref]
+        ).values.flatten()
+
+        # Safe division
+        pct = np.zeros_like(series_vals, dtype=float)
+        mask = liab_total_data != 0
+        pct[mask] = series_vals[mask] / liab_total_data[mask] * 100
+
         fig.add_trace(
             go.Bar(
                 name=liab_labels[ref],
                 x=years_str,
-                y=series.values,
+                y=series_vals,
                 text=[f"{p:.1f}%" for p in pct],
                 textposition="outside",
                 offsetgroup="stack",
@@ -164,7 +174,6 @@ def plot_overview_dashboard_clean(statement):
     # ============================================================
     # 3) INCOME (XE, XF, XH, RS, XI)
     # ============================================================
-
     income_refs = ["XE", "XF", "XH", "RS", "XI"]
     income_data = statement.income
 
@@ -177,19 +186,17 @@ def plot_overview_dashboard_clean(statement):
         ref: get_account_label(statement, "income", ref) for ref in income_refs
     }
 
-    # Remove zero-only components
-
-    income_labels = {ref: income_labels[ref] for ref in income_refs}
-
     # Grouped bars (left)
     for ref in income_refs:
-        series = income_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        series_vals = income_components.sel(
+            compte=pd.IndexSlice[:, ref]
+        ).values.flatten()
         fig.add_trace(
             go.Bar(
                 name=income_labels[ref],
                 x=years_str,
-                y=series.values,
-                text=[f"{v:,.0f}" for v in series.values],
+                y=series_vals,
+                text=[f"{v:,.0f}" for v in series_vals],
                 textposition="outside",
                 offsetgroup=ref,
             ),
@@ -199,7 +206,16 @@ def plot_overview_dashboard_clean(statement):
 
     # Waterfall (right)
     for year in income_components.annee.values:
-        year_vals = income_components.sel(annee=year).squeeze().values
+        # Sécurisation de l'alignement et de l'ordre des références
+        year_vals = [
+            float(
+                income_components.sel(
+                    compte=pd.IndexSlice[:, ref], annee=year
+                ).values.item()
+            )
+            for ref in income_refs
+        ]
+
         fig.add_trace(
             go.Waterfall(
                 name=str(pd.to_datetime(year).year),
@@ -215,7 +231,6 @@ def plot_overview_dashboard_clean(statement):
     # ============================================================
     # 4) CASHFLOW (ZB, ZC, ZF, ZG)
     # ============================================================
-
     cash_refs = ["ZB", "ZC", "ZF", "ZG"]
     cash_data = statement.cashflow
 
@@ -228,19 +243,17 @@ def plot_overview_dashboard_clean(statement):
         ref: get_account_label(statement, "cashflow", ref) for ref in cash_refs
     }
 
-    # Remove zero-only components
-
-    cash_labels = {ref: cash_labels[ref] for ref in cash_refs}
-
     # Grouped bars (left)
     for ref in cash_refs:
-        series = cash_components.sel(compte=pd.IndexSlice[:, ref]).squeeze()
+        series_vals = cash_components.sel(
+            compte=pd.IndexSlice[:, ref]
+        ).values.flatten()
         fig.add_trace(
             go.Bar(
                 name=cash_labels[ref],
                 x=years_str,
-                y=series.values,
-                text=[f"{v:,.0f}" for v in series.values],
+                y=series_vals,
+                text=[f"{v:,.0f}" for v in series_vals],
                 textposition="outside",
                 offsetgroup=ref,
             ),
@@ -250,7 +263,16 @@ def plot_overview_dashboard_clean(statement):
 
     # Waterfall (right)
     for year in cash_components.annee.values:
-        year_vals = cash_components.sel(annee=year).squeeze().values
+        # Sécurisation de l'alignement et de l'ordre des références
+        year_vals = [
+            float(
+                cash_components.sel(
+                    compte=pd.IndexSlice[:, ref], annee=year
+                ).values.item()
+            )
+            for ref in cash_refs
+        ]
+
         fig.add_trace(
             go.Waterfall(
                 name=str(pd.to_datetime(year).year),
@@ -266,7 +288,6 @@ def plot_overview_dashboard_clean(statement):
     # ============================================================
     # FINAL LAYOUT
     # ============================================================
-
     fig.update_layout(
         title={
             "text": "OHADA 4‑Panel Overview Dashboard (Clean Version)",

@@ -53,6 +53,7 @@ def main():
     print(f"  Liabilities count: {len(data['balance_sheet']['liabilities'])}")
     print(f"  Income items count: {len(data['income_statement'])}")
     print(f"  Cashflow items count: {len(data['cashflow_statement'])}")
+    print(f"  Other items count: {len(data['other_data'])}")
 
 if __name__ == '__main__':
     main()
