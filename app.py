@@ -98,8 +98,8 @@ if uploaded_excels:
 
                 
                 # Mise à jour sécurisée de l'index global des années du statement
-                if hasattr(statement, "years"):
-                    statement.years = pd.DatetimeIndex(np.unique(statement.years))
+                # if hasattr(statement, "periods"):
+                #    statement.years = pd.DatetimeIndex(np.unique(statement.periods))
                 # ============================================================
 
                 # Stockage persistant dans la session
@@ -149,7 +149,7 @@ page = st.sidebar.radio(
 
 # Extraction sécurisée des années disponibles depuis xarray
 try:
-    available_years = pd.to_datetime(statement.periods).year.astype(str).tolist()
+    available_years = statement.years.year.values.tolist()
 except Exception:
     # Fallback si l'index de dates est une liste de chaînes simples
     available_years = [str(y)[:4] for y in statement.periods]
