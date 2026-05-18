@@ -4,22 +4,22 @@ Data Cleaning Utilities for OHADA Financial Statements
 Provides functions to clean, validate, and normalize extracted financial data.
 """
 
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any
 
 
 def remove_empty(data: List[Dict]) -> List[Dict]:
     """
     Remove records with missing required fields.
-    
+
     Filters out records that don't have both 'reference' and 'net' fields,
     ensuring data quality in the final output.
-    
+
     Args:
         data: List of financial statement records
-        
+
     Returns:
         List of records with all required fields present
-        
+
     Example:
         >>> records = [
         ...     {'reference': 'AD', 'net': 1000},
@@ -39,17 +39,17 @@ def remove_empty(data: List[Dict]) -> List[Dict]:
 def remove_unnecessary(data: Any) -> Any:
     """
     Recursively remove non-financial keys from nested data structures.
-    
+
     Keeps only: 'reference', 'range', 'rubriques', 'posts'
     Applies recursively to lists and dictionaries, removing metadata
     and temporary fields used during processing.
-    
+
     Args:
         data: Data structure (dict, list, or scalar) to clean
-        
+
     Returns:
         Cleaned data with only essential keys retained
-        
+
     Example:
         >>> messy = {
         ...     'reference': 'AD',

@@ -6,7 +6,7 @@ Represents extracted and structured financial data from OHADA Excel files.
 
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
-from decimal import Decimal
+# from decimal import Decimal
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -99,9 +99,10 @@ class FinancialStatement:
     # Company metadata extracted from Fiche R2
     metadata: Optional[CompanyMetadata] = None
 
-
     # Cached xarray Datasets
-    _arrays_cache: Optional[Dict[str, xr.DataArray]] = field(default=None, init=False, repr=False)
+    _arrays_cache: Optional[Dict[str, xr.DataArray]] = field(
+        default=None, init=False, repr=False
+    )
 
     @property
     def arrays(self) -> Dict[str, xr.DataArray]:
@@ -112,19 +113,24 @@ class FinancialStatement:
 
     # Clean, unified entry points for the user
     @property
-    def asset(self) -> xr.DataArray: return self.arrays["asset"]
-    
-    @property
-    def liability(self) -> xr.DataArray: return self.arrays["liability"]
-    
-    @property
-    def income(self) -> xr.DataArray: return self.arrays["income"]
-    
-    @property
-    def cashflow(self) -> xr.DataArray: return self.arrays["cashflow"]
+    def asset(self) -> xr.DataArray:
+        return self.arrays["asset"]
 
     @property
-    def other(self) -> xr.DataArray: return self.arrays["other"]
+    def liability(self) -> xr.DataArray:
+        return self.arrays["liability"]
+
+    @property
+    def income(self) -> xr.DataArray:
+        return self.arrays["income"]
+
+    @property
+    def cashflow(self) -> xr.DataArray:
+        return self.arrays["cashflow"]
+
+    @property
+    def other(self) -> xr.DataArray:
+        return self.arrays["other"]
 
     @property
     def years(self) -> pd.DatetimeIndex:
@@ -135,10 +141,10 @@ class FinancialStatement:
         # On extrait l'index de la dimension 'annee' de n'importe quel tableau (ex: asset)
         if self.asset is not None:
             return pd.DatetimeIndex(self.asset.coords["annee"].values)
-        
+
         # Fallback au cas où l'objet est vide
         return pd.DatetimeIndex([])
-    
+
     def __post_init__(self):
         if self.periods is None:
             self.periods = []
@@ -174,7 +180,6 @@ class FinancialStatement:
         income_accounts = create_index(INCOME_ACCOUNTS)
         cashflow_accounts = create_index(CASHFLOW_ACCOUNTS)
         other_accounts = create_index(OTHER_ACCOUNTS)
-
 
         # --------------------------------------------------------------
         # Helper: reshape numpy → (account, year, value_type)
@@ -276,23 +281,20 @@ class FinancialStatement:
             .round(2)
         )
 
-        other_data_da = (
-            xr.DataArray(
-                data=reshape_statement(self._other_data, ["Net"]),
-                coords={"compte": other_accounts, "annee": years_idx},
-                dims=("compte", "annee"),
-                name="other",
-            )
-            .astype(int)
-        )
+        other_data_da = xr.DataArray(
+            data=reshape_statement(self._other_data, ["Net"]),
+            coords={"compte": other_accounts, "annee": years_idx},
+            dims=("compte", "annee"),
+            name="other",
+        ).astype(int)
 
         return {
-                "asset": asset_da,
-                "liability": liability_da,
-                "income": income_da,
-                "cashflow": cashflow_da,
-                "other": other_data_da,
-            }
+            "asset": asset_da,
+            "liability": liability_da,
+            "income": income_da,
+            "cashflow": cashflow_da,
+            "other": other_data_da,
+        }
 
     # ---------------------------------------------------------
     # INTERNAL HELPERS
@@ -322,7 +324,7 @@ class FinancialStatement:
     @property
     def to_numpy(self) -> Dict[str, np.ndarray]:
         """
-        Renvoie un dictionnaire contenant les matrices NumPy nettoyées, 
+        Renvoie un dictionnaire contenant les matrices NumPy nettoyées,
         remodelées et prêtes à l'emploi (SANS colonne de référence).
         Idéal pour le calcul matriciel et les modèles mathématiques.
         Structure de l'actif : (n_comptes, n_annees, 3).
@@ -343,11 +345,13 @@ class FinancialStatement:
             "other": self._other_data,
         }
 
-    def to_dict(self, include_metadata: bool = True, include_notes: bool = True) -> Dict[str, Any]:
+    def to_dict(
+        self, include_metadata: bool = True, include_notes: bool = True
+    ) -> Dict[str, Any]:
         """
         Convertit l'état financier en un dictionnaire JSON-serializable.
         Contient les données brutes AVEC les colonnes de référence.
-        
+
         Args:
             include_metadata: Si True, inclut les métadonnées de l'entreprise.
             include_notes: Si True, inclut les dictionnaires d'annexes (notes).
@@ -361,13 +365,13 @@ class FinancialStatement:
             "periods": self.periods,
             "file_path": self.file_path,
         }
-        
+
         if include_metadata:
             data["metadata"] = self.metadata.to_dict() if self.metadata else None
-            
+
         if include_notes:
             data["notes"] = self._convert_notes(self.notes)
-            
+
         return data
 
     def to_json(self) -> Dict[str, Any]:
@@ -400,7 +404,6 @@ class FinancialStatement:
     def get_other(self, reference: str) -> Optional[np.ndarray]:
         """Query your other data natively via reference code."""
         return self.other.sel(compte=reference)
-
 
     # ---------------------------------------------------------
     # GETTERS FOR NOTES

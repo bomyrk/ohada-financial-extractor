@@ -3,28 +3,28 @@ import tempfile
 import streamlit as st
 import pandas as pd
 import numpy as np
+
 # Import your FinancialExtractor
 
 from src.ohada_extractor import FinancialExtractor
 
 # Import your visualization functions
 from src.ohada_extractor.visualization.dynamic.plot_dynamic_overview import (
-    plot_overview_dashboard_clean
+    plot_overview_dashboard_clean,
 )
 from src.ohada_extractor.visualization.dynamic.plot_dynamic_tabs import (
-    plot_ohada_tabs_dynamic
+    plot_ohada_tabs_dynamic,
 )
 from src.ohada_extractor.visualization.dynamic.plot_dynamic_summary import (
     plot_asset_summary_dynamic,
     plot_liability_summary_dynamic,
 )
 from src.ohada_extractor.visualization.dynamic.plot_dynamic_summary import (
-    plot_income_summary_dynamic
+    plot_income_summary_dynamic,
 )
 from src.ohada_extractor.visualization.dynamic.plot_dynamic_summary import (
-    plot_cashflow_summary_dynamic
+    plot_cashflow_summary_dynamic,
 )
-
 
 # ============================================================
 #  STREAMLIT APP LAYOUT
@@ -58,7 +58,7 @@ st.sidebar.header("📁 Upload DSF Excel File(s)")
 uploaded_excels = st.sidebar.file_uploader(
     "Upload one or multiple DSF Excel files",
     type=["xlsx", "xls"],
-    accept_multiple_files=True
+    accept_multiple_files=True,
 )
 
 # Génération d'un identifiant unique basé sur les fichiers présents dans le uploader
@@ -74,29 +74,34 @@ if files_identifier != st.session_state.current_files_processed:
 if uploaded_excels:
     st.sidebar.markdown("---")
     st.sidebar.write(f"📎 **{len(uploaded_excels)} file(s) ready.**")
-    
+
     # Le bouton qui déclenche explicitement le chargement
-    process_button = st.sidebar.button("⚙️ Process & Load Data", type="primary", use_container_width=True)
-    
+    process_button = st.sidebar.button(
+        "⚙️ Process & Load Data", type="primary", use_container_width=True
+    )
+
     if process_button:
         extractor = FinancialExtractor()
         temp_paths = []
-        
+
         try:
-            with st.spinner("Extracting and normalizing financial data from DSF tables..."):
+            with st.spinner(
+                "Extracting and normalizing financial data from DSF tables..."
+            ):
                 # Écriture temporaire sur le disque
                 for f in uploaded_excels:
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{f.name}") as tmp:
+                    with tempfile.NamedTemporaryFile(
+                        delete=False, suffix=f"_{f.name}"
+                    ) as tmp:
                         tmp.write(f.getvalue())
                         temp_paths.append(tmp.name)
-                
+
                 # 1. Routage de l'extraction brute
                 if len(temp_paths) == 1:
                     statement = extractor.extract_from_excel(temp_paths[0])
                 else:
                     statement = extractor.extract_over_period(temp_paths)
 
-                
                 # Mise à jour sécurisée de l'index global des années du statement
                 # if hasattr(statement, "periods"):
                 #    statement.years = pd.DatetimeIndex(np.unique(statement.periods))
@@ -106,9 +111,11 @@ if uploaded_excels:
                 st.session_state.statement = statement
                 st.session_state.current_files_processed = files_identifier
                 st.sidebar.success("Data loaded and cleaned successfully!")
-                
+
         except Exception as e:
-            st.error(f"Extraction Error: An error occurred while parsing the DSF files. Details: {e}")
+            st.error(
+                f"Extraction Error: An error occurred while parsing the DSF files. Details: {e}"
+            )
             st.stop()
         finally:
             # Nettoyage immédiat du disque
@@ -123,7 +130,9 @@ else:
 
 # Si les fichiers sont là mais que l'utilisateur n'a pas encore cliqué sur le bouton
 if st.session_state.statement is None:
-    st.info("ℹ️ Click on **'Process & Load Data'** in the sidebar to generate the dashboards.")
+    st.info(
+        "ℹ️ Click on **'Process & Load Data'** in the sidebar to generate the dashboards."
+    )
     st.stop()
 
 statement = st.session_state.statement
@@ -144,7 +153,7 @@ page = st.sidebar.radio(
         "Liabilities Summary",
         "Income Summary",
         "Cashflow Summary",
-    ]
+    ],
 )
 
 # Extraction sécurisée des années disponibles depuis xarray

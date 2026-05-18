@@ -33,9 +33,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
         row = (idx - 1) // 2 + 1
         col = (idx - 1) % 2 + 1
 
-        data = prepare_data_for_plotting(
-            statement, data_type, period, value_type
-        )
+        data = prepare_data_for_plotting(statement, data_type, period, value_type)
 
         # --------------------------------------------------------
         # NETTOYAGE XARRAY : Éliminer les comptes entièrement à zéro
@@ -43,9 +41,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
         # Calcule la valeur absolue maximale sur l'axe du temps ('annee') ou globalement
         dim_to_reduce = "annee" if "annee" in data.dims else None
         if dim_to_reduce:
-            max_vals = np.abs(data.values).max(
-                axis=data.dims.index(dim_to_reduce)
-            )
+            max_vals = np.abs(data.values).max(axis=data.dims.index(dim_to_reduce))
         else:
             max_vals = np.abs(data.values)
 
@@ -159,9 +155,7 @@ def plot_all_dynamic(statement, style, period="all", value_type="Net"):
                     col=col,
                 )
 
-        fig.update_xaxes(
-            title_text="Accounts", row=row, col=col, tickangle=45
-        )
+        fig.update_xaxes(title_text="Accounts", row=row, col=col, tickangle=45)
         fig.update_yaxes(title_text="Values", row=row, col=col)
 
     if style == "bar" and period == "all":

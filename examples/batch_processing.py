@@ -16,10 +16,10 @@ from ohada_extractor.formatters import OHADAJSONFormatter
 def process_multiple_files(file_list):
     """
     Process multiple OHADA financial statement files.
-    
+
     Args:
         file_list: List of Excel file paths
-        
+
     Returns:
         List of extracted FinancialStatement objects
     """
@@ -33,14 +33,11 @@ def process_multiple_files(file_list):
     print(f"  File: {statements.file_path}")
 
     # Convert to JSON
-    json_output = OHADAJSONFormatter.to_json(
-        statement=statements,
-        indent=2
-    )
+    json_output = OHADAJSONFormatter.to_json(statement=statements, indent=2)
 
     # Save to file
-    output_file = Path(__file__).parent.parent / 'output_extraction.json'
-    with open(output_file, 'w') as f:
+    output_file = Path(__file__).parent.parent / "output_extraction.json"
+    with open(output_file, "w") as f:
         f.write(json_output)
 
     print(f"\n✓ JSON output saved to: {output_file}")
@@ -59,21 +56,21 @@ def process_multiple_files(file_list):
 
 def main():
     # Example: process files from a directory
-    data_dir = Path(__file__).parent / 'data'
-    
+    data_dir = Path(__file__).parent / "data"
+
     # Find all Excel files
-    excel_files = sorted(data_dir.glob('*.xlsx'))
-    
+    excel_files = sorted(data_dir.glob("*.xlsx"))
+
     if not excel_files:
         print(f"No Excel files found in {data_dir}")
         print("Please add OHADA Excel files to the examples/data directory")
         return
-    
+
     print(f"Found {len(excel_files)} Excel files")
-    
+
     # Process
     process_multiple_files(excel_files)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

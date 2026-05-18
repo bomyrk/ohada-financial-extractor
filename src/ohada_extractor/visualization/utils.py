@@ -4,7 +4,6 @@ Shared helpers for static and dynamic plotting.
 """
 
 import numpy as np
-import pandas as pd
 
 # ----------------------------------------------------------------------
 #  INPUT VALIDATION
@@ -103,23 +102,22 @@ def get_account_label(statement, data_type, ref_code):
         "cashflow": "cashflow",
     }
 
-    
     # 2. Get the xarray DataArray (e.g., statement.asset)
     data_array = getattr(statement, attr_map[data_type])
-    
+
     # 3. Retrieve the MultiIndex associated with the 'compte' coordinate
     # xarray maps MultiIndex levels onto both data coordinates and components
     try:
         # We find the specific position where the level 'Reference' matches our ref_code
         references = data_array.coords["Reference"].values
         libelles = data_array.coords["Label"].values
-        
+
         # Look for the match index
         match_indices = np.where(references == ref_code)[0]
         if len(match_indices) > 0:
             # Return the label corresponding to the first match
             return str(libelles[match_indices[0]])
-            
+
     except Exception:
         pass
 

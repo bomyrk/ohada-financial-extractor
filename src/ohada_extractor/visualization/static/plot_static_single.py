@@ -136,7 +136,7 @@ def plot_single_static(statement, data_type, style, period, value_type):
         # Filtrage strict contre les valeurs négatives ou nulles (ex: pertes, cashflow négatif)
         positive_mask = vals > 0
         filtered_vals = vals[positive_mask]
-        filtered_labels = [l for l, keep in zip(labels, positive_mask) if keep]
+        filtered_labels = [lab for lab, keep in zip(labels, positive_mask) if keep]
 
         if len(filtered_vals) == 0:
             raise ValueError(
@@ -156,9 +156,7 @@ def plot_single_static(statement, data_type, style, period, value_type):
     # -----------------------------
     # Formatting
     # -----------------------------
-    title_value = (
-        f"Value Type: {value_type}" if data_type == "assets" else "Net Values"
-    )
+    title_value = f"Value Type: {value_type}" if data_type == "assets" else "Net Values"
     period_title = (
         "All Periods" if period == "all" else str(pd.to_datetime(period).year)
     )

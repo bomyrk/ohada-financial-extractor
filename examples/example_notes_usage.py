@@ -43,16 +43,14 @@ def main():
     # 1. Load a DSF Excel file
     # -------------------------------------------------------------------
 
-    sample_file = Path(__file__).parent / 'data' / 'DSF_Normal_Tantanpion_2024.xlsx'
+    sample_file = Path(__file__).parent / "data" / "DSF_Normal_Tantanpion_2024.xlsx"
 
     extractor = FinancialExtractor()
 
     print("\n--- Extracting statement from DSF Excel file ---")
     statement = extractor.extract_from_excel(sample_file)
 
-
     print(f"Extracted {len(statement.notes)} notes.")
-
 
     # -------------------------------------------------------------------
     # 3. Retrieve a note by key
@@ -70,7 +68,6 @@ def main():
     print("\nPreprocessed value:")
     print(note_pre)
 
-
     # -------------------------------------------------------------------
     # 4. Retrieve a note by human-readable name
     # -------------------------------------------------------------------
@@ -83,7 +80,6 @@ def main():
     print(f"Searching for note named: {note_name}")
     print("Result:")
     print(note_by_name)
-
 
     # -------------------------------------------------------------------
     # 5. Export all notes to JSON
@@ -105,7 +101,7 @@ def main():
     print(notes_json)
 
     os.makedirs("output", exist_ok=True)
-    output_path = sample_file.parent.parent / "output"/ "notes_export.json"
+    output_path = sample_file.parent.parent / "output" / "notes_export.json"
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(notes_json)

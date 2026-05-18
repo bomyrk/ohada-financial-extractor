@@ -212,7 +212,7 @@ class FinancialExtractor:
 
         if not self._workbook:
             raise ValueError("No active workbook loaded.")
-        
+
         workbook_sheets = {
             " ".join(s.split()).lower() for s in self._workbook.sheetnames
         }
@@ -222,7 +222,7 @@ class FinancialExtractor:
         missing = required_sheets - workbook_sheets
         if missing:
             raise ValueError(f"Missing required sheets: {missing}")
-        logger.info(f"Workbook validated: all required sheets present")
+        logger.info("Workbook validated: all required sheets present")
 
     def _extract_all_statements(self):
         """Extract data from all financial statement sheets."""
@@ -246,7 +246,7 @@ class FinancialExtractor:
         """Get worksheet by normalized name."""
         if not self._workbook:
             return None
-        
+
         for ws in self._workbook.worksheets:
             if " ".join(ws.title.split()).lower() == sheet_name.lower():
                 return ws
@@ -574,7 +574,8 @@ class FinancialExtractor:
         finStatY: np.ndarray, finStatLY: np.ndarray, i: int, j: int
     ) -> bool:
         """
-        Checks whether the financial data for a given column is consistent between the current year and the previous year.
+        Checks whether the financial data for a given column is consistent between 
+        the current year and the previous year.
 
         Args:
             finStatY (np.ndarray): Financial statements for the current year.

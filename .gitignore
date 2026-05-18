@@ -25,6 +25,7 @@ src/ohada_extractor/_version.py
 *.egg
 MANIFEST
 *.in
+*.pre-commit-config.yaml
 
 # Testing
 .pytest_cache/

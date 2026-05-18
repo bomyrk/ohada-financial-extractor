@@ -10,11 +10,16 @@ from ohada_extractor.core.schemas import OHADA_STATEMENTS
 
 class TestFinancialExtractor(unittest.TestCase):
     """Test FinancialExtractor class."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         self.extractor = FinancialExtractor()
-        self.sample_file = Path(__file__).parent.parent / 'examples' / 'data' / 'DSF_Normal_Tantanpion_2024.xlsx'
+        self.sample_file = (
+            Path(__file__).parent.parent
+            / "examples"
+            / "data"
+            / "DSF_Normal_Tantanpion_2024.xlsx"
+        )
 
     def test_extractor_initialization(self):
         """Test that extractor initializes correctly."""
@@ -23,31 +28,36 @@ class TestFinancialExtractor(unittest.TestCase):
 
     def test_schemas_defined(self):
         """Test that all required statements are defined."""
-        required_statements = ['assets_sheet', 'liabilities_sheet', 'income_statement', 'cashflow']
+        required_statements = [
+            "assets_sheet",
+            "liabilities_sheet",
+            "income_statement",
+            "cashflow",
+        ]
         for stmt in required_statements:
             self.assertIn(stmt, OHADA_STATEMENTS)
 
     def test_assets_schema(self):
         """Test assets schema configuration."""
-        assets = OHADA_STATEMENTS['assets_sheet']
-        self.assertEqual(assets.name, 'Balance Sheet Assets')
-        self.assertEqual(assets.start_account, 'AD')
-        self.assertEqual(assets.end_account, 'BZ')
+        assets = OHADA_STATEMENTS["assets_sheet"]
+        self.assertEqual(assets.name, "Balance Sheet Assets")
+        self.assertEqual(assets.start_account, "AD")
+        self.assertEqual(assets.end_account, "BZ")
         self.assertEqual(assets.account_count, 29)
         self.assertTrue(assets.has_value_types)
 
     def test_liabilities_schema(self):
         """Test liabilities schema configuration."""
-        liab = OHADA_STATEMENTS['liabilities_sheet']
-        self.assertEqual(liab.name, 'Balance Sheet Liability')
-        self.assertEqual(liab.start_account, 'CA')
-        self.assertEqual(liab.end_account, 'DZ')
+        liab = OHADA_STATEMENTS["liabilities_sheet"]
+        self.assertEqual(liab.name, "Balance Sheet Liability")
+        self.assertEqual(liab.start_account, "CA")
+        self.assertEqual(liab.end_account, "DZ")
         self.assertEqual(liab.account_count, 28)
         self.assertFalse(liab.has_value_types)
 
     @unittest.skipIf(
-        not Path('examples/data/DSF_Normal_Tantanpion_2024.xlsx').exists(),
-        "Sample data not available"
+        not Path("examples/data/DSF_Normal_Tantanpion_2024.xlsx").exists(),
+        "Sample data not available",
     )
     def test_extract_from_excel(self):
         """Test extraction from Excel file."""
@@ -58,7 +68,7 @@ class TestFinancialExtractor(unittest.TestCase):
 
 class TestOHADAStatements(unittest.TestCase):
     """Test OHADA statement definitions."""
-    
+
     def test_all_accounts_have_codes(self):
         """Test that all accounts have valid codes."""
         for stmt_key, stmt in OHADA_STATEMENTS.items():
@@ -70,5 +80,5 @@ class TestOHADAStatements(unittest.TestCase):
                 self.assertTrue(code.isupper() or code.isdigit())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
