@@ -2,6 +2,7 @@ import os
 import tempfile
 import streamlit as st
 import pandas as pd
+import numpy as np
 # Import your FinancialExtractor
 
 from src.ohada_extractor import FinancialExtractor
@@ -45,8 +46,8 @@ st.markdown("---")
 # Évite de recalculer l'extraction lourde à chaque interaction utilisateur
 if "statement" not in st.session_state:
     st.session_state.statement = None
-if "processed_files_hash" not in st.session_state:
-    st.session_state.processed_files_hash = None
+if "current_files_processed" not in st.session_state:
+    st.session_state.current_files_processed = None
 
 # ============================================================
 #  FILE UPLOAD
@@ -60,56 +61,69 @@ uploaded_excels = st.sidebar.file_uploader(
     accept_multiple_files=True
 )
 
-# Création d'une signature simple pour détecter si les fichiers téléversés ont changé
-current_files_hash = (
-    zip([f.name for f in uploaded_excels], [f.size for f in uploaded_excels])
-    if uploaded_excels
-    else None
+# Génération d'un identifiant unique basé sur les fichiers présents dans le uploader
+files_identifier = (
+    [(f.name, f.size) for f in uploaded_excels] if uploaded_excels else []
 )
 
+# Si l'utilisateur supprime ou change les fichiers, on réinitialise l'état pour forcer un nouveau clic
+if files_identifier != st.session_state.current_files_processed:
+    st.session_state.statement = None
+
+# Affichage du bouton de validation uniquement si des fichiers sont chargés
 if uploaded_excels:
-    # Si les fichiers sont nouveaux ou ont changé, on déclenche l'extraction
-    if st.session_state.processed_files_hash != current_files_hash:
+    st.sidebar.markdown("---")
+    st.sidebar.write(f"📎 **{len(uploaded_excels)} file(s) ready.**")
+    
+    # Le bouton qui déclenche explicitement le chargement
+    process_button = st.sidebar.button("⚙️ Process & Load Data", type="primary", use_container_width=True)
+    
+    if process_button:
         extractor = FinancialExtractor()
         temp_paths = []
         
         try:
             with st.spinner("Extracting and normalizing financial data from DSF tables..."):
-                # Sauvegarde temporaire sécurisée
+                # Écriture temporaire sur le disque
                 for f in uploaded_excels:
-                    # Utilisation d'un fichier temporaire qui s'auto-nettoie ou identifié proprement
                     with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{f.name}") as tmp:
                         tmp.write(f.getvalue())
                         temp_paths.append(tmp.name)
                 
-                # Traitement selon le volume de fichiers
+                # 1. Routage de l'extraction brute
                 if len(temp_paths) == 1:
                     statement = extractor.extract_from_excel(temp_paths[0])
                 else:
                     statement = extractor.extract_over_period(temp_paths)
+
                 
-                # Sauvegarde dans le state de l'application
+                # Mise à jour sécurisée de l'index global des années du statement
+                if hasattr(statement, "years"):
+                    statement.years = pd.DatetimeIndex(np.unique(statement.years))
+                # ============================================================
+
+                # Stockage persistant dans la session
                 st.session_state.statement = statement
-                st.session_state.processed_files_hash = current_files_hash
-                st.sidebar.success("Excel file(s) processed successfully!")
+                st.session_state.current_files_processed = files_identifier
+                st.sidebar.success("Data loaded and cleaned successfully!")
                 
         except Exception as e:
             st.error(f"Extraction Error: An error occurred while parsing the DSF files. Details: {e}")
             st.stop()
         finally:
-            # NETTOYAGE STRICT DU DISQUE : On efface les fichiers temporaires immédiatement après lecture
+            # Nettoyage immédiat du disque
             for path in temp_paths:
                 if os.path.exists(path):
                     os.remove(path)
 else:
-    # Réinitialisation si l'utilisateur vide sa sélection
     st.session_state.statement = None
-    st.session_state.processed_files_hash = None
-    st.warning("Please upload at least one DSF Excel file to generate the dashboard analysis.")
+    st.session_state.current_files_processed = None
+    st.warning("Please upload at least one DSF Excel file in the sidebar to continue.")
     st.stop()
 
-# Sécurité si le statement est vide malgré tout
+# Si les fichiers sont là mais que l'utilisateur n'a pas encore cliqué sur le bouton
 if st.session_state.statement is None:
+    st.info("ℹ️ Click on **'Process & Load Data'** in the sidebar to generate the dashboards.")
     st.stop()
 
 statement = st.session_state.statement
