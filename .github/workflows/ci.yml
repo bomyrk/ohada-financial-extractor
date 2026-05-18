@@ -29,14 +29,16 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Lint with flake8
+      - name: Install Black
         run: |
-          flake8 src/ohada_extractor --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 src/ohada_extractor --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+          pip install black==24.10.0 ruff==0.6.9
 
+      - name: Lint with Ruff
+        run: |
+          ruff check src/ohada_extractor
+          
       - name: Check formatting with black
         run: |
-          pip install black
           black --check src/ohada_extractor
 
       - name: Run tests
