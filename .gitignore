@@ -47,3 +47,5 @@ Thumbs.db
 # *.xlsx
 !examples/data/sample_ohada_statement_2024.xlsx
 output.json
+
+tet.py

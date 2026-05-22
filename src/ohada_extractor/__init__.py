@@ -29,9 +29,13 @@ __author__ = "Kamguia Wabo Leonel B. "
 
 from .core.extractor import FinancialExtractor
 from .core.schemas import ASSETS_ACCOUNTS, OHADA_STATEMENTS
+from .validation import CoherenceCheckResult, CoherenceReport, CoherenceValidator
 
 __all__ = [
     "FinancialExtractor",
+    "CoherenceValidator",
+    "CoherenceCheckResult",
+    "CoherenceReport",
     "OHADA_STATEMENTS",
     "ASSETS_ACCOUNTS",
 ]

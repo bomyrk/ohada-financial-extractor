@@ -171,6 +171,9 @@ OTHER_ACCOUNTS = [
     ("Effectif moyen de personnel extérieur", "EMPE"),
 ]
 
+# file extensions
+FILE_EXTENSIONS = [".xls", ".xlsx", ".xlsm"]
+
 
 @dataclass
 class OHADAStatement:
@@ -572,6 +575,18 @@ CURRENCY_MAPPING = {
     16: "XAF",
     14: "KMF",
     15: "GNF",
+}
+
+NORMALIZED_ACTIVITY_MAP = {
+    "commerce general": "Commerce général",
+    "commerce generale": "Commerce général",
+    "commerce": "Commerce général",
+    "industrie": "Industrie",
+    "industrie manufacturière": "Industrie",
+    "services": "Services",
+    "service": "Services",
+    "transport": "Transport",
+    "transports": "Transport",
 }
 
 # ----------------------------------------------------------------------

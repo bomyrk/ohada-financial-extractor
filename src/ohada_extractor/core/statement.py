@@ -4,6 +4,7 @@ Financial Statement Data Container
 Represents extracted and structured financial data from OHADA Excel files.
 """
 
+import json
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -35,9 +36,24 @@ class CompanyMetadata:
     country: Optional[str] = None
     year_creation: Optional[int] = None
     regime_fiscal: Optional[str] = None
+    number_of_units: Optional[int] = None
+    owned: Optional[str] = None
+
+    # KPI from Note 31
     dividend: Optional[np.ndarray] = None
     number_of_shares: Optional[np.ndarray] = None
     number_of_employees: Optional[np.ndarray] = None
+
+    # Activity-related fields
+    activities_breakdown: Optional[List[Dict]] = None
+    main_activity: Optional[Dict] = None
+    secondary_activities: Optional[List[Dict]] = None
+
+    # Multi-year activity data
+    activities_by_year: Optional[Dict[int, Dict]] = None
+    yoy_growth: Optional[Dict[int, List[Dict]]] = None
+    sector_concentration: Optional[Dict[int, float]] = None
+    ranking_changes: Optional[Dict[int, List[Dict]]] = None
 
     def to_dict(self):
         """Convert metadata to JSON‑friendly dict."""
@@ -61,6 +77,20 @@ class CompanyMetadata:
                 missing.append(field_name)
         return missing
 
+    def __str__(self) -> str:
+        parts = [
+            f"legal_form={self.legal_form or 'n/a'}",
+            f"country={self.country or 'n/a'}",
+            f"currency={self.currency or 'n/a'}",
+            f"fiscal_regime={self.regime_fiscal or 'n/a'}",
+            f"year_creation={self.year_creation or 'n/a'}",
+        ]
+
+        if self.main_activity:
+            parts.append(f"main_activity={self.main_activity.get('label', 'n/a')}")
+
+        return f"CompanyMetadata({', '.join(parts)})"
+
 
 # ----------------------------------------------------------------------
 #  FINANCIAL STATEMENT MODEL
@@ -75,7 +105,7 @@ class FinancialStatement:
         _liability_data: NumPy array of balance sheet liabilities
         _income_data: NumPy array of income statement data
         _cashflow_data: NumPy array of cash flow statement data
-        other_data: Numpy array of note 31 data
+        _other_data: Numpy array of note 31 data
         notes (annexes): Dictionary of notes data
         periods: List of period dates (e.g., ['2023-12-31', '2024-12-31'])
         file_path: Original Excel file path
@@ -101,6 +131,7 @@ class FinancialStatement:
 
     # Cached xarray Datasets
     _arrays_cache: Optional[Dict[str, xr.DataArray]] = field(default=None, init=False, repr=False)
+    SERIALIZATION_SCHEMA_VERSION = "1.0"
 
     @property
     def arrays(self) -> Dict[str, xr.DataArray]:
@@ -146,6 +177,62 @@ class FinancialStatement:
     def __post_init__(self):
         if self.periods is None:
             self.periods = []
+
+    def __str__(self) -> str:
+        file_label = self.file_path or "n/a"
+        periods_label = ", ".join(str(period) for period in self.periods) if self.periods else "n/a"
+        notes_count = len(self.notes) if self.notes else 0
+        metadata_label = "yes" if self.metadata is not None else "no"
+
+        return (
+            "FinancialStatement("
+            f"file_path={file_label}, "
+            f"periods=[{periods_label}], "
+            f"notes={notes_count}, "
+            f"metadata={metadata_label}"
+            ")"
+        )
+
+    def validate_coherence(self, raise_on_error: bool = False) -> bool:
+        """
+        Validate internal OHADA financial-statement coherence.
+
+        Args:
+            raise_on_error: If True, raises ValueError when validation fails.
+                If False, returns False and logs validation details.
+        """
+        from ohada_extractor.validation.coherence_validator import CoherenceValidator
+
+        is_valid = CoherenceValidator.from_financial_statement(self).validate()
+        if raise_on_error and not is_valid:
+            raise ValueError("Financial statement coherence validation failed.")
+        return is_valid
+
+    def build_coherence_report(self):
+        """
+        Build a detailed OHADA coherence report for this statement.
+        """
+        from ohada_extractor.validation.coherence_validator import CoherenceValidator
+
+        return CoherenceValidator.from_financial_statement(self).build_report()
+
+    def coherence_report(self):
+        """
+        Alias for build_coherence_report().
+        """
+        return self.build_coherence_report()
+
+    def build_metadata(self):
+        """
+        Extract and attach company metadata for this statement.
+
+        Returns:
+            CompanyMetadata or None if the required metadata notes are missing.
+        """
+        from ohada_extractor.core.metadata_extractor import CompanyMetadataExtractor
+
+        self.metadata = CompanyMetadataExtractor.extract_from_statement(self)
+        return self.metadata
 
     # ------------------------------------------------------------------
     #  NEW: Convert numpy → xarray for validation + visualization
@@ -305,6 +392,52 @@ class FinancialStatement:
             }
         return out
 
+    @staticmethod
+    def _to_serializable_value(value):
+        if isinstance(value, np.ndarray):
+            return {
+                "__ndarray__": True,
+                "dtype": str(value.dtype),
+                "data": FinancialStatement._to_serializable_value(value.tolist()),
+            }
+
+        if isinstance(value, np.generic):
+            return value.item()
+
+        if isinstance(value, dict):
+            return {
+                str(FinancialStatement._to_serializable_value(key)): FinancialStatement._to_serializable_value(val)
+                for key, val in value.items()
+            }
+
+        if isinstance(value, tuple):
+            return {
+                "__tuple__": True,
+                "data": [FinancialStatement._to_serializable_value(item) for item in value],
+            }
+
+        if isinstance(value, list):
+            return [FinancialStatement._to_serializable_value(item) for item in value]
+
+        return value
+
+    @staticmethod
+    def _from_serializable_value(value):
+        if isinstance(value, dict):
+            if value.get("__ndarray__") is True:
+                data = FinancialStatement._from_serializable_value(value.get("data"))
+                return np.array(data, dtype=object)
+
+            if value.get("__tuple__") is True:
+                return tuple(FinancialStatement._from_serializable_value(item) for item in value.get("data", []))
+
+            return {key: FinancialStatement._from_serializable_value(val) for key, val in value.items()}
+
+        if isinstance(value, list):
+            return [FinancialStatement._from_serializable_value(item) for item in value]
+
+        return value
+
     # ---------------------------------------------------------
     # EXPORT METHODS
     # ---------------------------------------------------------
@@ -364,6 +497,69 @@ class FinancialStatement:
         """Alias for JSON‑safe export."""
         return self.to_dict()
 
+    def to_serializable_dict(self, include_metadata: bool = True, include_notes: bool = True) -> Dict[str, Any]:
+        """
+        Return a JSON-safe payload that can reconstruct this FinancialStatement.
+
+        This is intended for persistence layers such as Redis. It stores the
+        raw extracted arrays and lets xarray DataArrays be rebuilt lazily when
+        the statement is loaded back.
+        """
+        payload = {
+            "schema_version": self.SERIALIZATION_SCHEMA_VERSION,
+            "assets": self._to_serializable_value(self._asset_data),
+            "liabilities": self._to_serializable_value(self._liability_data),
+            "income": self._to_serializable_value(self._income_data),
+            "cashflow": self._to_serializable_value(self._cashflow_data),
+            "other": self._to_serializable_value(self._other_data),
+            "periods": self._to_serializable_value(self.periods),
+            "file_path": self.file_path,
+        }
+
+        if include_metadata:
+            payload["metadata"] = self._to_serializable_value(self.metadata.__dict__ if self.metadata else None)
+
+        if include_notes:
+            payload["notes"] = self._to_serializable_value(self.notes)
+
+        return payload
+
+    @classmethod
+    def from_serializable_dict(cls, payload: Dict[str, Any]) -> "FinancialStatement":
+        """
+        Rebuild a FinancialStatement from to_serializable_dict() output.
+        """
+        metadata_payload = cls._from_serializable_value(payload.get("metadata"))
+        metadata = CompanyMetadata(**metadata_payload) if metadata_payload else None
+
+        return cls(
+            _asset_data=cls._from_serializable_value(payload.get("assets")),
+            _liability_data=cls._from_serializable_value(payload.get("liabilities")),
+            _income_data=cls._from_serializable_value(payload.get("income")),
+            _cashflow_data=cls._from_serializable_value(payload.get("cashflow")),
+            _other_data=cls._from_serializable_value(payload.get("other")),
+            notes=cls._from_serializable_value(payload.get("notes")),
+            periods=cls._from_serializable_value(payload.get("periods")),
+            file_path=payload.get("file_path"),
+            metadata=metadata,
+        )
+
+    def to_json_string(self, include_metadata: bool = True, include_notes: bool = True, **json_kwargs) -> str:
+        """
+        Serialize this statement to a JSON string.
+        """
+        return json.dumps(
+            self.to_serializable_dict(include_metadata=include_metadata, include_notes=include_notes),
+            **json_kwargs,
+        )
+
+    @classmethod
+    def from_json_string(cls, json_string: str) -> "FinancialStatement":
+        """
+        Rebuild a FinancialStatement from a JSON string.
+        """
+        return cls.from_serializable_dict(json.loads(json_string))
+
     # ---------------------------------------------------------
     # GETTERS FOR SPECIFIC ACCOUNTS
     # ---------------------------------------------------------
@@ -387,9 +583,10 @@ class FinancialStatement:
         # This searches your MultiIndex 'compte' seamlessly
         return self.cashflow.sel(Reference=reference)
 
-    def get_other(self, reference: str) -> Optional[np.ndarray]:
+    def get_other(self, reference: str) -> xr.DataArray:
         """Query your other data natively via reference code."""
-        return self.other.sel(compte=reference)
+        # This searches your MultiIndex 'compte' seamlessly
+        return self.other.sel(Reference=reference)
 
     # ---------------------------------------------------------
     # GETTERS FOR NOTES
