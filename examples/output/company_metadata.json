@@ -1,19 +1,122 @@
 {
-    "currency": "XAF",
-    "legal_form": "Société à Responsabilité Limitée (SARL)",
-    "country": "Cameroun",
-    "year_creation": 2008,
-    "regime_fiscal": "Réel normal",
-    "dividend": [
-        null,
-        null
-    ],
-    "number_of_shares": [
-        8000,
-        8000
-    ],
-    "number_of_employees": [
-        2086,
-        3643
-    ]
+  "currency": "XAF",
+  "legal_form": "Société à Responsabilité Limitée (SARL)",
+  "country": "Cameroun",
+  "year_creation": 2008,
+  "regime_fiscal": "Réel normal",
+  "number_of_units": 3,
+  "owned": "Private",
+  "dividend": [
+    null,
+    null
+  ],
+  "number_of_shares": [
+    8000.0,
+    8000.0
+  ],
+  "number_of_employees": [
+    2086.0,
+    3643.0
+  ],
+  "activities_breakdown": [
+    {
+      "label_raw": "Mise à disposition du personnel",
+      "label": "Mise à disposition du personnel",
+      "reference": "038003",
+      "value": 2961330339.45,
+      "percentage": 95.0
+    },
+    {
+      "label_raw": "Conseils en ressources humaines",
+      "label": "Conseils en ressources humaines",
+      "reference": "038003",
+      "value": 155859491.5500002,
+      "percentage": 5.0
+    },
+    {
+      "label_raw": "Divers",
+      "label": "Divers",
+      "reference": "000000",
+      "value": 0.0,
+      "percentage": 0.0
+    }
+  ],
+  "main_activity": {
+    "label_raw": "Mise à disposition du personnel",
+    "label": "Mise à disposition du personnel",
+    "reference": "038003",
+    "value": 2961330339.45,
+    "percentage": 95.0
+  },
+  "secondary_activities": [
+    {
+      "label_raw": "Conseils en ressources humaines",
+      "label": "Conseils en ressources humaines",
+      "reference": "038003",
+      "value": 155859491.5500002,
+      "percentage": 5.0
+    },
+    {
+      "label_raw": "Divers",
+      "label": "Divers",
+      "reference": "000000",
+      "value": 0.0,
+      "percentage": 0.0
+    }
+  ],
+  "activities_by_year": {
+    "0": {
+      "activities_breakdown": [
+        {
+          "label_raw": "Mise à disposition du personnel",
+          "label": "Mise à disposition du personnel",
+          "reference": "038003",
+          "value": 2961330339.45,
+          "percentage": 95.0
+        },
+        {
+          "label_raw": "Conseils en ressources humaines",
+          "label": "Conseils en ressources humaines",
+          "reference": "038003",
+          "value": 155859491.5500002,
+          "percentage": 5.0
+        },
+        {
+          "label_raw": "Divers",
+          "label": "Divers",
+          "reference": "000000",
+          "value": 0.0,
+          "percentage": 0.0
+        }
+      ],
+      "main_activity": {
+        "label_raw": "Mise à disposition du personnel",
+        "label": "Mise à disposition du personnel",
+        "reference": "038003",
+        "value": 2961330339.45,
+        "percentage": 95.0
+      },
+      "secondary_activities": [
+        {
+          "label_raw": "Conseils en ressources humaines",
+          "label": "Conseils en ressources humaines",
+          "reference": "038003",
+          "value": 155859491.5500002,
+          "percentage": 5.0
+        },
+        {
+          "label_raw": "Divers",
+          "label": "Divers",
+          "reference": "000000",
+          "value": 0.0,
+          "percentage": 0.0
+        }
+      ]
+    }
+  },
+  "yoy_growth": {},
+  "sector_concentration": {
+    "0": 9050.0
+  },
+  "ranking_changes": {}
 }

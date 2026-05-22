@@ -5,8 +5,11 @@ Unit tests for basic extraction functionality
 import unittest
 from pathlib import Path
 
+import numpy as np
+
 from ohada_extractor import FinancialExtractor
 from ohada_extractor.core.schemas import OHADA_STATEMENTS
+from ohada_extractor.core.statement import FinancialStatement
 
 
 class TestFinancialExtractor(unittest.TestCase):
@@ -60,6 +63,36 @@ class TestFinancialExtractor(unittest.TestCase):
         statement = self.extractor.extract_from_excel(self.sample_file)
         self.assertIsNotNone(statement)
         self.assertIsNotNone(statement.periods)
+
+    @unittest.skipIf(
+        not Path("examples/data/DSF_Normal_Tantanpion_2024.xlsx").exists(),
+        "Sample data not available",
+    )
+    def test_financial_statement_json_round_trip(self):
+        """Test JSON persistence and xarray rebuild after loading."""
+        statement = self.extractor.extract_from_excel(self.sample_file)
+        statement.build_metadata()
+        original_report = statement.build_coherence_report()
+
+        json_payload = statement.to_json_string(ensure_ascii=False)
+        restored = FinancialStatement.from_json_string(json_payload)
+        restored_report = restored.build_coherence_report()
+
+        self.assertEqual(restored.periods, statement.periods)
+        self.assertEqual(restored.file_path, statement.file_path)
+        self.assertEqual(len(restored.notes), len(statement.notes))
+        self.assertIsNotNone(restored.metadata)
+        self.assertEqual(restored.metadata.legal_form, statement.metadata.legal_form)
+        self.assertEqual(restored_report.total_checks, original_report.total_checks)
+        self.assertEqual(restored_report.data_quality_score, original_report.data_quality_score)
+
+        for key in ["asset", "liability", "income", "cashflow", "other"]:
+            original = statement.arrays[key]
+            round_tripped = restored.arrays[key]
+
+            self.assertEqual(original.dims, round_tripped.dims)
+            self.assertEqual(original.shape, round_tripped.shape)
+            np.testing.assert_allclose(original.values, round_tripped.values, equal_nan=True)
 
 
 class TestOHADAStatements(unittest.TestCase):

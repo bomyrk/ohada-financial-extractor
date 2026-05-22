@@ -6,6 +6,7 @@ OHADA accounting standards.
 """
 
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
@@ -15,7 +16,7 @@ import openpyxl
 from dateutil.relativedelta import relativedelta
 from openpyxl.worksheet.worksheet import Worksheet
 
-from .schemas import OHADA_NOTES, OHADA_STATEMENTS, OTHER_ACCOUNTS
+from .schemas import FILE_EXTENSIONS, OHADA_NOTES, OHADA_STATEMENTS, OTHER_ACCOUNTS
 from .statement import FinancialStatement
 
 logger = logging.getLogger(__name__)
@@ -43,12 +44,60 @@ class FinancialExtractor:
     # ---------------------------------------------------------
     # 2. PUBLIC API (Top-level methods)
     # ---------------------------------------------------------
-    def extract_from_excel(self, file_path: Union[str, Path]) -> "FinancialStatement":
+    @staticmethod
+    def discover_financial_files(
+        directory, extension=".xlsx", min_files=2, max_files=100, include_subdirectories=False
+    ) -> list:
+        """
+        Reads all files of a specified type in a directory.
+        """
+        if directory is None:
+            raise ValueError("The directory path cannot be None.")
+
+        if not isinstance(directory, str):
+            raise ValueError("The directory path must be a string.")
+
+        if not os.path.isdir(directory):
+            raise ValueError(f"The path '{directory}' is not a valid directory.")
+
+        if extension.lower() not in FILE_EXTENSIONS:
+            raise ValueError(f"Unsupported file extension '{extension}'. Supported extensions are: {FILE_EXTENSIONS}")
+
+        list_of_files = []
+
+        for root, _dirs, files in os.walk(directory):
+            if not include_subdirectories and root != directory:
+                continue
+            for file in files:
+                if file.lower().endswith(extension.lower()):
+                    full_path = os.path.join(root, file)
+                    list_of_files.append(full_path)
+
+        if len(list_of_files) < min_files:
+            logger.error(" Less than {min_files} files found.")
+            raise Exception(f"There are less than {min_files} files of type '{extension}' in the directory.")
+        elif len(list_of_files) > max_files:
+            logger.error(f" More than {max_files} files found.")
+            raise Exception(f"There are more than {max_files} files of type '{extension}' in the directory.")
+
+        logger.info(f"{len(list_of_files)} files found:")
+        list_of_files.sort()
+        for file in list_of_files:
+            logger.info(f"  - {file}")
+
+        return list_of_files
+
+    def extract_from_excel(
+        self,
+        file_path: Union[str, Path],
+        validate_coherence: bool = False,
+    ) -> "FinancialStatement":
         """
         Extract financial data from a single OHADA Excel file.
 
         Args:
             file_path: Path to the Excel file
+            validate_coherence: If True, run OHADA coherence validation after extraction
 
         Returns:
             FinancialStatement object with extracted data
@@ -73,7 +122,7 @@ class FinancialExtractor:
 
         from .statement import FinancialStatement
 
-        return FinancialStatement(
+        statement = FinancialStatement(
             _asset_data=self._raw_data.get("assets"),
             _liability_data=self._raw_data.get("liabilities"),
             _income_data=self._raw_data.get("income"),
@@ -84,12 +133,22 @@ class FinancialExtractor:
             file_path=str(file_path),
         )
 
-    def extract_over_period(self, file_list: List[Union[str, Path]]) -> "FinancialStatement":
+        if validate_coherence:
+            statement.validate_coherence(raise_on_error=True)
+
+        return statement
+
+    def extract_over_period(
+        self,
+        file_list: List[Union[str, Path]],
+        validate_coherence: bool = False,
+    ) -> "FinancialStatement":
         """
         Extract and consolidate financial data from multiple files across years.
 
         Args:
             file_list: List of Excel file paths
+            validate_coherence: If True, run OHADA coherence validation after consolidation
 
         Returns:
             Consolidated FinancialStatement
@@ -186,7 +245,7 @@ class FinancialExtractor:
             tmp_data[np.where(tmp_data == None)] = 0
 
         # Return a proper FinancialStatement
-        return FinancialStatement(
+        statement = FinancialStatement(
             _asset_data=combined_asset,
             _liability_data=combined_liabilities,
             _income_data=combined_income,
@@ -196,6 +255,66 @@ class FinancialExtractor:
             periods=periods,
             file_path=";".join(str(p) for p in file_list),
         )
+
+        if validate_coherence:
+            statement.validate_coherence(raise_on_error=True)
+
+        return statement
+
+    def extract_from_directory(
+        self,
+        directory: str,
+        extension: str = ".xlsx",
+        min_files: int = 1,
+        max_files: int = 100,
+        include_subdirectories: bool = False,
+        validate_coherence: bool = False,
+    ) -> "FinancialStatement":
+        """
+        High-level method:
+        Extract financial data from all OHADA Excel files in a directory.
+
+        - If 1 file → extract_from_excel
+        - If 2+ files → extract_over_period (multi-year consolidation)
+
+        Args:
+            directory (str): Path to directory containing Excel files.
+            extension (str): File extension to filter (default: .xlsx)
+            min_files (int): Minimum number of files required.
+            max_files (int): Maximum number of files allowed.
+            include_subdirectories (bool): Whether to scan subfolders.
+            validate_coherence (bool): Whether to validate coherence after extraction.
+
+        Returns:
+            FinancialStatement
+        """
+
+        # 1. Get list of files
+        file_list = self.discover_financial_files(
+            directory=directory,
+            extension=extension,
+            min_files=min_files,
+            max_files=max_files,
+            include_subdirectories=include_subdirectories,
+        )
+
+        # 2. Sort files by year (important for multi-year consolidation)
+        def extract_year_from_filename(path):
+            # Try to detect a year in the filename
+            name = os.path.basename(path)
+            for token in name.replace("-", "_").split("_"):
+                if token.isdigit() and len(token) == 4:
+                    return int(token)
+            return 0  # fallback
+
+        file_list.sort(key=extract_year_from_filename)
+
+        # 3. Single file → simple extraction
+        if len(file_list) == 1:
+            return self.extract_from_excel(file_list[0], validate_coherence=validate_coherence)
+
+        # 4. Multi-year → consolidated extraction
+        return self.extract_over_period(file_list, validate_coherence=validate_coherence)
 
     # ---------------------------------------------------------
     # 3. CORE EXTRACTION PIPELINE

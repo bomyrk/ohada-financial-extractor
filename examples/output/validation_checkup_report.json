@@ -1,0 +1,937 @@
+{
+  "file_path": "C:\\Users\\bomyr\\PycharmProjects\\ohada-financial-extractor\\examples\\data\\DSF_Normal_Tantanpion_2024.xlsx",
+  "periods": [
+    "2023-12-31",
+    "2024-12-31"
+  ],
+  "summary": {
+    "passed": true,
+    "data_quality_score": 100.0,
+    "total_checks": 31,
+    "passed_checks": 31,
+    "failed_checks": 0
+  },
+  "checks": [
+    {
+      "name": "Balance sheet equality",
+      "expression": "Assets BZ = Liabilities DZ",
+      "financial_type": "balance_sheet",
+      "passed": true,
+      "severity": "high",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 1186852036.0,
+        "2024-12-31": 1541733491.0
+      },
+      "expected": {
+        "2023-12-31": 1186852036.0,
+        "2024-12-31": 1541733491.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "Net income cross-check",
+      "expression": "Income XI = Liability CJ",
+      "financial_type": "income_statement",
+      "passed": true,
+      "severity": "high",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 220371282.0,
+        "2024-12-31": 307462452.0
+      },
+      "expected": {
+        "2023-12-31": 220371282.0,
+        "2024-12-31": 307462452.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "Cashflow net movement",
+      "expression": "Cashflow ZG = ZB + ZC + ZF",
+      "financial_type": "cashflow_statement",
+      "passed": true,
+      "severity": "high",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": -172078385.0,
+        "2024-12-31": -82244678.0
+      },
+      "expected": {
+        "2023-12-31": -172078385.0,
+        "2024-12-31": -82244678.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "asset: AD=AE+AF+AG+AH",
+      "expression": "AD=AE+AF+AG+AH",
+      "financial_type": "asset",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "Gross",
+        "Amortissement",
+        "Net"
+      ],
+      "actual": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 1143616.0
+        },
+        "2024-12-31": {
+          "Gross": 23989574.0,
+          "Amortissement": 23901369.0,
+          "Net": 88205.0
+        }
+      },
+      "expected": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 1143616.0
+        },
+        "2024-12-31": {
+          "Gross": 23989574.0,
+          "Amortissement": 23901369.0,
+          "Net": 88205.0
+        }
+      },
+      "difference": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 0.0
+        },
+        "2024-12-31": {
+          "Gross": 0.0,
+          "Amortissement": 0.0,
+          "Net": 0.0
+        }
+      },
+      "message": null
+    },
+    {
+      "name": "asset: AI=AJ+AK+AL+AM+AN",
+      "expression": "AI=AJ+AK+AL+AM+AN",
+      "financial_type": "asset",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "Gross",
+        "Amortissement",
+        "Net"
+      ],
+      "actual": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 40068551.0
+        },
+        "2024-12-31": {
+          "Gross": 119138376.0,
+          "Amortissement": 82669838.0,
+          "Net": 36468538.0
+        }
+      },
+      "expected": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 40068551.0
+        },
+        "2024-12-31": {
+          "Gross": 119138376.0,
+          "Amortissement": 82669838.0,
+          "Net": 36468538.0
+        }
+      },
+      "difference": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 0.0
+        },
+        "2024-12-31": {
+          "Gross": 0.0,
+          "Amortissement": 0.0,
+          "Net": 0.0
+        }
+      },
+      "message": null
+    },
+    {
+      "name": "asset: AQ=AR+AS",
+      "expression": "AQ=AR+AS",
+      "financial_type": "asset",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "Gross",
+        "Amortissement",
+        "Net"
+      ],
+      "actual": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 16223850.0
+        },
+        "2024-12-31": {
+          "Gross": 17086350.0,
+          "Amortissement": 0.0,
+          "Net": 17086350.0
+        }
+      },
+      "expected": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 16223850.0
+        },
+        "2024-12-31": {
+          "Gross": 17086350.0,
+          "Amortissement": 0.0,
+          "Net": 17086350.0
+        }
+      },
+      "difference": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 0.0
+        },
+        "2024-12-31": {
+          "Gross": 0.0,
+          "Amortissement": 0.0,
+          "Net": 0.0
+        }
+      },
+      "message": null
+    },
+    {
+      "name": "asset: AZ=AD+AI+AP+AQ",
+      "expression": "AZ=AD+AI+AP+AQ",
+      "financial_type": "asset",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "Gross",
+        "Amortissement",
+        "Net"
+      ],
+      "actual": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 57436017.0
+        },
+        "2024-12-31": {
+          "Gross": 160214300.0,
+          "Amortissement": 106571207.0,
+          "Net": 53643093.0
+        }
+      },
+      "expected": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 57436017.0
+        },
+        "2024-12-31": {
+          "Gross": 160214300.0,
+          "Amortissement": 106571207.0,
+          "Net": 53643093.0
+        }
+      },
+      "difference": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 0.0
+        },
+        "2024-12-31": {
+          "Gross": 0.0,
+          "Amortissement": 0.0,
+          "Net": 0.0
+        }
+      },
+      "message": null
+    },
+    {
+      "name": "asset: BC=BH+BI+BJ",
+      "expression": "BC=BH+BI+BJ",
+      "financial_type": "asset",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "Gross",
+        "Amortissement",
+        "Net"
+      ],
+      "actual": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 1098222833.0
+        },
+        "2024-12-31": {
+          "Gross": 1598341803.0,
+          "Amortissement": 123030755.0,
+          "Net": 1475311048.0
+        }
+      },
+      "expected": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 1098222833.0
+        },
+        "2024-12-31": {
+          "Gross": 1598341803.0,
+          "Amortissement": 123030755.0,
+          "Net": 1475311048.0
+        }
+      },
+      "difference": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 0.0
+        },
+        "2024-12-31": {
+          "Gross": 0.0,
+          "Amortissement": 0.0,
+          "Net": 0.0
+        }
+      },
+      "message": null
+    },
+    {
+      "name": "asset: BK=BA+BB+BC",
+      "expression": "BK=BA+BB+BC",
+      "financial_type": "asset",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "Gross",
+        "Amortissement",
+        "Net"
+      ],
+      "actual": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 1098342833.0
+        },
+        "2024-12-31": {
+          "Gross": 1603041803.0,
+          "Amortissement": 123030755.0,
+          "Net": 1480011048.0
+        }
+      },
+      "expected": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 1098342833.0
+        },
+        "2024-12-31": {
+          "Gross": 1603041803.0,
+          "Amortissement": 123030755.0,
+          "Net": 1480011048.0
+        }
+      },
+      "difference": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 0.0
+        },
+        "2024-12-31": {
+          "Gross": 0.0,
+          "Amortissement": 0.0,
+          "Net": 0.0
+        }
+      },
+      "message": null
+    },
+    {
+      "name": "asset: BT=BQ+BR+BS",
+      "expression": "BT=BQ+BR+BS",
+      "financial_type": "asset",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "Gross",
+        "Amortissement",
+        "Net"
+      ],
+      "actual": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 31073186.0
+        },
+        "2024-12-31": {
+          "Gross": 8079350.0,
+          "Amortissement": 0.0,
+          "Net": 8079350.0
+        }
+      },
+      "expected": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 31073186.0
+        },
+        "2024-12-31": {
+          "Gross": 8079350.0,
+          "Amortissement": 0.0,
+          "Net": 8079350.0
+        }
+      },
+      "difference": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 0.0
+        },
+        "2024-12-31": {
+          "Gross": 0.0,
+          "Amortissement": 0.0,
+          "Net": 0.0
+        }
+      },
+      "message": null
+    },
+    {
+      "name": "asset: BZ=AZ+BK+BT+BU",
+      "expression": "BZ=AZ+BK+BT+BU",
+      "financial_type": "asset",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "Gross",
+        "Amortissement",
+        "Net"
+      ],
+      "actual": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 1186852036.0
+        },
+        "2024-12-31": {
+          "Gross": 1771335453.0,
+          "Amortissement": 229601962.0,
+          "Net": 1541733491.0
+        }
+      },
+      "expected": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 1186852036.0
+        },
+        "2024-12-31": {
+          "Gross": 1771335453.0,
+          "Amortissement": 229601962.0,
+          "Net": 1541733491.0
+        }
+      },
+      "difference": {
+        "2023-12-31": {
+          "Gross": null,
+          "Amortissement": null,
+          "Net": 0.0
+        },
+        "2024-12-31": {
+          "Gross": 0.0,
+          "Amortissement": 0.0,
+          "Net": 0.0
+        }
+      },
+      "message": null
+    },
+    {
+      "name": "liability: CP=CA+CB+CD+CE+CF+CG+CH+CJ+CL+CM",
+      "expression": "CP=CA+CB+CD+CE+CF+CG+CH+CJ+CL+CM",
+      "financial_type": "liability",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 579425960.0,
+        "2024-12-31": 886888412.0
+      },
+      "expected": {
+        "2023-12-31": 579425960.0,
+        "2024-12-31": 886888412.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "liability: DD=DA+DB+DC",
+      "expression": "DD=DA+DB+DC",
+      "financial_type": "liability",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 36179901.0,
+        "2024-12-31": 36179901.0
+      },
+      "expected": {
+        "2023-12-31": 36179901.0,
+        "2024-12-31": 36179901.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "liability: DF=CP+DD",
+      "expression": "DF=CP+DD",
+      "financial_type": "liability",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 615605861.0,
+        "2024-12-31": 923068313.0
+      },
+      "expected": {
+        "2023-12-31": 615605861.0,
+        "2024-12-31": 923068313.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "liability: DP=DH+DI+DJ+DK+DM+DN",
+      "expression": "DP=DH+DI+DJ+DK+DM+DN",
+      "financial_type": "liability",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 493056132.0,
+        "2024-12-31": 481224293.0
+      },
+      "expected": {
+        "2023-12-31": 493056132.0,
+        "2024-12-31": 481224293.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "liability: DT=DQ+DR",
+      "expression": "DT=DQ+DR",
+      "financial_type": "liability",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 78190043.0,
+        "2024-12-31": 137440885.0
+      },
+      "expected": {
+        "2023-12-31": 78190043.0,
+        "2024-12-31": 137440885.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "liability: DZ=DF+DP+DT+DY",
+      "expression": "DZ=DF+DP+DT+DY",
+      "financial_type": "liability",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 1186852036.0,
+        "2024-12-31": 1541733491.0
+      },
+      "expected": {
+        "2023-12-31": 1186852036.0,
+        "2024-12-31": 1541733491.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XA=TA+RA+RB",
+      "expression": "XA=TA+RA+RB",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "expected": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XB=TA+TB+TC+TD",
+      "expression": "XB=TA+TB+TC+TD",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 3239302277.0,
+        "2024-12-31": 3117189831.0
+      },
+      "expected": {
+        "2023-12-31": 3239302277.0,
+        "2024-12-31": 3117189831.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XC=XB+RA+RB+TE+TF+TG+TH+TI+RC+RD+RE+RF+RG+RH+RI+RJ",
+      "expression": "XC=XB+RA+RB+TE+TF+TG+TH+TI+RC+RD+RE+RF+RG+RH+RI+RJ",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 4565678112.0,
+        "2024-12-31": 4581588693.0
+      },
+      "expected": {
+        "2023-12-31": 4565678112.0,
+        "2024-12-31": 4581588693.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XD=XC+RK",
+      "expression": "XD=XC+RK",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 385155320.0,
+        "2024-12-31": 481086507.0
+      },
+      "expected": {
+        "2023-12-31": 385155320.0,
+        "2024-12-31": 481086507.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XE=XD+TJ+RL",
+      "expression": "XE=XD+TJ+RL",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 360042493.0,
+        "2024-12-31": 463167675.0
+      },
+      "expected": {
+        "2023-12-31": 360042493.0,
+        "2024-12-31": 463167675.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XF=TK+TL+TM-RM-RN",
+      "expression": "XF=TK+TL+TM-RM-RN",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": -1962946.0,
+        "2024-12-31": -7393553.0
+      },
+      "expected": {
+        "2023-12-31": -1962946.0,
+        "2024-12-31": -7393553.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XG=XE+XF",
+      "expression": "XG=XE+XF",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 358079547.0,
+        "2024-12-31": 455774122.0
+      },
+      "expected": {
+        "2023-12-31": 358079547.0,
+        "2024-12-31": 455774122.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XH=TN+TO-RO-RP",
+      "expression": "XH=TN+TO-RO-RP",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 310000.0,
+        "2024-12-31": 3125000.0
+      },
+      "expected": {
+        "2023-12-31": 310000.0,
+        "2024-12-31": 3125000.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "income: XI=XG+XH+RQ+RS",
+      "expression": "XI=XG+XH+RQ+RS",
+      "financial_type": "income",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 220371282.0,
+        "2024-12-31": 307462452.0
+      },
+      "expected": {
+        "2023-12-31": 220371282.0,
+        "2024-12-31": 307462452.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "cashflow: ZB=FA-FB-FC-FD+FE",
+      "expression": "ZB=FA-FB-FC-FD+FE",
+      "financial_type": "cashflow",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": -113496478.0,
+        "2024-12-31": -71243770.0
+      },
+      "expected": {
+        "2023-12-31": -113496478.0,
+        "2024-12-31": -71243770.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "cashflow: ZC=FI+FJ-FF-FG-FH",
+      "expression": "ZC=FI+FJ-FF-FG-FH",
+      "financial_type": "cashflow",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": -58581907.0,
+        "2024-12-31": -11000908.0
+      },
+      "expected": {
+        "2023-12-31": -58581907.0,
+        "2024-12-31": -11000908.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "cashflow: ZD=FK+FL-FM-FN",
+      "expression": "ZD=FK+FL-FM-FN",
+      "financial_type": "cashflow",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "expected": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "cashflow: ZE=FO+FP+FQ",
+      "expression": "ZE=FO+FP+FQ",
+      "financial_type": "cashflow",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "expected": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    },
+    {
+      "name": "cashflow: ZF=ZD+ZE",
+      "expression": "ZF=ZD+ZE",
+      "financial_type": "cashflow",
+      "passed": true,
+      "severity": "medium",
+      "value_labels": [
+        "value"
+      ],
+      "actual": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "expected": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "difference": {
+        "2023-12-31": 0.0,
+        "2024-12-31": 0.0
+      },
+      "message": null
+    }
+  ]
+}
