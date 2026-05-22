@@ -378,9 +378,9 @@ class CoherenceValidator:
                 financial_type="cashflow_statement",
                 actual=self.cashflow.sel(compte=pd.IndexSlice[:, "ZG"]),
                 expected=(
-                    self.cashflow.sel(compte=pd.IndexSlice[:, "ZB"])
-                    + self.cashflow.sel(compte=pd.IndexSlice[:, "ZC"])
-                    + self.cashflow.sel(compte=pd.IndexSlice[:, "ZF"])
+                    self.cashflow.sel(compte=pd.IndexSlice[:, "ZB"]).drop_vars("compte")
+                    + self.cashflow.sel(compte=pd.IndexSlice[:, "ZC"]).drop_vars("compte")
+                    + self.cashflow.sel(compte=pd.IndexSlice[:, "ZF"]).drop_vars("compte")
                 ),
                 severity="high",
             ),
