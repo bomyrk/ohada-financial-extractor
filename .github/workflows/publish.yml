@@ -26,18 +26,18 @@ jobs:
       - name: Install build tools
         run: |
           pip install --upgrade pip
-          pip install build twine
+          pip install build setuptools_scm
 
-      - name: Build package
-        run: |
-          python -m build
+      - name: Clean dist folder
+        run: rm -rf dist
 
-      - name: Verify metadata
-        run: twine check dist/*
+      - name: Build wheel and sdist
+        run: python -m build
 
       - name: Publish to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          twine upload dist/*
+        uses: pypa/gh-action-pypi-publish@v1.10.0
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
+          verbose: true
