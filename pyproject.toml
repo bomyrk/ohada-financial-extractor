@@ -47,8 +47,10 @@ Homepage = "https://github.com/bomyrk/ohada-financial-extractor"
 Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
 
 [tool.setuptools]
-[tool.setuptools.packages.find]
-where = ["src"]
+packages = ["ohada_extractor"]
+
+[tool.setuptools.package-dir]
+"" = "src"
 
 # [tool.setuptools_scm]
 # write_to = "src/ohada_extractor/_version.py"
