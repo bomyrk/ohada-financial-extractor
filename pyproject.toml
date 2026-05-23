@@ -47,9 +47,6 @@ Homepage = "https://github.com/bomyrk/ohada-financial-extractor"
 Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
 
 [tool.setuptools]
-# Si votre code est dans un dossier 'src', setuptools le trouvera automatiquement
-package-dir = {"" = "src"}
-
 [tool.setuptools.packages.find]
 where = ["src"]
 
