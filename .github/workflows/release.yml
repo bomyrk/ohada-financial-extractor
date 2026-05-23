@@ -61,7 +61,7 @@ jobs:
         run: rm -rf dist/*
 
       - name: Install build tools
-        run: pip install build setuptools_scm
+        run: pip install build
 
       - name: Build package
         run: python -m build

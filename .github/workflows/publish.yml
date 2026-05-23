@@ -26,7 +26,7 @@ jobs:
       - name: Install build tools
         run: |
           pip install --upgrade pip
-          pip install build setuptools_scm
+          pip install build
 
       - name: Clean dist folder
         run: rm -rf dist
