@@ -52,9 +52,6 @@ packages = ["ohada_extractor"]
 [tool.setuptools.package-dir]
 "" = "src"
 
-# [tool.setuptools_scm]
-# write_to = "src/ohada_extractor/_version.py"
-
 [tool.black]
 line-length = 120
 target-version = ["py310"]
@@ -67,4 +64,4 @@ select = [
     "B",   # bugbear
 ]
 
-ignore = ["E711", "B905", "E501", ]
+ignore = ["E711", "B905", "E501"]
