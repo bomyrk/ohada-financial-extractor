@@ -14,31 +14,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate changelog entry
-        id: changelog
-        uses: orhun/git-cliff-action@v3
-        with:
-          config: |
-            [changelog]
-            header = ""
-            body = """
-            ## [{{ version }}] - {{ date }}
-            {{ body }}
-            """
-            trim = true
-
-            [git]
-            conventional_commits = true
-            filter_commits = true
-            commit_parsers = [
-              { message = "^feat", group = "Added" },
-              { message = "^fix", group = "Fixed" },
-              { message = "^docs", group = "Documentation" },
-              { message = "^refactor", group = "Changed" },
-              { message = "^perf", group = "Performance" },
-              { message = "^test", group = "Tests" },
-              { message = "^chore", skip = true },
-            ]
+      #- name: Generate changelog entry
+      #  id: changelog
+      #  uses: orhun/git-cliff-action@v3
+      #  with:
+      #    config: |
+      #      [changelog]
+      #      header = ""
+      #      body = """
+      #      ## [{{ version }}] - {{ date }}
+      #      {{ body }}
+      #      """
+      #      trim = true
+      #
+      #      [git]
+      #      conventional_commits = true
+      #      filter_commits = true
+      #      commit_parsers = [
+      #        { message = "^feat", group = "Added" },
+      #        { message = "^fix", group = "Fixed" },
+      #        { message = "^docs", group = "Documentation" },
+      #        { message = "^refactor", group = "Changed" },
+      #        { message = "^perf", group = "Performance" },
+      #        { message = "^test", group = "Tests" },
+      #        { message = "^chore", skip = true },
+      #      ]
 
       - name: Update CHANGELOG.md
         run: |
