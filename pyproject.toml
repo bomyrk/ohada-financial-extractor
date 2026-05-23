@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ohada-financial-extractor"
-version = "0.1.5"
+dynamic = ["version"]
 description = "Extract and normalize financial data from OHADA-compliant Excel financial statements (DSF)"
 readme = { file = "docs/README.md", content-type = "text/markdown" }
 requires-python = ">=3.10,<3.13"
@@ -48,6 +48,9 @@ Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
+
+[tool.setuptools_scm]
+write_to = "src/ohada_extractor/_version.py"
 
 [tool.setuptools.packages.find]
 where = ["src"]
