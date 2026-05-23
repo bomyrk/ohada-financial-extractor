@@ -45,16 +45,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Create tag
-        run: |
-          git tag -a "v${{ steps.version.outputs.next_version }}" -m "Release v${{ steps.version.outputs.next_version }}"
-          git push origin "v${{ steps.version.outputs.next_version }}"
+      # - name: Create tag
+      #   run: |
+      #     git tag -a "v${{ steps.version.outputs.next_version }}" -m "Release v${{ steps.version.outputs.next_version }}"
+      #     git push origin "v${{ steps.version.outputs.next_version }}"
 
-      - name: Re-checkout to include the new tag
-        uses: actions/checkout@v4.1.7
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Re-checkout to include the new tag
+      #   uses: actions/checkout@v4.1.7
+      #   with:
+      #     fetch-depth: 0
+      #     token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Clean dist folder
         run: rm -rf dist/*
