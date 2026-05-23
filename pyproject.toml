@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -47,10 +47,11 @@ Homepage = "https://github.com/bomyrk/ohada-financial-extractor"
 Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
 
 [tool.setuptools]
-packages = ["ohada_extractor"]
+package-dir = { "" = "src" }
 
-[tool.setuptools.package-dir]
-"" = "src"
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["ohada_extractor", "ohada_extractor.*"]
 
 [tool.black]
 line-length = 120
