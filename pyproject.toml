@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=65.0", "setuptools_scm>=8.0", "wheel"]
+requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -51,11 +51,6 @@ Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-
-[tool.setuptools_scm]
-write_to = "src/ohada_extractor/_version.py"
-git_describe_command = "git describe --tags --dirty --always"
-fallback_version = "0.2.0"
 
 [tool.setuptools.packages.find]
 where = ["src"]
