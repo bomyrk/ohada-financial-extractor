@@ -5,6 +5,7 @@ Converts extracted arrays into JSON-serializable format.
 """
 
 import json
+import math
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Union
 
@@ -24,7 +25,13 @@ class OHADAJSONFormatter:
         if isinstance(obj, np.integer):
             return int(obj)
         elif isinstance(obj, np.floating):
+            if not np.isfinite(obj):
+                return None
             return round(float(obj), 2)
+        elif isinstance(obj, float):
+            if math.isnan(obj) or math.isinf(obj):
+                return None
+            return obj
         elif isinstance(obj, np.ndarray):
             return [OHADAJSONFormatter.numpy_to_serializable(item) for item in obj.tolist()]
         elif isinstance(obj, (date, datetime)):

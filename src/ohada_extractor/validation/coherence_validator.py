@@ -291,7 +291,7 @@ class CoherenceValidator:
         Assets carry Gross, Amortissement, and Net values. Other statements
         carry one scalar value per period.
         """
-        value_labels = ["value"]
+        value_labels = ["valeur"]
 
         if "valeur" in data.dims:
             value_labels = [str(label) for label in data.coords["valeur"].values]
@@ -377,11 +377,7 @@ class CoherenceValidator:
                 expression="Cashflow ZG = ZB + ZC + ZF",
                 financial_type="cashflow_statement",
                 actual=self.cashflow.sel(compte=pd.IndexSlice[:, "ZG"]),
-                expected=(
-                    self.cashflow.sel(compte=pd.IndexSlice[:, "ZB"]).drop_vars("compte")
-                    + self.cashflow.sel(compte=pd.IndexSlice[:, "ZC"]).drop_vars("compte")
-                    + self.cashflow.sel(compte=pd.IndexSlice[:, "ZF"]).drop_vars("compte")
-                ),
+                expected=self.cashflow.sel(compte=pd.IndexSlice[:, ["ZB", "ZC", "ZF"]]).sum(dim="compte", keepdims=True),
                 severity="high",
             ),
         ]
