@@ -119,16 +119,19 @@ class OHADAJSONFormatter:
         if metadata_obj is None:
             return None
         return {
-            "currency": metadata_obj.currency,
             "legal_form": metadata_obj.legal_form,
             "country": metadata_obj.country,
+            "currency": metadata_obj.currency,
             "year_creation": metadata_obj.year_creation,
             "regime_fiscal": metadata_obj.regime_fiscal,
             "number_of_units": metadata_obj.number_of_units,
             "owned": metadata_obj.owned,
+            "main_activity": metadata_obj.main_activity.get('label') if metadata_obj.main_activity else None,
+            "secondary_activity": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.secondary_activity),
+            "activities_breakdown": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.activities_breakdown),
             "dividend": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.dividend),
-            "number_of_shares": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_shares),
-            "number_of_employees": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_employees),
+            "shares": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_shares),
+            "employees": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_employees),
         }
 
     # ---------------------------------------------------------
@@ -320,6 +323,7 @@ class OHADAJSONFormatter:
             "other_data": OHADAJSONFormatter.format_statement(
                 statement._other_data, periods, OTHER_ACCOUNTS, "other_data"
             ),
+            "years": OHADAJSONFormatter.parse_years(statement.years),
             "notes": OHADAJSONFormatter.format_notes(statement.notes),
         }
 
@@ -391,6 +395,7 @@ class OHADAJSONFormatter:
             "income_statement": hierarchical_income,
             "cashflow_statement": hierarchical_cashflow,
             "other_data": flat_other,  # other_data has no parent mapping, keep flat
+            "years": OHADAJSONFormatter.parse_years(statement.years),
             "notes": OHADAJSONFormatter.format_notes(statement.notes),
         }
 
