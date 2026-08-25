@@ -38,7 +38,7 @@ jobs:
         id: version
         run: |
           # Extract last tag
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.5")
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.4.0")
           
           echo "Last tag detected: $LAST_TAG"
             
