@@ -497,6 +497,54 @@ class FinancialStatement:
         """Alias for JSON‑safe export."""
         return self.to_dict()
 
+    def to_ohada_json(self, indent: int = 2) -> str:
+        """
+        Export this statement as a structured OHADA JSON string.
+
+        This method returns a JSON string with the rich labeled OHADA structure
+        (balance_sheet.assets/liabilities, income_statement, cashflow_statement,
+        per-account records with reference/label/values). This is different from
+        to_json()/to_dict() which return a raw dict with simple arrays.
+
+        Args:
+            indent: JSON indentation level (default: 2)
+
+        Returns:
+            JSON string with structured OHADA format
+
+        Example:
+            >>> ohada_json_str = statement.to_ohada_json()
+            >>> parsed = json.loads(ohada_json_str)
+            >>> 'balance_sheet' in parsed
+            True
+        """
+        # Lazy import to avoid circular dependency between core and formatters
+        from ..formatters.json_formatter import OHADAJSONFormatter
+        return OHADAJSONFormatter.to_json(self, indent=indent)
+
+    def to_ohada_dict(self) -> Dict[str, Any]:
+        """
+        Export this statement as a structured OHADA dictionary.
+
+        This method returns a dict with the rich labeled OHADA structure
+        (balance_sheet.assets/liabilities, income_statement, cashflow_statement,
+        per-account records with reference/label/values). This is different from
+        to_dict() which returns a raw dict with simple arrays.
+
+        Returns:
+            Dictionary with structured OHADA format
+
+        Example:
+            >>> ohada_dict = statement.to_ohada_dict()
+            >>> 'balance_sheet' in ohada_dict
+            True
+            >>> 'income_statement' in ohada_dict
+            True
+        """
+        # Lazy import to avoid circular dependency between core and formatters
+        from ..formatters.json_formatter import OHADAJSONFormatter
+        return OHADAJSONFormatter.format_statement_data(self)
+
     def to_serializable_dict(self, include_metadata: bool = True, include_notes: bool = True) -> Dict[str, Any]:
         """
         Return a JSON-safe payload that can reconstruct this FinancialStatement.
