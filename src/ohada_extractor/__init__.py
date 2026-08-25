@@ -20,10 +20,7 @@ Example:
     >>> json_output = data.to_json()
 """
 
-try:
-    from ._version import version as __version__
-except ImportError:
-    __version__ = "unknown"
+__version__ = "0.1.5"
 
 __author__ = "Kamguia Wabo Leonel B. "
 
