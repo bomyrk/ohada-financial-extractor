@@ -56,9 +56,7 @@ uploaded_excels = st.sidebar.file_uploader(
 )
 
 # Génération d'un identifiant unique basé sur les fichiers présents dans le uploader
-files_identifier = (
-    [(f.name, f.size) for f in uploaded_excels] if uploaded_excels else []
-)
+files_identifier = [(f.name, f.size) for f in uploaded_excels] if uploaded_excels else []
 
 # Si l'utilisateur supprime ou change les fichiers, 
 # on réinitialise l'état pour forcer un nouveau clic
@@ -71,23 +69,17 @@ if uploaded_excels:
     st.sidebar.write(f"📎 **{len(uploaded_excels)} file(s) ready.**")
 
     # Le bouton qui déclenche explicitement le chargement
-    process_button = st.sidebar.button(
-        "⚙️ Process & Load Data", type="primary", use_container_width=True
-    )
+    process_button = st.sidebar.button("⚙️ Process & Load Data", type="primary", use_container_width=True)
 
     if process_button:
         extractor = FinancialExtractor()
         temp_paths = []
 
         try:
-            with st.spinner(
-                "Extracting and normalizing financial data from DSF tables..."
-            ):
+            with st.spinner("Extracting and normalizing financial data from DSF tables..."):
                 # Écriture temporaire sur le disque
                 for f in uploaded_excels:
-                    with tempfile.NamedTemporaryFile(
-                        delete=False, suffix=f"_{f.name}"
-                    ) as tmp:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{f.name}") as tmp:
                         tmp.write(f.getvalue())
                         temp_paths.append(tmp.name)
 
@@ -108,9 +100,7 @@ if uploaded_excels:
                 st.sidebar.success("Data loaded and cleaned successfully!")
 
         except Exception as e:
-            st.error(
-                f"Extraction Error: An error occurred while parsing the DSF files. Details: {e}"
-            )
+            st.error(f"Extraction Error: An error occurred while parsing the DSF files. Details: {e}")
             st.stop()
         finally:
             # Nettoyage immédiat du disque
@@ -125,9 +115,7 @@ else:
 
 # Si les fichiers sont là mais que l'utilisateur n'a pas encore cliqué sur le bouton
 if st.session_state.statement is None:
-    st.info(
-        "ℹ️ Click on **'Process & Load Data'** in the sidebar to generate the dashboards."
-    )
+    st.info("ℹ️ Click on **'Process & Load Data'** in the sidebar to generate the dashboards.")
     st.stop()
 
 statement = st.session_state.statement

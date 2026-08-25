@@ -20,7 +20,7 @@ wheels/
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
-src/ohada_extractor/_version.py
+
 .installed.cfg
 *.egg
 MANIFEST
@@ -47,3 +47,5 @@ Thumbs.db
 # *.xlsx
 !examples/data/sample_ohada_statement_2024.xlsx
 output.json
+
+tet.py

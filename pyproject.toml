@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -28,18 +28,21 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 
-dependencies = [
-    "openpyxl>=3.1.5",
-    "numpy>=2.2.0",
-    "pandas>=2.2.0",
-    "xarray>=0.21.0",
-    "pyqt5>=5.15.11",
-    "matplotlib>=3.10.1",
-    "plotly>=6.5.0",
-    "streamlit>=1.56.0"
-]
-
-[project.optional-dependencies]
+dependencies = [  
+    "openpyxl>=3.1.5",  
+    "numpy>=2.2.0",  
+    "pandas>=2.2.0",  
+    "xarray>=0.21.0",  
+    "python-dateutil>=2.8.2",  
+]  
+  
+[project.optional-dependencies]  
+viz = [  
+    "pyqt5>=5.15.11",  
+    "matplotlib>=3.10.1",  
+    "plotly>=6.5.0",  
+    "streamlit>=1.56.0",  
+]  
 dev = ["pytest>=6.0", "pytest-cov>=2.12.0"]
 
 [project.urls]
@@ -47,14 +50,14 @@ Homepage = "https://github.com/bomyrk/ohada-financial-extractor"
 Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
 
 [tool.setuptools]
-# Si votre code est dans un dossier 'src', setuptools le trouvera automatiquement
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
+package-dir = { "" = "src" }
 
 [tool.setuptools_scm]
 write_to = "src/ohada_extractor/_version.py"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["ohada_extractor", "ohada_extractor.*"]
 
 [tool.black]
 line-length = 120
@@ -68,4 +71,4 @@ select = [
     "B",   # bugbear
 ]
 
-ignore = ["E711"]
+ignore = ["E711", "B905", "E501"]
