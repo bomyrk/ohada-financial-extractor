@@ -54,6 +54,8 @@ package-dir = { "" = "src" }
 
 [tool.setuptools_scm]
 write_to = "src/ohada_extractor/_version.py"
+git_describe_command = "git describe --tags --dirty --always"
+fallback_version = "0.2.0"
 
 [tool.setuptools.packages.find]
 where = ["src"]

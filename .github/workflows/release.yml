@@ -80,6 +80,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          ref: "refs/tags/v${{ steps.version.outputs.next_version }}"
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Clean dist folder
