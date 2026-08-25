@@ -2,6 +2,16 @@ name: Auto Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 permissions:
   id-token: write
@@ -32,11 +42,26 @@ jobs:
           
           echo "Last tag detected: $LAST_TAG"
             
-          # Compute next patch version
+          # Compute next version based on type
           BASE=${LAST_TAG#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
-          NEXT_PATCH=$((PATCH + 1))
-          NEXT_VERSION="$MAJOR.$MINOR.$NEXT_PATCH"
+          
+          case "${{ github.event.inputs.version_type }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch|*)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEXT_VERSION="$MAJOR.$MINOR.$PATCH"
             
           echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
