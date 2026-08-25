@@ -6,8 +6,8 @@ Represents extracted and structured financial data from OHADA Excel files.
 
 import json
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
-# from decimal import Decimal
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import pandas as pd
 import xarray as xr

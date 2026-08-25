@@ -58,7 +58,8 @@ uploaded_excels = st.sidebar.file_uploader(
 # Génération d'un identifiant unique basé sur les fichiers présents dans le uploader
 files_identifier = [(f.name, f.size) for f in uploaded_excels] if uploaded_excels else []
 
-# Si l'utilisateur supprime ou change les fichiers, on réinitialise l'état pour forcer un nouveau clic
+# Si l'utilisateur supprime ou change les fichiers, 
+# on réinitialise l'état pour forcer un nouveau clic
 if files_identifier != st.session_state.current_files_processed:
     st.session_state.statement = None
 

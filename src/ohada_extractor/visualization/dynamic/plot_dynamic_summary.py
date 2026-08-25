@@ -488,6 +488,9 @@ def plot_income_summary_dynamic(statement, period="all"):
     fig.show()
 
 
+
+
+
 def plot_cashflow_summary_dynamic(statement, period="all"):
     """Dynamic summary plots for Cashflow with grouped bars + waterfall."""
 
