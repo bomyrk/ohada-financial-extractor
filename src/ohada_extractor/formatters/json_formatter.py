@@ -126,7 +126,7 @@ class OHADAJSONFormatter:
             "regime_fiscal": metadata_obj.regime_fiscal,
             "number_of_units": metadata_obj.number_of_units,
             "owned": metadata_obj.owned,
-            "main_activity": metadata_obj.main_activity.get('label') if metadata_obj.main_activity else None,
+            "main_activity": metadata_obj.main_activity.get("label") if metadata_obj.main_activity else None,
             "secondary_activity": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.secondary_activity),
             "activities_breakdown": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.activities_breakdown),
             "dividend": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.dividend),
@@ -226,7 +226,9 @@ class OHADAJSONFormatter:
     # HIERARCHICAL FORMATTING
     # ---------------------------------------------------------
     @staticmethod
-    def build_hierarchy(flat_records: List[Dict[str, Any]], parent_map: Dict[str, Optional[str]]) -> List[Dict[str, Any]]:
+    def build_hierarchy(
+        flat_records: List[Dict[str, Any]], parent_map: Dict[str, Optional[str]]
+    ) -> List[Dict[str, Any]]:
         """
         Build a hierarchical tree from flat records using parent-child relationships.
 
@@ -239,19 +241,19 @@ class OHADAJSONFormatter:
         """
         # Build a lookup by reference
         records_by_ref = {record["reference"]: record.copy() for record in flat_records}
-        
+
         # Initialize children lists for all records
         for record in records_by_ref.values():
             record["children"] = []
-        
+
         # Track orphans
         orphans = []
-        
+
         # Build the tree structure
         roots = []
         for ref, record in records_by_ref.items():
             parent_ref = parent_map.get(ref)
-            
+
             if parent_ref is None:
                 # This is a root node
                 roots.append(record)
@@ -260,15 +262,17 @@ class OHADAJSONFormatter:
                 records_by_ref[parent_ref]["children"].append(record)
             else:
                 # Orphan: parent not found in records
-                logger.warning(f"Orphan reference '{ref}' has parent '{parent_ref}' not found in records. Placing at root.")
+                logger.warning(
+                    f"Orphan reference '{ref}' has parent '{parent_ref}' not found in records. Placing at root."
+                )
                 orphans.append(record)
                 roots.append(record)
-        
+
         # Add orphans to roots if they weren't already added
         for orphan in orphans:
             if orphan not in roots:
                 roots.append(orphan)
-        
+
         return roots
 
     # ---------------------------------------------------------
@@ -348,7 +352,7 @@ class OHADAJSONFormatter:
         )
 
         periods = statement.periods if len(statement.periods) > 2 else statement.periods[::-1]
-        
+
         # Generate flat records using existing formatters
         flat_assets = OHADAJSONFormatter.format_assets(statement._asset_data, periods, ASSETS_ACCOUNTS)
         flat_liabilities = OHADAJSONFormatter.format_statement(
@@ -357,22 +361,18 @@ class OHADAJSONFormatter:
             LIABILITIES_ACCOUNTS,
             "liabilities",
         )
-        flat_income = OHADAJSONFormatter.format_statement(
-            statement._income_data, periods, INCOME_ACCOUNTS, "income"
-        )
+        flat_income = OHADAJSONFormatter.format_statement(statement._income_data, periods, INCOME_ACCOUNTS, "income")
         flat_cashflow = OHADAJSONFormatter.format_statement(
             statement._cashflow_data, periods, CASHFLOW_ACCOUNTS, "cashflow"
         )
-        flat_other = OHADAJSONFormatter.format_statement(
-            statement._other_data, periods, OTHER_ACCOUNTS, "other_data"
-        )
-        
+        flat_other = OHADAJSONFormatter.format_statement(statement._other_data, periods, OTHER_ACCOUNTS, "other_data")
+
         # Build hierarchical trees
         hierarchical_assets = OHADAJSONFormatter.build_hierarchy(flat_assets, ASSETS_PARENTS)
         hierarchical_liabilities = OHADAJSONFormatter.build_hierarchy(flat_liabilities, LIABILITIES_PARENTS)
         hierarchical_income = OHADAJSONFormatter.build_hierarchy(flat_income, INCOME_PARENTS)
         hierarchical_cashflow = OHADAJSONFormatter.build_hierarchy(flat_cashflow, CASHFLOW_PARENTS)
-        
+
         return {
             "metadata": OHADAJSONFormatter.format_metadata(statement.metadata),
             "extraction_metadata": {

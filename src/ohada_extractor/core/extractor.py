@@ -665,7 +665,7 @@ class FinancialExtractor:
         """
         Checks whether the financial data for a given column is consistent
         between the current year and the previous year.
-        Checks whether the financial data for a given column is consistent between 
+        Checks whether the financial data for a given column is consistent between
         the current year and the previous year.
 
         Args:

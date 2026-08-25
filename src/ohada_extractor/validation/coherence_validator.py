@@ -377,7 +377,9 @@ class CoherenceValidator:
                 expression="Cashflow ZG = ZB + ZC + ZF",
                 financial_type="cashflow_statement",
                 actual=self.cashflow.sel(compte=pd.IndexSlice[:, "ZG"]),
-                expected=self.cashflow.sel(compte=pd.IndexSlice[:, ["ZB", "ZC", "ZF"]]).sum(dim="compte", keepdims=True),
+                expected=self.cashflow.sel(compte=pd.IndexSlice[:, ["ZB", "ZC", "ZF"]]).sum(
+                    dim="compte", keepdims=True
+                ),
                 severity="high",
             ),
         ]
