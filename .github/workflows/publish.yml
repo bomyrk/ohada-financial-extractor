@@ -1,43 +1,39 @@
 name: Publish to PyPI
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  build-and-publish:
+  publish:
     runs-on: ubuntu-latest
-    permissions: 
-      contents: read
-      id-token: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.1.7
+      - name: Checkout tagged commit
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v5.1.0
+      - name: Install Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
       - name: Install build tools
-        run: |
-          pip install --upgrade pip
-          pip install build twine
+        run: pip install build setuptools-scm
 
-      - name: Clean dist folder
-        run: rm -rf dist
-
-      - name: Build wheel and sdist
+      - name: Build package
         run: python -m build
 
+      - name: List dist folder
+        run: ls -la dist/
+
       - name: Publish to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          twine upload dist/*
-        
+        uses: pypa/gh-action-pypi-publish@v1.10.0
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
