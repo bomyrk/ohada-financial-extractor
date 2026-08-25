@@ -5,11 +5,15 @@ Converts extracted arrays into JSON-serializable format.
 """
 
 import json
+import logging
+import math
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 class OHADAJSONFormatter:
@@ -24,7 +28,13 @@ class OHADAJSONFormatter:
         if isinstance(obj, np.integer):
             return int(obj)
         elif isinstance(obj, np.floating):
+            if not np.isfinite(obj):
+                return None
             return round(float(obj), 2)
+        elif isinstance(obj, float):
+            if math.isnan(obj) or math.isinf(obj):
+                return None
+            return obj
         elif isinstance(obj, np.ndarray):
             return [OHADAJSONFormatter.numpy_to_serializable(item) for item in obj.tolist()]
         elif isinstance(obj, (date, datetime)):
@@ -109,14 +119,19 @@ class OHADAJSONFormatter:
         if metadata_obj is None:
             return None
         return {
-            "currency": metadata_obj.currency,
             "legal_form": metadata_obj.legal_form,
             "country": metadata_obj.country,
+            "currency": metadata_obj.currency,
             "year_creation": metadata_obj.year_creation,
             "regime_fiscal": metadata_obj.regime_fiscal,
+            "number_of_units": metadata_obj.number_of_units,
+            "owned": metadata_obj.owned,
+            "main_activity": metadata_obj.main_activity.get("label") if metadata_obj.main_activity else None,
+            "secondary_activity": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.secondary_activity),
+            "activities_breakdown": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.activities_breakdown),
             "dividend": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.dividend),
-            "number_of_shares": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_shares),
-            "number_of_employees": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_employees),
+            "shares": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_shares),
+            "employees": OHADAJSONFormatter.numpy_to_serializable(metadata_obj.number_of_employees),
         }
 
     # ---------------------------------------------------------
@@ -208,6 +223,59 @@ class OHADAJSONFormatter:
         return result
 
     # ---------------------------------------------------------
+    # HIERARCHICAL FORMATTING
+    # ---------------------------------------------------------
+    @staticmethod
+    def build_hierarchy(
+        flat_records: List[Dict[str, Any]], parent_map: Dict[str, Optional[str]]
+    ) -> List[Dict[str, Any]]:
+        """
+        Build a hierarchical tree from flat records using parent-child relationships.
+
+        Args:
+            flat_records: List of flat records from format_assets or format_statement
+            parent_map: Dictionary mapping reference -> parent_reference (None for roots)
+
+        Returns:
+            List of root nodes with nested children structure
+        """
+        # Build a lookup by reference
+        records_by_ref = {record["reference"]: record.copy() for record in flat_records}
+
+        # Initialize children lists for all records
+        for record in records_by_ref.values():
+            record["children"] = []
+
+        # Track orphans
+        orphans = []
+
+        # Build the tree structure
+        roots = []
+        for ref, record in records_by_ref.items():
+            parent_ref = parent_map.get(ref)
+
+            if parent_ref is None:
+                # This is a root node
+                roots.append(record)
+            elif parent_ref in records_by_ref:
+                # Add to parent's children
+                records_by_ref[parent_ref]["children"].append(record)
+            else:
+                # Orphan: parent not found in records
+                logger.warning(
+                    f"Orphan reference '{ref}' has parent '{parent_ref}' not found in records. Placing at root."
+                )
+                orphans.append(record)
+                roots.append(record)
+
+        # Add orphans to roots if they weren't already added
+        for orphan in orphans:
+            if orphan not in roots:
+                roots.append(orphan)
+
+        return roots
+
+    # ---------------------------------------------------------
     # FULL STATEMENT FORMATTER (UPDATED)
     # ---------------------------------------------------------
     @staticmethod
@@ -259,6 +327,75 @@ class OHADAJSONFormatter:
             "other_data": OHADAJSONFormatter.format_statement(
                 statement._other_data, periods, OTHER_ACCOUNTS, "other_data"
             ),
+            "years": OHADAJSONFormatter.parse_years(statement.years),
+            "notes": OHADAJSONFormatter.format_notes(statement.notes),
+        }
+
+    @staticmethod
+    def format_statement_data_hierarchical(statement) -> Dict[str, Any]:
+        """
+        Format a FinancialStatement object into a hierarchical JSON-ready dictionary.
+
+        Returns:
+            Dictionary with formatted statements in hierarchical tree structure
+        """
+        from ..core.schemas import (
+            ASSETS_ACCOUNTS,
+            ASSETS_PARENTS,
+            CASHFLOW_ACCOUNTS,
+            CASHFLOW_PARENTS,
+            INCOME_ACCOUNTS,
+            INCOME_PARENTS,
+            LIABILITIES_ACCOUNTS,
+            LIABILITIES_PARENTS,
+            OTHER_ACCOUNTS,
+        )
+
+        periods = statement.periods if len(statement.periods) > 2 else statement.periods[::-1]
+
+        # Generate flat records using existing formatters
+        flat_assets = OHADAJSONFormatter.format_assets(statement._asset_data, periods, ASSETS_ACCOUNTS)
+        flat_liabilities = OHADAJSONFormatter.format_statement(
+            statement._liability_data,
+            periods,
+            LIABILITIES_ACCOUNTS,
+            "liabilities",
+        )
+        flat_income = OHADAJSONFormatter.format_statement(statement._income_data, periods, INCOME_ACCOUNTS, "income")
+        flat_cashflow = OHADAJSONFormatter.format_statement(
+            statement._cashflow_data, periods, CASHFLOW_ACCOUNTS, "cashflow"
+        )
+        flat_other = OHADAJSONFormatter.format_statement(statement._other_data, periods, OTHER_ACCOUNTS, "other_data")
+
+        # Build hierarchical trees
+        hierarchical_assets = OHADAJSONFormatter.build_hierarchy(flat_assets, ASSETS_PARENTS)
+        hierarchical_liabilities = OHADAJSONFormatter.build_hierarchy(flat_liabilities, LIABILITIES_PARENTS)
+        hierarchical_income = OHADAJSONFormatter.build_hierarchy(flat_income, INCOME_PARENTS)
+        hierarchical_cashflow = OHADAJSONFormatter.build_hierarchy(flat_cashflow, CASHFLOW_PARENTS)
+
+        return {
+            "metadata": OHADAJSONFormatter.format_metadata(statement.metadata),
+            "extraction_metadata": {
+                "periods": periods,
+                "statement_types": [
+                    "balance_sheet_assets",
+                    "balance_sheet_liabilities",
+                    "income",
+                    "cashflow",
+                    "other_data",
+                    "notes",
+                    "metadata",
+                ],
+                "format": "hierarchical",
+            },
+            "balance_sheet": {
+                "assets": hierarchical_assets,
+                "liabilities": hierarchical_liabilities,
+            },
+            "income_statement": hierarchical_income,
+            "cashflow_statement": hierarchical_cashflow,
+            "other_data": flat_other,  # other_data has no parent mapping, keep flat
+            "years": OHADAJSONFormatter.parse_years(statement.years),
             "notes": OHADAJSONFormatter.format_notes(statement.notes),
         }
 
@@ -266,15 +403,19 @@ class OHADAJSONFormatter:
     # JSON STRING OUTPUT (UPDATED)
     # ---------------------------------------------------------
     @staticmethod
-    def to_json(statement, indent: int = 2) -> str:
+    def to_json(statement, indent: int = 2, hierarchical: bool = False) -> str:
         """
         Convert all statements to JSON string.
 
         Args:
             indent: JSON indentation level (None for compact)
+            hierarchical: If True, output hierarchical tree structure; if False, output flat lists
 
         Returns:
             JSON string
         """
-        data = OHADAJSONFormatter.format_statement_data(statement)
+        if hierarchical:
+            data = OHADAJSONFormatter.format_statement_data_hierarchical(statement)
+        else:
+            data = OHADAJSONFormatter.format_statement_data(statement)
         return json.dumps(data, indent=indent, default=OHADAJSONFormatter.numpy_to_serializable)

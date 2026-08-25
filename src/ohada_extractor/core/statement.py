@@ -6,7 +6,7 @@ Represents extracted and structured financial data from OHADA Excel files.
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -497,6 +497,56 @@ class FinancialStatement:
         """Alias for JSON‑safe export."""
         return self.to_dict()
 
+    def to_ohada_json(self, indent: int = 2) -> str:
+        """
+        Export this statement as a structured OHADA JSON string.
+
+        This method returns a JSON string with the rich labeled OHADA structure
+        (balance_sheet.assets/liabilities, income_statement, cashflow_statement,
+        per-account records with reference/label/values). This is different from
+        to_json()/to_dict() which return a raw dict with simple arrays.
+
+        Args:
+            indent: JSON indentation level (default: 2)
+
+        Returns:
+            JSON string with structured OHADA format
+
+        Example:
+            >>> ohada_json_str = statement.to_ohada_json()
+            >>> parsed = json.loads(ohada_json_str)
+            >>> 'balance_sheet' in parsed
+            True
+        """
+        # Lazy import to avoid circular dependency between core and formatters
+        from ..formatters.json_formatter import OHADAJSONFormatter
+
+        return OHADAJSONFormatter.to_json(self, indent=indent)
+
+    def to_ohada_dict(self) -> Dict[str, Any]:
+        """
+        Export this statement as a structured OHADA dictionary.
+
+        This method returns a dict with the rich labeled OHADA structure
+        (balance_sheet.assets/liabilities, income_statement, cashflow_statement,
+        per-account records with reference/label/values). This is different from
+        to_dict() which returns a raw dict with simple arrays.
+
+        Returns:
+            Dictionary with structured OHADA format
+
+        Example:
+            >>> ohada_dict = statement.to_ohada_dict()
+            >>> 'balance_sheet' in ohada_dict
+            True
+            >>> 'income_statement' in ohada_dict
+            True
+        """
+        # Lazy import to avoid circular dependency between core and formatters
+        from ..formatters.json_formatter import OHADAJSONFormatter
+
+        return OHADAJSONFormatter.format_statement_data(self)
+
     def to_serializable_dict(self, include_metadata: bool = True, include_notes: bool = True) -> Dict[str, Any]:
         """
         Return a JSON-safe payload that can reconstruct this FinancialStatement.
@@ -559,6 +609,102 @@ class FinancialStatement:
         Rebuild a FinancialStatement from a JSON string.
         """
         return cls.from_serializable_dict(json.loads(json_string))
+
+    def to_dataframe(
+        self, statement: str = None, tidy: bool = True, value_type: str = "Net", reset_index: bool = True
+    ) -> Union[pd.DataFrame, Dict[str, pd.DataFrame]]:
+        """
+        Convert financial statement data to pandas DataFrame for time-series analysis.
+
+        Args:
+            statement: Name of statement to return ('asset', 'liability', 'income', 'cashflow', 'other').
+                      If None, returns a dict of DataFrames for all statements.
+            tidy: If True, returns long format with columns [Reference, Label, annee, value, valeur].
+                  If False, returns wide format with account index and year columns.
+            value_type: For assets only, which value type to use ('Gross', 'Amortissement', 'Net').
+                       Ignored for other statements.
+            reset_index: If True, resets the MultiIndex to columns. If False, keeps the MultiIndex (Label, Reference)
+                        as the index, which is useful for hierarchical operations.
+
+        Returns:
+            Single DataFrame if statement is specified, otherwise dict of DataFrames for all statements.
+            Returns None or empty DataFrame if underlying array is None.
+
+        Examples:
+            >>> # Get all statements in tidy format with MultiIndex as columns
+            >>> dfs = statement.to_dataframe()
+            >>> # Get single statement in wide format with MultiIndex preserved as index
+            >>> income_df = statement.to_dataframe('income', tidy=False, reset_index=False)
+            >>> # Get assets with Gross values
+            >>> assets_gross = statement.to_dataframe('asset', value_type='Gross')
+        """
+
+        def convert_array_to_df(da: xr.DataArray, is_asset: bool = False) -> pd.DataFrame:
+            """Convert xarray DataArray to pandas DataFrame."""
+            if da is None:
+                return pd.DataFrame()
+
+            # For assets, select the specified value_type
+            if is_asset and "valeur" in da.dims:
+                da = da.sel(valeur=value_type)
+
+            if tidy:
+                # Tidy (long) format: columns [Reference, Label, annee, value]
+                if is_asset and "valeur" in da.dims:
+                    # Use to_dataframe() for assets with valeur dimension
+                    df = da.to_dataframe()
+                    if reset_index:
+                        df = df.reset_index()
+                else:
+                    # Use to_pandas() for other statements (2D arrays), then melt to tidy format
+                    df = da.to_pandas()
+                    if reset_index:
+                        df = df.reset_index()
+                        # Melt so years become values in annee column
+                        id_vars = ["Label", "Reference"]
+                        value_vars = [col for col in df.columns if col not in id_vars]
+                        df = df.melt(id_vars=id_vars, value_vars=value_vars, var_name="annee", value_name="value")
+                        # Convert annee to datetime
+                        df["annee"] = pd.to_datetime(df["annee"])
+                    else:
+                        # Keep MultiIndex, melt with index as id_vars
+                        df = df.reset_index()
+                        id_vars = ["Label", "Reference"]
+                        value_vars = [col for col in df.columns if col not in id_vars]
+                        df = df.melt(id_vars=id_vars, value_vars=value_vars, var_name="annee", value_name="value")
+                        # Convert annee to datetime
+                        df["annee"] = pd.to_datetime(df["annee"])
+                        # Set MultiIndex back
+                        df = df.set_index(["Label", "Reference"])
+            else:
+                # Wide format: index = account, columns = years
+                df = da.to_pandas()
+                if reset_index:
+                    # Reset index to make Label and Reference columns
+                    df = df.reset_index()
+
+            # Ensure time axis is monotonic increasing
+            if "annee" in df.columns:
+                df = df.sort_values("annee")
+
+            return df
+
+        # Handle single statement request
+        if statement is not None:
+            if statement not in self.arrays:
+                raise ValueError(f"Invalid statement '{statement}'. Must be one of: {list(self.arrays.keys())}")
+
+            da = self.arrays[statement]
+            is_asset = statement == "asset"
+            return convert_array_to_df(da, is_asset)
+
+        # Return all statements as dict
+        result = {}
+        for stmt_name, da in self.arrays.items():
+            is_asset = stmt_name == "asset"
+            result[stmt_name] = convert_array_to_df(da, is_asset)
+
+        return result
 
     # ---------------------------------------------------------
     # GETTERS FOR SPECIFIC ACCOUNTS

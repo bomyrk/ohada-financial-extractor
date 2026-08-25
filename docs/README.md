@@ -104,11 +104,11 @@ import json
 extractor = FinancialExtractor()
 statement = extractor.extract_from_excel('financial_statement.xlsx')
 
-# Convert to JSON
-json_output = OHADAJSONFormatter.to_json(
-    statement=statement,
-    indent=2
-)
+# Convert to structured OHADA JSON (convenience method)
+json_output = statement.to_ohada_json(indent=2)
+
+# Or get the structured dictionary directly
+ohada_dict = statement.to_ohada_dict()
 
 # Use or save
 data = json.loads(json_output)
