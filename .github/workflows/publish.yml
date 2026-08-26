@@ -32,13 +32,13 @@ jobs:
           python-version: "3.10"
 
       - name: Install build tools
-        run: pip install build setuptools-scm
+        run: pip install build setuptools-scm twine
 
       - name: Build package
         run: python -m build
 
       - name: Validate distributions
-        run: twine check dist/*
+        run: python -m twine check dist/*
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.10.0
