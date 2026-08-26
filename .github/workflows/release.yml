@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   tag:
@@ -62,3 +63,24 @@ jobs:
         run: |
           git tag -a "v${{ steps.version.outputs.next_version }}" -m "Release v${{ steps.version.outputs.next_version }}"
           git push origin "v${{ steps.version.outputs.next_version }}"
+
+      # This is intentionally in the same workflow as tag creation. Tags pushed
+      # with GITHUB_TOKEN do not trigger a separate `push` workflow.
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install build tools
+        run: pip install build setuptools-scm twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Validate distributions
+        run: twine check dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.10.0
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
