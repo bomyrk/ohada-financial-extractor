@@ -20,7 +20,7 @@ Example:
     >>> json_output = data.to_json()
 """
 
-#__version__ = "0.2.0"
+# __version__ = "0.2.0"
 
 __author__ = "Kamguia Wabo Leonel B. "
 
@@ -29,10 +29,8 @@ from importlib.metadata import PackageNotFoundError, version
 try:
     __version__ = version("ohada-financial-extractor")
 except PackageNotFoundError:
-    try:
-        from ._version import version as __version__
-    except ImportError:
-        __version__ = "0.0.0.dev0"
+    # Package is being run directly from the source tree.
+    __version__ = "0.0.0.dev0"
 
 from .core.extractor import FinancialExtractor
 from .core.schemas import ASSETS_ACCOUNTS, OHADA_STATEMENTS
