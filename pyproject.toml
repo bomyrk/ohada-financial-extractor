@@ -51,7 +51,9 @@ Repository = "https://github.com/bomyrk/ohada-financial-extractor.git"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-# version_file = "src/ohada_extractor/_version.py"
+
+# Derive the package version from Git tags such as v1.0.3.
+[tool.setuptools_scm]
 
 [tool.setuptools.packages.find]
 where = ["src"]
