@@ -136,7 +136,7 @@ print(f"Total Assets: {data['balance_sheet']['assets'][-1]}")
 - Operating, investing, financing activities
 - Beginning and ending cash positions
 
-### **Metadata Extraction (NEW)**
+### **Metadata Extraction**
 
 The extractor now automatically parses company metadata from DSF notes and headers, including:
 
@@ -174,7 +174,7 @@ metadata_dict = metadata.to_dict()
 ````
 This enables automated KYC, and regulatory reporting workflow.
 
-### **Notes Extraction (NEW)**
+### **Notes Extraction**
 
 The extractor now includes 23 OHADA Notes (Annexes) engine, parsing structured and unstructured notes such as:
 - Fiche R2 — Company identity
@@ -203,14 +203,57 @@ Each note includes:
 
 Notes can be exported to JSON for auditing or BI tools.
 
+### **DataFrame Export (NEW)**
+
+The extractor now includes a **DataFrame export module** for OHADA financial statements.
+
+- Purpose: 
+converts the internal xarray model into pandas DataFrames for time-series / panel analysis, plugging directly into the Python data-science stack (pandas, statsmodels, scikit-learn).
+
+- The signature and parameters:
+  - statement: one of 'asset', 'liability', 'income', 'cashflow', 'other'; if None, returns a dict of DataFrames for all statements.
+  - tidy: True → long format with columns [Reference, Label, annee, value]; False → wide format with account index and year columns.
+  - value_type: for assets only, one of 'Gross', 'Amortissement', 'Net' (default 'Net'); ignored for other statements.
+  - reset_index: True resets the MultiIndex (Label, Reference) to columns; False keeps it as the index for hierarchical operations.
+  - Note that the annee column is a proper datetime and sorted monotonically increasing, so the output is directly usable as a time series.
+
+**Static DataFrame Export**
+
+Export the financial statement to a pandas DataFrame:
+
+````python
+from ohada_extractor import FinancialExtractor  
+  
+extractor = FinancialExtractor()  
+statement = extractor.extract_from_excel("financial_statement.xlsx")  
+  
+# All statements as a dict of tidy (long) DataFrames  
+dfs = statement.to_dataframe()  
+  
+# Single statement in tidy format: columns [Reference, Label, annee, value]  
+income_df = statement.to_dataframe("income")  
+  
+# Wide format (accounts as rows, years as columns) for time-series ops  
+income_wide = statement.to_dataframe("income", tidy=False)  
+yoy_growth = income_wide.select_dtypes("number").pct_change(axis=1)  
+  
+# Assets with Gross values instead of Net  
+assets_gross = statement.to_dataframe("asset", value_type="Gross")  
+  
+# Preserve the (Label, Reference) MultiIndex for hierarchical operations  
+income_hier = statement.to_dataframe("income", tidy=False, reset_index=False)
+
+````
 
 ### **Features**
-- ✅ Multi-file period aggregation (2-5 years)
+- ✅ Multi-file period aggregation (2+ years)
 - ✅ Automatic data validation
 - ✅ JSON-serializable output
 - ✅ Account code standardization (OHADA)
 - ✅ Gross/Amort/Net decomposition for assets
 - ✅ Support for 18 OHADA zone countries
+- ✅ Pandas DataFrame export (tidy/long & wide formats) for time-series analysis
+
 
 ### **📊 Visualization Layer (NEW)**
 
