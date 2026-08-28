@@ -140,6 +140,33 @@ class FinancialStatement:
             self._arrays_cache = self._build_arrays()
         return self._arrays_cache
 
+    def keys(self) -> list[str]:  
+        """Return the valid statement keys, or [] if periods is empty."""  
+        try:  
+            return list(self.arrays.keys())  
+        except ValueError:  
+            # _build_arrays raises ValueError when self.periods is empty  
+            return []  
+    
+    def __getitem__(self, key: str) -> xr.DataArray:  
+        valid_keys = self.keys()  
+        if key in valid_keys:  
+            return self.arrays[key]  
+        raise KeyError(  
+            f"{key!r} is not a valid statement key. "  
+            f"Valid keys are: {valid_keys}"  
+        )
+
+    def __contains__(self, key: str) -> bool:  
+        # keys() already handles the empty-periods case by returning []  
+        return key in self.keys()  
+    
+    def __iter__(self):  
+        return iter(self.keys())  
+    
+    def __len__(self) -> int:  
+        return len(self.keys())
+
     # Clean, unified entry points for the user
     @property
     def asset(self) -> xr.DataArray:
