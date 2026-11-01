@@ -176,7 +176,11 @@ class FinancialExtractor:
                 first._liability_data.copy()[:, 1:-1],
             )
         )
-        combined_income = np.hstack((first._income_data.copy()[:, [0, -1]], first._income_data.copy()[:, 1:-1]))
+        combined_income = np.hstack(
+            (first._income_data.copy()[:, [0, -1]], 
+             first._income_data.copy()[:, 1:-1]
+            )
+        )
         combined_cashflow = np.hstack(
             (
                 first._cashflow_data.copy()[:, [0, -1]],
