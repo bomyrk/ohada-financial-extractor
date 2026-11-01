@@ -6,7 +6,7 @@ Represents extracted and structured financial data from OHADA Excel files.
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -139,6 +139,30 @@ class FinancialStatement:
         if self._arrays_cache is None:
             self._arrays_cache = self._build_arrays()
         return self._arrays_cache
+
+    def keys(self) -> list[str]:
+        """Return the valid statement keys, or [] if periods is empty."""
+        try:
+            return list(self.arrays.keys())
+        except ValueError:
+            # _build_arrays raises ValueError when self.periods is empty
+            return []
+
+    def __getitem__(self, key: str) -> xr.DataArray:
+        valid_keys = self.keys()
+        if key in valid_keys:
+            return self.arrays[key]
+        raise KeyError(f"{key!r} is not a valid statement key. " f"Valid keys are: {valid_keys}")
+
+    def __contains__(self, key: str) -> bool:
+        # keys() already handles the empty-periods case by returning []
+        return key in self.keys()
+
+    def __iter__(self):
+        return iter(self.keys())
+
+    def __len__(self) -> int:
+        return len(self.keys())
 
     # Clean, unified entry points for the user
     @property
@@ -520,6 +544,7 @@ class FinancialStatement:
         """
         # Lazy import to avoid circular dependency between core and formatters
         from ..formatters.json_formatter import OHADAJSONFormatter
+
         return OHADAJSONFormatter.to_json(self, indent=indent)
 
     def to_ohada_dict(self) -> Dict[str, Any]:
@@ -543,6 +568,7 @@ class FinancialStatement:
         """
         # Lazy import to avoid circular dependency between core and formatters
         from ..formatters.json_formatter import OHADAJSONFormatter
+
         return OHADAJSONFormatter.format_statement_data(self)
 
     def to_serializable_dict(self, include_metadata: bool = True, include_notes: bool = True) -> Dict[str, Any]:
@@ -636,6 +662,7 @@ class FinancialStatement:
             >>> # Get assets with Gross values
             >>> assets_gross = statement.to_dataframe('asset', value_type='Gross')
         """
+
         def convert_array_to_df(da: xr.DataArray, is_asset: bool = False) -> pd.DataFrame:
             """Convert xarray DataArray to pandas DataFrame."""
             if da is None:
@@ -689,18 +716,16 @@ class FinancialStatement:
         # Handle single statement request
         if statement is not None:
             if statement not in self.arrays:
-                raise ValueError(
-                    f"Invalid statement '{statement}'. Must be one of: {list(self.arrays.keys())}"
-                )
+                raise ValueError(f"Invalid statement '{statement}'. Must be one of: {list(self.arrays.keys())}")
 
             da = self.arrays[statement]
-            is_asset = (statement == "asset")
+            is_asset = statement == "asset"
             return convert_array_to_df(da, is_asset)
 
         # Return all statements as dict
         result = {}
         for stmt_name, da in self.arrays.items():
-            is_asset = (stmt_name == "asset")
+            is_asset = stmt_name == "asset"
             result[stmt_name] = convert_array_to_df(da, is_asset)
 
         return result
