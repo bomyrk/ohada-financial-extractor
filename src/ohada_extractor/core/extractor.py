@@ -7,6 +7,7 @@ OHADA accounting standards.
 
 import logging
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Union
@@ -16,7 +17,7 @@ import openpyxl
 from dateutil.relativedelta import relativedelta
 from openpyxl.worksheet.worksheet import Worksheet
 
-from .schemas import FILE_EXTENSIONS, OHADA_NOTES, OHADA_STATEMENTS, OTHER_ACCOUNTS
+from .schemas import FILE_EXTENSIONS, OHADA_NOTES, OHADA_STATEMENTS, OTHER_ACCOUNTS, R1_FIELDS
 from .statement import FinancialStatement
 
 logger = logging.getLogger(__name__)
@@ -401,6 +402,7 @@ class FinancialExtractor:
 
         for row in sheet.iter_rows(values_only=True):
             if row[0] is None and end_code not in [str(val).upper() for val in row[1:]]:
+                #if all(val is None or val == '' for val in row):
                 continue
 
             # Check if we've found the start code
@@ -547,6 +549,10 @@ class FinancialExtractor:
                     pre_process=False,
                 )
 
+                # FICHE R1 special processing
+                if cfg.sheet_name == "Fiche R1":
+                    preprocess_value = self._process_fiche_r1(raw_value)
+
                 # FICHE R2 special processing
                 if cfg.sheet_name == "Fiche R2":
                     preprocess_value = tuple(self._process_fiche_r2(raw_value))
@@ -660,6 +666,129 @@ class FinancialExtractor:
         income_breakdown = np.hstack((self._convert_array(e[:, :-2]), e[:, -2:]))
 
         return stacked, income_breakdown
+
+    def _process_fiche_r1(self, raw_data, as_array: bool=True):
+        """
+        Process Fiche R1 data into structured blocks
+        """
+        data = np.array(raw_data, dtype=object)
+        result = {}
+
+        # Helper: collect non-None values of a given type from a row
+        def row_values(row, types=(str, int, float, datetime), exclude_prefixes=('ZA','ZB','ZC','ZD','ZE','ZF','ZG','ZH','ZI')):
+            vals = []
+            for cell in row:
+                if cell is None:
+                    continue
+                if isinstance(cell, str) and cell.strip().startswith(exclude_prefixes):
+                    continue
+                if isinstance(cell, types):
+                    vals.append(cell)
+            return vals
+
+        # --- ZA: EXERCICE COMPTABLE (two periods in the same row) ---
+        za_row = data[0]
+        # Find all date pairs in the row
+        all_matches = []
+        for cell in za_row:
+            if isinstance(cell, str):
+                all_matches.extend(re.findall(r'\d{2}/\d{2}/\d{4}', cell))
+
+        # First match = current period, second = next period
+        if len(all_matches) >= 1:
+            result['za_du']    = datetime.strptime(all_matches[0], '%d/%m/%Y')
+            result['za_au']    = datetime.strptime(all_matches[1], '%d/%m/%Y')
+
+        # --- ZB: DATE D'ARRETE (datetime) ---
+        zb_vals = []
+        for c in data[1]:
+            if isinstance(c, datetime):
+                zb_vals.append(c)
+            elif isinstance(c, str) and re.fullmatch(r'\d{2}/\d{2}/\d{4}', c.strip()):
+                zb_vals.append(datetime.strptime(c.strip(), '%d/%m/%Y'))
+
+        if zb_vals:
+            result['zb_arrete'] = zb_vals[0]
+
+        # --- ZC: EXERCICE PRECEDANT ---
+        zc_row = data[2]
+        # datetime object in the row
+        for cell in zc_row:
+            if isinstance(cell, datetime):
+                result['zc_exercice_precedant'] = cell
+            elif isinstance(cell, str) and re.fullmatch(r'\d{2}/\d{2}/\d{4}', cell.strip()):
+                result['zc_exercice_precedant'] = datetime.strptime(cell.strip(), '%d/%m/%Y')
+        # duration (int)
+        for cell in zc_row:
+            if isinstance(cell, (int, np.integer)) and cell != 0:
+                result['zc_duree_mois'] = int(cell)
+                break
+
+        # --- ZD: Greffe / N° Registre / N° Répertoire (strings) ---
+        zd_vals = [c for c in data[3] if isinstance(c, str) and c.strip()]
+        zd_labels = {'ZD', 'Greffe', 'N° Registre du commerce', 'N° Répertoire des entités'}
+        zd_vals = [c for c in zd_vals if c.strip() not in zd_labels]
+        if zd_vals:
+            result['zd_greffe'] = zd_vals[0]
+        if len(zd_vals) > 1:
+            result['zd_registre'] = zd_vals[1]
+        if len(zd_vals) > 2:
+            result['zd_repertoire'] = zd_vals[2]
+
+        # --- ZE: caisse / code importateur / code activité ---
+        ze_vals = [c for c in data[4] if isinstance(c, str) and c.strip()]
+        ze_labels = {'ZE', 'N° de caisse sociale', 'N° Code Importateur', 'Code activité principale'}
+        ze_vals = [c for c in ze_vals if c.strip() not in ze_labels]
+        if ze_vals:
+            result['ze_caisse'] = ze_vals[0]
+        if len(ze_vals) > 1:
+            result['ze_code_importateur'] = ze_vals[1]
+        if len(ze_vals) > 2:
+            result['ze_code_activite'] = ze_vals[2]
+
+        # --- ZF: entreprise ---
+        zf_vals = [c for c in data[5] if isinstance(c, str) and c.strip()]
+        zf_labels = {"ZF", "Désignation de l'entreprise", "Sigle"}
+        zf_vals = [c for c in zf_vals if c.strip() not in zf_labels]
+        if zf_vals:
+            result['zf_entreprise'] = zf_vals[0]
+        if len(zf_vals) >1:
+            result['zf_sigle'] = zf_vals[1]
+
+        # --- ZG: téléphone / email / code / BP / ville ---
+        zg_vals = [c for c in data[6] if isinstance(c, str) and c.strip()]
+        zg_labels = {'ZG', 'N° de éléphone', 'Email', 'Code', 'BP', 'Ville'}
+        zg_vals = [c for c in zg_vals if c.strip() not in zg_labels]
+        if zg_vals:
+            result['zg_telephone'] = zg_vals[0]
+        if len(zg_vals) > 1:
+            result['zg_email'] = zg_vals[1]
+        if len(zg_vals) > 2:
+            result['zg_code'] = zg_vals[2]
+        if len(zg_vals) > 3:
+            result['zg_bp'] = zg_vals[3]
+        if len(zg_vals) > 4:
+            result['zg_ville'] = zg_vals[4]
+
+        # --- ZH: adresse ---
+        zh_vals = [c for c in data[7] if isinstance(c, str) and c.strip()]
+        zh_labels = {'ZH', 'Adresse géographique complète (Immeuble, Rue, Quartier, Ville,Pays)'}
+        zh_vals = [c for c in zh_vals if c.strip() not in zh_labels]
+        if zh_vals:
+            result['zh_adresse'] = zh_vals[0]
+
+        # --- ZI: activité ---
+        zi_vals = [c for c in data[8] if isinstance(c, str) and c.strip()]
+        zi_labels = {"ZI", "Désignation précise de l'activité principale exercée par l'entreprise"}
+        zi_vals = [c for c in zi_vals if c.strip() not in zi_labels]
+        if zi_vals:
+            result['zi_activite'] = zi_vals[0]
+
+        if as_array:
+            return np.array([[f, result.get(f)] for f in R1_FIELDS], dtype=object)
+        
+        return result
+
 
     # ---------------------------------------------------------
     # 6. MULTI-YEAR CONSOLIDATION

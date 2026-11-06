@@ -1,5 +1,5 @@
 {
-  "file_path": "C:\\Users\\bomyr\\PycharmProjects\\ohada-financial-extractor\\examples\\data\\DSF_Normal_Tantanpion_2024.xlsx",
+  "file_path": "/home/kamguia/Documents/BK_Projects/ohada-financial-extractor/examples/data/DSF_Normal_Tantanpion_2024.xlsx",
   "periods": [
     "2023-12-31",
     "2024-12-31"
@@ -19,7 +19,7 @@
       "passed": true,
       "severity": "high",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 1186852036.0,
@@ -42,7 +42,7 @@
       "passed": true,
       "severity": "high",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 220371282.0,
@@ -65,7 +65,7 @@
       "passed": true,
       "severity": "high",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": -172078385.0,
@@ -480,7 +480,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 579425960.0,
@@ -503,7 +503,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 36179901.0,
@@ -526,7 +526,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 615605861.0,
@@ -549,7 +549,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 493056132.0,
@@ -572,7 +572,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 78190043.0,
@@ -595,7 +595,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 1186852036.0,
@@ -618,7 +618,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 0.0,
@@ -641,7 +641,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 3239302277.0,
@@ -664,7 +664,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 4565678112.0,
@@ -687,7 +687,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 385155320.0,
@@ -710,7 +710,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 360042493.0,
@@ -733,7 +733,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": -1962946.0,
@@ -756,7 +756,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 358079547.0,
@@ -779,7 +779,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 310000.0,
@@ -802,7 +802,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 220371282.0,
@@ -825,7 +825,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": -113496478.0,
@@ -848,7 +848,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": -58581907.0,
@@ -871,7 +871,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 0.0,
@@ -894,7 +894,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 0.0,
@@ -917,7 +917,7 @@
       "passed": true,
       "severity": "medium",
       "value_labels": [
-        "value"
+        "valeur"
       ],
       "actual": {
         "2023-12-31": 0.0,

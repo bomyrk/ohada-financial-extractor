@@ -409,15 +409,15 @@ OHADA_NOTES = {
     # SPECIAL SHEETS (custom preprocessing)
     # ---------------------------------------------------------
     "Fiche R1": OHADANoteStatement(
-            sheet_name="Fiche R1",
-            start_marker="ZA",
-            end_marker="ZI",
-            expected_rows=9,
-            columns_idx=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
-            lines_idx=None,
-            keys="ficher1",
-            names="DESCRIPTION DE L'ENTREPRISE",
-            is_special=True,
+        sheet_name="Fiche R1",
+        start_marker="ZA",
+        end_marker="ZI",
+        expected_rows=9,
+        columns_idx=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+        lines_idx=None,
+        keys="ficher1",
+        names="DESCRIPTION DE L'ENTREPRISE",
+        is_special=True,
     ),
     "Fiche R2": OHADANoteStatement(
         sheet_name="Fiche R2",
@@ -761,7 +761,7 @@ OHADA_NOTES = {
         expected_rows=8,
         columns_idx=(1, 2),
         lines_idx=(1, 2, 3, 4, 5, 6, 7),
-        keys="note27",
+        keys="note27a",
         names="CHARGES DE PERSONNEL",
     ),
     "NOTE 28": OHADANoteStatement(
@@ -784,11 +784,21 @@ OHADA_NOTES = {
         keys="note29",
         names="CHARGES ET REVENUS FINANCIERS",
     ),
+    "NOTE 31": OHADANoteStatement(
+        sheet_name="NOTE 31",
+        start_marker="Capital Social",
+        end_marker="Personnel extérieur facturé à l’entité(9)",
+        expected_rows=21,
+        columns_idx=(1, 2, 3, 4, 5),
+        lines_idx=None,
+        keys="note31",
+        names="REPARTITION DU RESULTAT",
+    ),
     "NOTE 34": OHADANoteStatement(
         sheet_name="NOTE 34",
         start_marker="NATURE DES INDICATIONS",
         end_marker="ENDETTEMENT FINANCIERE NET",
-        expected_rows=54,
+        expected_rows=55,
         columns_idx=(1, 2, 3),
         lines_idx=None,
         keys="note34",
@@ -878,6 +888,18 @@ NORMALIZED_ACTIVITY_MAP = {
     "transport": "Transport",
     "transports": "Transport",
 }
+
+R1_FIELDS = [
+    'za_du', 'za_au',
+    'zb_arrete',
+    'zc_exercice_precedant', 'zc_duree_mois',
+    'zd_greffe', 'zd_registre', 'zd_repertoire',
+    'ze_caisse', 'ze_code_importateur', 'ze_code_activite',
+    'zf_entreprise', 'zf_sigle',
+    'zg_telephone', 'zg_email', 'zg_code', 'zg_bp', 'zg_ville',
+    'zh_adresse',
+    'zi_activite',
+]  # 19 fields 
 
 # ----------------------------------------------------------------------
 #  MAPPING HELPERS (FINAL VERSION)

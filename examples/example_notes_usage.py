@@ -87,18 +87,12 @@ def main():
 
     print("\n--- Exporting all notes to JSON ---")
 
+    from src.ohada_extractor.formatters import OHADAJSONFormatter
     notes_export = {}
 
-    for key, entry in statement.notes.items():
-        notes_export[key] = {
-            "name": entry.get("name"),
-            "raw_value": to_python_value(entry.get("raw_value")),
-            "preprocess_value": to_python_value(entry.get("preprocess_value")),
-        }
+    notes_export  = OHADAJSONFormatter.format_notes(statement.notes)
 
     notes_json = json.dumps(notes_export, indent=4, ensure_ascii=False)
-
-    print(notes_json)
 
     os.makedirs("output", exist_ok=True)
     output_path = sample_file.parent.parent / "output" / "notes_export.json"

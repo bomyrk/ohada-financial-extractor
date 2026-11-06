@@ -69,6 +69,25 @@ class CompanyMetadataExtractor:
         return "stable"
 
     @staticmethod
+    def from_fiche_r1(fr1: np.array):
+        """
+        Extract company metadata from preprocessed Fiche R1 array
+
+        Each row:: [field, val_1, field, val_2, ..., field, val_n]
+        """
+        n_files = fr1.shape[1] // 2
+        results = [{} for _ in range(n_files)]
+
+        for row in fr1:
+            field = str(row[0])
+            for i in range(n_files):
+                value = row[1 + i * 2]
+                if value is not None and value != '':
+                    results[i][field] = value
+
+        return results
+
+    @staticmethod
     def from_fiche_r2(f2a: np.ndarray) -> CompanyMetadata:
         """
         Extract company metadata from the preprocessed Fiche R2 array.
@@ -376,6 +395,7 @@ class CompanyMetadataExtractor:
         """
         High-level helper: extract metadata directly from a FinancialStatement.
         Combines:
+            - Fiche R1 metadata
             - Fiche R2 metadata
             - Note 31 KPIs
 
@@ -413,5 +433,28 @@ class CompanyMetadataExtractor:
             metadata.yoy_growth = metadata_ext["yoy_growth"]
             metadata.ranking_changes = metadata_ext["ranking_changes"]
             metadata.sector_concentration = metadata_ext["sector_concentration"]
+
+        # Add metadata from fiche R1 extension
+        fr1 = statement.get_note("ficher1", processed=True)  # already preprocessed
+        if fr1 is not None:
+            r1_list = CompanyMetadataExtractor.from_fiche_r1(fr1)
+
+            r1 = r1_list[-1]
+            metadata.company_name      = r1.get('zf_entreprise')
+            metadata.sigle             = r1.get('zf_sigle')
+            metadata.rc_number         = r1.get('zd_registre')
+            metadata.address           = r1.get('zh_adresse')
+            metadata.city              = r1.get('zg_ville')
+            metadata.phone             = r1.get('zg_telephone')
+            metadata.email             = r1.get('zg_email')
+            metadata.postal_code       = r1.get('zg_code')
+            metadata.postal_box        = r1.get('zg_bp')
+            metadata.activity_code     = r1.get('ze_code_activite')
+            metadata.activity_label    = r1.get('zi_activite')
+            metadata.code_import       = r1.get('ze_code_importateur')
+
+            # za_du/za_au -> list across all files
+            metadata.fiscal_year_start = [d.get('za_du') if d.get('za_du') else None for d in r1_list ]
+            metadata.fiscal_year_end   = [d.get('za_au') if d.get('za_au') else None for d in r1_list ]
 
         return metadata

@@ -7,6 +7,7 @@ Represents extracted and structured financial data from OHADA Excel files.
 import json
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -31,6 +32,27 @@ class CompanyMetadata:
     Structured company metadata extracted from Fiche R2.
     """
 
+    # --- Identity (R1) ---
+    company_name: Optional[str] = None
+    sigle: Optional[str] = None
+    rc_number: Optional[str] = None
+
+    # --- Fiscal (R1) ---
+    activity_code: Optional[str] = None
+    fiscal_year_start: Optional[List[datetime]] = None
+    fiscal_year_end: Optional[list[datetime]] = None
+    code_import: Optional[str] = None
+    activity_label: Optional[str] = None
+
+    # --- Contact / Location (R1) ---
+    address: Optional[str] = None
+    city: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    postal_code: Optional[str] = None
+    postal_box: Optional[str] = None
+
+    # --- Fiche (R2) ----
     currency: Optional[str] = None
     legal_form: Optional[str] = None
     country: Optional[str] = None
@@ -79,6 +101,7 @@ class CompanyMetadata:
 
     def __str__(self) -> str:
         parts = [
+            f"company_name={self.company_name or 'n/a'}",
             f"legal_form={self.legal_form or 'n/a'}",
             f"country={self.country or 'n/a'}",
             f"currency={self.currency or 'n/a'}",
@@ -90,6 +113,20 @@ class CompanyMetadata:
             parts.append(f"main_activity={self.main_activity.get('label', 'n/a')}")
 
         return f"CompanyMetadata({', '.join(parts)})"
+
+    def __getitem__(self, key: str):
+        if not hasattr(self, key):
+            raise KeyError(f"Unknown field: {key!r}")
+        return getattr(self, key)
+
+    def __contains__(self, key: str) -> bool:
+        return hasattr(self, key)
+
+    def __len__(self) -> int:
+        return len(self.__dict__)
+
+    def __iter__(self):
+        return iter(self.__dict__.items())   
 
 
 # ----------------------------------------------------------------------
@@ -443,6 +480,9 @@ class FinancialStatement:
         if isinstance(value, list):
             return [FinancialStatement._to_serializable_value(item) for item in value]
 
+        if isinstance(value, datetime):
+            return value.isoformat()
+
         return value
 
     @staticmethod
@@ -459,6 +499,9 @@ class FinancialStatement:
 
         if isinstance(value, list):
             return [FinancialStatement._from_serializable_value(item) for item in value]
+
+        if isinstance(value, datetime):
+            return datetime.fromisoformat(value)
 
         return value
 

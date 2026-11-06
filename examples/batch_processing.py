@@ -37,7 +37,7 @@ def process_multiple_files(file_list):
     json_output = OHADAJSONFormatter.to_json(statement=statements, indent=2)
 
     # Save to file
-    output_file = Path(__file__).parent.parent / "output_extraction.json"
+    output_file = Path(__file__).parent /"output" / "output_extraction.json"
     with open(output_file, "w") as f:
         f.write(json_output)
 

@@ -38,7 +38,7 @@ def main():
     json_output = OHADAJSONFormatter.to_json(statement=statement, indent=2)
 
     # Save to file
-    output_file = sample_file.parent.parent / "output_extraction.json"
+    output_file = sample_file.parent / "output" / "output_extraction.json"
     with open(output_file, "w") as f:
         f.write(json_output)
 

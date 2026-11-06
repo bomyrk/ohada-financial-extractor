@@ -1,4 +1,18 @@
 {
+  "company_name": null,
+  "sigle": null,
+  "rc_number": null,
+  "activity_code": null,
+  "fiscal_year_start": null,
+  "fiscal_year_end": null,
+  "code_import": null,
+  "activity_label": null,
+  "address": null,
+  "city": null,
+  "phone": null,
+  "email": null,
+  "postal_code": null,
+  "postal_box": null,
   "currency": "XAF",
   "legal_form": "Société à Responsabilité Limitée (SARL)",
   "country": "Cameroun",
@@ -6,18 +20,9 @@
   "regime_fiscal": "Réel normal",
   "number_of_units": 3,
   "owned": "Private",
-  "dividend": [
-    null,
-    null
-  ],
-  "number_of_shares": [
-    8000.0,
-    8000.0
-  ],
-  "number_of_employees": [
-    2086.0,
-    3643.0
-  ],
+  "dividend": 0,
+  "number_of_shares": 8000.0,
+  "number_of_employees": 2086.0,
   "activities_breakdown": [
     {
       "label_raw": "Mise à disposition du personnel",
@@ -30,7 +35,7 @@
       "label_raw": "Conseils en ressources humaines",
       "label": "Conseils en ressources humaines",
       "reference": "038003",
-      "value": 155859491.5500002,
+      "value": 155859491.55,
       "percentage": 5.0
     },
     {
@@ -53,7 +58,7 @@
       "label_raw": "Conseils en ressources humaines",
       "label": "Conseils en ressources humaines",
       "reference": "038003",
-      "value": 155859491.5500002,
+      "value": 155859491.55,
       "percentage": 5.0
     },
     {
@@ -78,7 +83,7 @@
           "label_raw": "Conseils en ressources humaines",
           "label": "Conseils en ressources humaines",
           "reference": "038003",
-          "value": 155859491.5500002,
+          "value": 155859491.55,
           "percentage": 5.0
         },
         {
@@ -101,7 +106,7 @@
           "label_raw": "Conseils en ressources humaines",
           "label": "Conseils en ressources humaines",
           "reference": "038003",
-          "value": 155859491.5500002,
+          "value": 155859491.55,
           "percentage": 5.0
         },
         {
