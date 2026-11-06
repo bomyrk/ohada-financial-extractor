@@ -4,3 +4,4 @@ include docs/OHADA_STANDARDS.md
 include LICENSE
 recursive-include src/ohada_extractor *.py
 recursive-include examples *
+prune examples/output
