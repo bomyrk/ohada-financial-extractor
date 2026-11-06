@@ -6,8 +6,8 @@ Represents extracted and structured financial data from OHADA Excel files.
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -126,7 +126,7 @@ class CompanyMetadata:
         return len(self.__dict__)
 
     def __iter__(self):
-        return iter(self.__dict__.items())   
+        return iter(self.__dict__.items())
 
 
 # ----------------------------------------------------------------------

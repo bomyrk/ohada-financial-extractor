@@ -890,16 +890,27 @@ NORMALIZED_ACTIVITY_MAP = {
 }
 
 R1_FIELDS = [
-    'za_du', 'za_au',
-    'zb_arrete',
-    'zc_exercice_precedant', 'zc_duree_mois',
-    'zd_greffe', 'zd_registre', 'zd_repertoire',
-    'ze_caisse', 'ze_code_importateur', 'ze_code_activite',
-    'zf_entreprise', 'zf_sigle',
-    'zg_telephone', 'zg_email', 'zg_code', 'zg_bp', 'zg_ville',
-    'zh_adresse',
-    'zi_activite',
-]  # 19 fields 
+    "za_du",
+    "za_au",
+    "zb_arrete",
+    "zc_exercice_precedant",
+    "zc_duree_mois",
+    "zd_greffe",
+    "zd_registre",
+    "zd_repertoire",
+    "ze_caisse",
+    "ze_code_importateur",
+    "ze_code_activite",
+    "zf_entreprise",
+    "zf_sigle",
+    "zg_telephone",
+    "zg_email",
+    "zg_code",
+    "zg_bp",
+    "zg_ville",
+    "zh_adresse",
+    "zi_activite",
+]  # 19 fields
 
 # ----------------------------------------------------------------------
 #  MAPPING HELPERS (FINAL VERSION)
